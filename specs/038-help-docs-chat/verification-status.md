@@ -15,7 +15,7 @@
 | CHK017-CHK030 (article structure / 5 sections / workflow) | `tools/help/generate_phase5_content.py`, MDX files under `data/help/articles/` |
 | CHK040-CHK048 (a11y / lang attr) | `tests/contract/help/test_lang_attr_lint.py`, `tools/help/lint_lang_attributes.py`, `tools/help/rehype_lang_attr.ts` |
 | CHK045-CHK046 (PII redaction notice) | `tests/integration/help/test_pii_redaction_notice.py`, `apps/agents/help_assistant/agent.py` |
-| CHK065 (snapshot dual-approval) | `tests/contract/help/test_snapshot_record_dual_approval.py`, `tests/contract/help/test_codeowners_dual_approval.py` |
+| CHK065 (snapshot dual-approval) | `tests/contract/help/test_snapshot_record_dual_approval.py`; `tests/contract/help/test_codeowners_dual_approval.py` validates current user ownership coverage while GitHub dual-review enforcement remains pending another eligible reviewer |
 | CHK067 (deprecation notice) | `tests/integration/help/test_deprecation_notice.py`, `apps/api/app/services/help/deprecation_resolver.py` |
 | CHK074 (screen_id_hash determinism) | `tests/contract/help/test_screen_id_hash.py`, `packages/domain/src/ama_domain/screen_id_hash.py` |
 | CHK076 (staleness backlog grace) | `docs/runbooks/help/screenshot-staleness.md`, `tools/help/check_screenshot_freshness.py` |

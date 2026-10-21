@@ -9,6 +9,28 @@ FRs: FR-025–028
 
 import logging
 from datetime import UTC, datetime
+from typing import Protocol
+
+
+class MonitoringAnalysisClient(Protocol):
+    async def analyse_cross_domain(self, indicator_data: list[dict[str, object]]) -> dict[str, object]: ...
+
+    async def recommend_activities(self, lagging_indicator_ids: list[str]) -> list[dict[str, object]]: ...
+
+    async def community_summary(
+        self, indicator_data: list[dict[str, object]], domain_filter: str | None
+    ) -> dict[str, object]: ...
+
+
+def _is_lagging_indicator(indicator: dict[str, object]) -> bool:
+    value = indicator.get("value")
+    target = indicator.get("target_value")
+    if value is not None and not isinstance(value, (int, float)):
+        raise TypeError("indicator value must be numeric")
+    if target is not None and not isinstance(target, (int, float)):
+        raise TypeError("indicator target_value must be numeric")
+    return indicator.get("trend") == "negative" or (value is not None and target is not None and value < target * 0.8)
+
 
 logger = logging.getLogger(__name__)
 
@@ -20,33 +42,26 @@ class AIAnalysisService:
     rule-based analysis directly.
     """
 
-    def __init__(self, monitoring_client=None):
+    def __init__(self, monitoring_client: MonitoringAnalysisClient | None = None) -> None:
         self._monitoring_client = monitoring_client
 
-    async def cross_domain_analysis(self, indicator_data: list[dict]) -> dict:
+    async def cross_domain_analysis(self, indicator_data: list[dict[str, object]]) -> dict[str, object]:
         """Run cross-domain correlation analysis on indicator data."""
         if self._monitoring_client:
             return await self._monitoring_client.analyse_cross_domain(indicator_data)
 
         # Inline rule-based fallback (mirrors IndicatorAnalysisService logic)
-        domains: dict[str, list[dict]] = {}
+        domains: dict[str, list[dict[str, object]]] = {}
         for ind in indicator_data:
             d = ind.get("domain", "unknown")
+            if not isinstance(d, str):
+                raise TypeError("indicator domain must be a string")
             domains.setdefault(d, []).append(ind)
 
-        correlations: list[dict] = []
-        lagging_domains: list[dict] = []
+        correlations: list[dict[str, object]] = []
+        lagging_domains: list[dict[str, object]] = []
         for domain, indicators in domains.items():
-            lagging = [
-                i
-                for i in indicators
-                if i.get("trend") == "negative"
-                or (
-                    i.get("value") is not None
-                    and i.get("target_value") is not None
-                    and i["value"] < i["target_value"] * 0.8
-                )
-            ]
+            lagging = [i for i in indicators if _is_lagging_indicator(i)]
             if lagging:
                 lagging_domains.append(
                     {
@@ -82,7 +97,7 @@ class AIAnalysisService:
             "generated_at": datetime.now(UTC).isoformat(),
         }
 
-    async def recommend_activities(self, lagging_indicator_ids: list[str]) -> list[dict]:
+    async def recommend_activities(self, lagging_indicator_ids: list[str]) -> list[dict[str, object]]:
         """Recommend AIDR catalogue activities for lagging indicators."""
         if self._monitoring_client:
             return await self._monitoring_client.recommend_activities(lagging_indicator_ids)
@@ -90,16 +105,18 @@ class AIAnalysisService:
 
     async def community_summary(
         self,
-        indicator_data: list[dict],
+        indicator_data: list[dict[str, object]],
         domain_filter: str | None = None,
-    ) -> dict:
+    ) -> dict[str, object]:
         """Generate a plain-language community recovery summary."""
         if self._monitoring_client:
             return await self._monitoring_client.community_summary(indicator_data, domain_filter)
 
-        domains: dict[str, list[dict]] = {}
+        domains: dict[str, list[dict[str, object]]] = {}
         for ind in indicator_data:
             d = ind.get("domain", "unknown")
+            if not isinstance(d, str):
+                raise TypeError("indicator domain must be a string")
             if domain_filter and d != domain_filter:
                 continue
             domains.setdefault(d, []).append(ind)

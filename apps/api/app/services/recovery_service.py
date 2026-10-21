@@ -8,6 +8,7 @@ FRs: FR-032–037 | SCs: SC-005 | Research: R-003, R-008, R-012
 """
 
 from datetime import UTC, datetime
+from typing import NotRequired, TypedDict
 from uuid import uuid4
 
 from app.services.state_store import INCIDENTS, RECOVERY_TRACKERS
@@ -19,6 +20,14 @@ from packages.domain.src.domain.models.recovery_environment_tracker import (
     RecoveryEnvironmentTracker,
     RecoveryIndicator,
 )
+
+
+class IndicatorUpdate(TypedDict):
+    indicator_name: str
+    value: float
+    update_source: NotRequired[str]
+    population_coverage: NotRequired[int]
+    linked_alert_id: NotRequired[str]
 
 
 class RecoveryService:
@@ -55,13 +64,13 @@ class RecoveryService:
         RECOVERY_TRACKERS[incident_id] = tracker
         return tracker
 
-    def get_dashboard(self, incident_id: str) -> dict:
+    def get_dashboard(self, incident_id: str) -> dict[str, object]:
         if incident_id not in RECOVERY_TRACKERS:
             msg = f"No recovery tracker for incident '{incident_id}'"
             raise KeyError(msg)
 
         tracker = RECOVERY_TRACKERS[incident_id]
-        grouped: dict[str, list[dict]] = {}
+        grouped: dict[str, list[dict[str, object]]] = {}
         for ind in tracker.indicators:
             grouped.setdefault(ind.environment, []).append(
                 ind.model_dump(mode="json"),
@@ -88,7 +97,7 @@ class RecoveryService:
         update_source: str = "manual",
         population_coverage: int | None = None,
         linked_alert_id: str | None = None,
-    ) -> dict:
+    ) -> dict[str, object]:
         if incident_id not in RECOVERY_TRACKERS:
             msg = f"No recovery tracker for incident '{incident_id}'"
             raise KeyError(msg)
@@ -114,7 +123,7 @@ class RecoveryService:
 
         is_regressed = self.check_regression_values(target.baseline_value, value)
 
-        updates: dict = {
+        updates: dict[str, object] = {
             "value": value,
             "last_updated_at": datetime.now(UTC),
             "update_source": update_source,
@@ -142,8 +151,8 @@ class RecoveryService:
     def batch_update_indicators(
         self,
         incident_id: str,
-        updates: list[dict],
-    ) -> dict:
+        updates: list[IndicatorUpdate],
+    ) -> dict[str, object]:
         results = []
         errors = []
         for item in updates:
@@ -171,14 +180,14 @@ class RecoveryService:
             "errors": errors,
         }
 
-    def get_community_view(self, incident_id: str) -> dict:
+    def get_community_view(self, incident_id: str) -> dict[str, object]:
         """Public-safe view filtering out sensitive indicators."""
         if incident_id not in RECOVERY_TRACKERS:
             msg = f"No recovery tracker for incident '{incident_id}'"
             raise KeyError(msg)
 
         tracker = RECOVERY_TRACKERS[incident_id]
-        grouped: dict[str, list[dict]] = {}
+        grouped: dict[str, list[dict[str, object]]] = {}
         for ind in tracker.indicators:
             if ind.data_classification == "sensitive":
                 continue

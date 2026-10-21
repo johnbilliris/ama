@@ -1,0 +1,6 @@
+{
+  "ai": "copilot",
+  "integration": "copilot",
+  "script": "ps",
+  "speckit_version": "1.1.1"
+}

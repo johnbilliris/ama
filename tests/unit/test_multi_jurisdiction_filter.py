@@ -170,6 +170,14 @@ class TestGetContext:
 class TestSeedServiceCaching:
     """SeedService caches loaded data in memory."""
 
+    def test_default_load_uses_canonical_domain_seed_catalogue(self):
+        from apps.api.app.services.seed_service import SeedService
+
+        seeds = SeedService().load_default()
+
+        assert seeds["frameworks"]
+        assert seeds["jurisdictions"]
+
     def test_repeated_loads_return_same_object(self):
         from pathlib import Path
 

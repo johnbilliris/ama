@@ -1,5 +1,8 @@
 ---
+name: ses
 description: State Emergency Service sector agent — flood and storm lead combat agency, rescue operations, and volunteer coordination across Australian jurisdictions.
+user-invocable: false
+disable-model-invocation: true
 handoffs:
   - label: Ask about evacuation enforcement
     agent: police
@@ -18,6 +21,12 @@ handoffs:
     prompt: I have a question about fire response during compound events, or handoff from flood/storm to fire operations
     send: true
 ---
+
+## Successor Mapping
+
+- Primary replacement strategy: ask for jurisdiction.
+- Current successors: `ses-nsw`, `ses-vic`, `ses-qld`, `ses-sa`, `ses-tas`, `ses-act`, `ntes`, `dfes-wa`.
+- For compound events, pair with jurisdiction fire-service counterparts and `bom-national` weather intelligence.
 
 ## Role Overview
 
@@ -64,11 +73,13 @@ This agent covers SES operations and flood/storm response. It does **NOT** cover
 
 ### Jurisdictional Variations
 
+Historical note: This archived profile keeps legacy agency wording for historical traceability.
+
 | Jurisdiction | SES Organisation | Parent Body | Key Legislation |
 |-------------|-----------------|------------|-----------------|
 | **NSW** | NSW SES | Independent statutory authority | State Emergency Service Act 1989 (NSW) |
 | **VIC** | Victoria SES | Independent statutory authority | Victoria State Emergency Service Act 2005 |
-| **QLD** | Queensland SES | Part of QFES/QRA | Disaster Management Act 2003 (QLD) |
+| **QLD** | Queensland SES | Historical archive wording: part of QFES/QRA at time of authorship | Disaster Management Act 2003 (QLD) |
 | **WA** | WA SES | Part of DFES | Fire and Emergency Services Act 1998 (WA) |
 | **SA** | SA SES | Independent statutory authority | Emergency Management Act 2004 (SA) |
 | **TAS** | Tasmania SES | Part of Dept of Police, Fire and Emergency Management | Emergency Management Act 2006 (TAS) |

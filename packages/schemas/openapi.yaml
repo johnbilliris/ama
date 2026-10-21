@@ -116,9 +116,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Signal'
+                $ref: '#/components/schemas/SignalPage'
   /incidents/{incidentId}/dashboard:
     get:
       tags: [Incidents]
@@ -175,13 +173,42 @@ paths:
           application/json:
             schema:
               type: object
+              required: [personaId, status]
               properties:
-                ownerPersonaId:
+                personaId:
                   type: string
                 status:
                   $ref: '#/components/schemas/TaskStatus'
-                blockingReason:
+      responses:
+        '200':
+          description: Task updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CoordinationTask'
+  /tasks/{taskId}/status:
+    post:
+      deprecated: true
+      tags: [Tasks]
+      summary: Deprecated alias for task status updates.
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [personaId, status]
+              properties:
+                personaId:
                   type: string
+                status:
+                  $ref: '#/components/schemas/TaskStatus'
       responses:
         '200':
           description: Task updated.
@@ -239,6 +266,48 @@ paths:
       responses:
         '202':
           description: Scenario run queued.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [scenarioRunId, status, requestedByPersonaId]
+                properties:
+                  scenarioRunId:
+                    type: string
+                  status:
+                    type: string
+                    enum: [queued]
+                  requestedByPersonaId:
+                    type: string
+  /scenarios/replay:
+    post:
+      deprecated: true
+      tags: [Scenarios]
+      summary: Backward-compatible synchronous replay endpoint.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scenarioName, scenarioType]
+              properties:
+                scenarioName:
+                  type: string
+                scenarioType:
+                  type: string
+                  enum: [bushfire, flood, cyclone, severe_storm]
+                jurisdictionIds:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Scenario run completed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScenarioRun'
 
   /dead-letters:
     get:
@@ -389,7 +458,7 @@ components:
       enum: [pending, validated, contradicted, rejected, escalated]
     TaskStatus:
       type: string
-      enum: [new, acknowledged, in_progress, blocked, completed, cancelled]
+      enum: [queued, in_progress, blocked, completed]
     IncidentType:
       type: string
       enum: [bushfire, flood, cyclone, storm, earthquake, other]
@@ -572,22 +641,28 @@ components:
               format: date-time
     CoordinationTask:
       type: object
-      required: [taskId, summary, status, priority, ownerOrganisationId]
+      required: [taskId, incidentId, title, assignedPersonaId, assignedOrganisationId, status, priority]
       properties:
         taskId:
           type: string
-        summary:
+        incidentId:
+          type: string
+        title:
+          type: string
+        assignedPersonaId:
+          type: string
+        assignedOrganisationId:
           type: string
         status:
           $ref: '#/components/schemas/TaskStatus'
         priority:
           type: string
-          enum: [critical, high, normal, low]
-        ownerOrganisationId:
-          type: string
-        ownerPersonaId:
-          type: string
-        blockingReason:
+          enum: [low, medium, high, critical]
+        dependencyTaskIds:
+          type: array
+          items:
+            type: string
+        approvalRequirement:
           type: string
     IncidentDashboard:
       type: object
@@ -631,12 +706,22 @@ components:
               type: integer
     PersonaWorkspace:
       type: object
-      required: [personaId, organisationId, incidentId, tasks, inboundRequests, dependencies]
+      required: [persona, incidentId, tasks, inboundRequests, pendingApprovals, dependencies]
       properties:
-        personaId:
-          type: string
-        organisationId:
-          type: string
+        persona:
+          type: object
+          required: [persona_id, display_name, organisation_id, jurisdiction_id, role]
+          properties:
+            persona_id:
+              type: string
+            display_name:
+              type: string
+            organisation_id:
+              type: string
+            jurisdiction_id:
+              type: string
+            role:
+              type: string
         incidentId:
           type: string
         tasks:
@@ -648,11 +733,58 @@ components:
           items:
             type: object
             additionalProperties: true
+        pendingApprovals:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
         dependencies:
           type: array
           items:
             type: object
             additionalProperties: true
+    SignalPage:
+      type: object
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Signal'
+        total:
+          type: integer
+          minimum: 0
+    ScenarioRun:
+      type: object
+      required: [scenario_run_id, scenario_name, scenario_type, jurisdiction_ids, organisation_ids, framework_ids, coordination_gap_summary, generated_findings]
+      properties:
+        scenario_run_id:
+          type: string
+        scenario_name:
+          type: string
+        scenario_type:
+          type: string
+          enum: [bushfire, flood, cyclone, severe_storm]
+        jurisdiction_ids:
+          type: array
+          items:
+            type: string
+        organisation_ids:
+          type: array
+          items:
+            type: string
+        framework_ids:
+          type: array
+          items:
+            type: string
+        coordination_gap_summary:
+          type: array
+          items:
+            type: string
+        generated_findings:
+          type: array
+          items:
+            type: string
     PublicAlert:
       type: object
       required: [alertId, status, approvalMode, languages, channelSet]

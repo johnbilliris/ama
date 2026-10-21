@@ -219,7 +219,7 @@ class MafAgentFacade:
         if not self.is_grounded_enabled():
             return None
         try:
-            from ama_domain import RetrievalRequest  # type: ignore[import-not-found]
+            from ama_domain import RetrievalRequest
         except ImportError:
             logger.warning("ama_domain not importable; retrieval disabled")
             return None
@@ -314,11 +314,8 @@ class MafAgentFacade:
             import json
             import time
 
-            sink = (
-                Path(os.environ.get("MAF_SHADOW_SINK_DIR"))
-                if os.environ.get("MAF_SHADOW_SINK_DIR")
-                else _DEFINITIONS_DIR.parent / "equivalence" / "reports" / "shadow"
-            )
+            sink_dir = os.environ.get("MAF_SHADOW_SINK_DIR")
+            sink = Path(sink_dir) if sink_dir else _DEFINITIONS_DIR.parent / "equivalence" / "reports" / "shadow"
             sink.mkdir(parents=True, exist_ok=True)
             line = {
                 "ts": time.time(),

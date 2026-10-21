@@ -24,10 +24,7 @@ PRs land on `main`. Promotion to `dev`/`staging`/`production` is by merging the 
 | `cd.yml` deploy + cosign verify | ✓ | ✓ | ✓ |
 | `cd.yml` health checks + auto-rollback | — | ✓ | ✓ |
 | `cd.yml` foundry carve-out registry validation | ✓ | ✓ | ✓ |
-| `dr-drill.yml` monthly + manual | — | ✓ | ✓ (manual only) |
-| `chaos-quarterly.yml` | — | ✓ | — |
-| `nightly-load.yml` | — | ✓ | — |
-| `dora-metrics.yml` daily aggregator | — | — | ✓ |
+| dora-metrics.yml daily aggregator | — | — | ✓ |
 
 ## Per-environment authentication
 

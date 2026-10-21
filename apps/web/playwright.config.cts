@@ -26,14 +26,19 @@ export default defineConfig({
       stderr: "pipe",
       env: {
         AMA_TEST_SUPPORT: "1",
+        AMA_TEST_MODE: "1",
         AMA_ENVIRONMENT: "dev",
       },
     },
     {
-      command: "corepack pnpm --filter @ama/web dev",
+      command: "pnpm --filter @ama/web exec next dev --webpack --hostname 127.0.0.1 --port 3000",
       url: "http://127.0.0.1:3000",
       reuseExistingServer: true,
       timeout: 120000,
+      env: {
+        API_PROXY_UPSTREAM: "http://127.0.0.1:8000/api",
+        NEXT_PUBLIC_API_BASE_URL: "/api",
+      },
     },
   ],
   use: {
@@ -71,6 +76,12 @@ export default defineConfig({
     {
       name: "help",
       testDir: "./__tests__/e2e/help",
+      use: { ...devices["Desktop Chrome"] }
+    },
+    {
+      name: "evidence",
+      testDir: "./tests/playwright/governance",
+      testMatch: "evidence.spec.ts",
       use: { ...devices["Desktop Chrome"] }
     }
   ]

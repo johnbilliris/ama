@@ -6,6 +6,7 @@ import pytest
 from common.aiims_registry import AiimsRegistry, registry
 from common.llm_budget_tracker import (
     MICROS_PER_AUD,
+    CosmosBudgetTracker,
     InMemoryBudgetTracker,
     build_budget_tracker,
 )
@@ -112,6 +113,57 @@ class TestBudgetTracker:
         monkeypatch.delenv("COSMOS_ENDPOINT", raising=False)
         t = build_budget_tracker()
         assert isinstance(t, InMemoryBudgetTracker)
+
+    def test_cosmos_conflict_retries_without_reset(self):
+        class FakeContainer:
+            def __init__(self):
+                self.doc = {
+                    "id": "global:202601",
+                    "scope": "global",
+                    "period_yyyymm": "202601",
+                    "total_aud_micros": 100_000,
+                    "monthly_budget_aud": 1.0,
+                    "last_updated": "2026-01-01T00:00:00+00:00",
+                    "_etag": "v1",
+                }
+                self.replace_calls = 0
+
+            def read_item(self, item, partition_key):
+                return dict(self.doc)
+
+            def replace_item(self, item, body, etag=None, match_condition=None):
+                self.replace_calls += 1
+                if self.replace_calls == 1:
+                    self.doc["_etag"] = "v2"
+                    raise RuntimeError("412 PreconditionFailed")
+                self.doc = dict(body)
+                self.doc["_etag"] = "v3"
+
+            def upsert_item(self, doc):
+                self.doc = dict(doc)
+
+        tracker = CosmosBudgetTracker(container=FakeContainer(), max_conflict_retries=2)
+        snap = tracker.add("global", 200_000, monthly_budget_aud=1.0)
+        assert snap.total_aud_micros == 300_000
+
+    def test_cosmos_none_container_uses_persistent_fallback(self):
+        tracker = CosmosBudgetTracker(container=None)
+        first = tracker.add(
+            "global",
+            100_000,
+            monthly_budget_aud=1.0,
+            rehearsal_run_id="run-1",
+            monitored_day="2026-09-15",
+        )
+        second = tracker.add(
+            "global",
+            200_000,
+            monthly_budget_aud=1.0,
+            rehearsal_run_id="run-1",
+            monitored_day="2026-09-15",
+        )
+        assert first.total_aud_micros == 100_000
+        assert second.total_aud_micros == 300_000
 
 
 # ---------------------------------------------------------------------------

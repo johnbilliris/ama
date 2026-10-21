@@ -4,8 +4,10 @@
 **Source spec**: `specs/040-success-criteria/spec.md`
 **Source decisions**: `specs/040-success-criteria/research.md` D1–D14
 
-This document maps the spec's nine Key Entities to concrete Cosmos DB
-containers, partition keys, and Pydantic v2 models. All containers live
+This document maps the spec's nine logical Key Entities to seven physical
+Cosmos DB containers, partition keys, and Pydantic v2 models. Measurement
+Method is generated from the ladder and Indicator Definition is stored with
+the KPI Ladder; they are not additional physical containers. All containers live
 in the existing AU Cosmos DB account
 (`australiaeast` primary, `australiasoutheast` paired DR — FR-029).
 
@@ -25,11 +27,11 @@ All IDs are ULIDs (string, 26 chars) generated server-side.
 | Container             | Partition key      | Append-only | TTL / archive          | Spec entity (Key Entities §)        |
 | --------------------- | ------------------ | ----------- | ---------------------- | ----------------------------------- |
 | `kpi_ladder`          | `/kpi_id`          | versioned   | none                   | KPI Ladder + Indicator Definition   |
-| `kpi_signals`         | `/scenario_id`     | yes         | 90d hot → cold-archive | Signal                              |
+| `kpi_signals`         | `/scenario_id`     | yes         | 90d hot; archive policy by signal class | Signal                         |
 | `delta_scorecards`    | `/scenario_id`     | versioned   | none                   | Delta Scorecard                     |
 | `causal_chains`       | `/capability_id`   | versioned   | none                   | Causal Chain                        |
 | `benchmark_register`  | `/kpi_id`          | versioned   | none                   | Benchmark Register                  |
-| `evidence_audit`      | `/audit_id`        | yes (locked) | 90d hot → 7y cold-lock | Audit Trail                         |
+| `evidence_audit`      | `/audit_id`        | yes (locked) | immediate mirror; 90d hot; 2555d total | Audit Trail                    |
 | `evidence_audit_dlq`  | `/audit_id`        | yes         | 30d                    | (operational dead-letter; not spec) |
 
 Measurement Method (Key Entity #3) is **not** a Cosmos entity — it is
@@ -311,7 +313,7 @@ class CitationRef(BaseModel):
     legacy string citations are split on best-effort by the seed
     loader; rows that cannot be split are tagged `provenance: manual`
     so they fall under the FR-028 ≤50 % manual cap (CHK138)."""
-    organisation: str
+    organisation: str  # canonical output; legacy `org` is accepted only on input
     document: str
     year: Annotated[int, Field(ge=1900, le=2100)]
     url: str  # http(s) URL — validated as AnyHttpUrl in the Pydantic model
@@ -382,7 +384,10 @@ class AuditEntry(BaseModel):
     payload: dict  # kind-specific structured detail
     correlation_id: str
     region: Literal["australiaeast", "australiasoutheast"]  # FR-029
-    archived_to_blob: bool = False  # set True after change-feed mirror at age 90d
+    mirror_state: Literal["pending", "mirrored", "failed"] = "pending"
+    source_etag: str | None = None
+    blob_etag: str | None = None
+    payload_sha256: str
 
     # FR-048 / SC-022(b) — Cycle 2. Populated only on PI-render audit
     # rows where the language-pack lookup chain fell back from the
@@ -428,8 +433,10 @@ AuditRow = AuditEntry
 - **Capstone exclusion (FR-033, SC-011)**: this spec is tagged
   non-capstone-critical-path in `specs/shared/capstone-metric-trace.md`
   (see `plan.md` §"Capstone-trace tagging step").
-- **Append-only audit (FR-025)**: enforced at the Manager tier; Cosmos
-  change-feed mirrors to immutable Blob (D3) for ≥7-year retention.
+- **Append-only audit (FR-025)**: enforced at the Manager and persistence
+  boundaries. Every row is mirrored immediately to immutable Blob; Cosmos
+  remains the 90-day hot store and Blob provides at least 2,555 days of
+  retrieval from record creation.
 
 ---
 
@@ -456,26 +463,24 @@ any prior invariant in this document.
   cold-archive Blob immutability policy MUST be `state=Locked` /
   `immutabilityPeriodSinceCreationInDays=2555` at deployment time
   (CHK069..CHK072).
-- **AU-refusal durability (FR-044 / D21)**: the audit write that
-  precedes any AU-refusal HTTP response uses Cosmos SDK request-options
-  override `consistency_level=Strong` (per-operation; the account-level
-  default `Session` remains for non-audit containers). A bounded
-  3-attempt exponential backoff (250 ms / 1 s / 4 s) is applied to
-  transient 5xx / 429; on exhaustion the API returns HTTP `503` with a
-  `ProblemDetails` body referencing FR-044 (CHK101..CHK108). The
-  total retry budget (≤ ~5.5 s) is bounded below the FR-046 ≤60 s
-  freshness SLO (CHK107).
+- **AU-refusal durability (FR-044 / D21)**: the Session-consistency Cosmos
+  source write is create-only and is followed synchronously by a create-only
+  upload to locked Blob. The refusal response is not returned until both
+  acknowledgements are captured. Three total attempts are permitted only for
+  transient 408/429/5xx or transport failures, with 250 ms and 1 s waits, a
+  4 s I/O budget, and a 5.5 s end-to-end ceiling. Exhaustion returns the
+  FR-044 HTTP 503 envelope.
 - **Risk-adjusted manual-cap contagion (FR-041)**: defaulted-neutral
   `(L=3, C=3)` rows are tagged `provenance: manual` and counted toward
   the FR-028 / SC-010 ≤50 % per-artefact manual cap. Publication is
   blocked when the cap is exceeded; unblocking paths are (a) replace
   with risk-register-sourced weights or (b) named-auditor sign-off per
   spec 037 FR-037.
-- **Public Information language fallback disclosure (FR-048)**: when
-  the language-pack lookup chain falls back, the API response field
-  `language_fallback_used: "<from_code>→<to_code>"` is set (U+2192
-  arrow), and the audit trail records a `language_fallback_used` row.
-  Silent downgrade is forbidden (CHK131..CHK134).
+- **Public Information language fallback disclosure (FR-048)**: when a
+  channel's language-pack lookup falls back, that channel carries
+  `language_fallback_used: "<from_code>→<to_code>"` (U+2192 arrow).
+  The field is omitted for channels without fallback, and the audit trail
+  records a `language_fallback_used` row. Silent downgrade is forbidden.
 - **Benchmark seed coverage (FR-049 / SC-022(c))**: the seeded
   `benchmark_register` MUST contain ≥32 jurisdictional rows + ≥5
   cross-sector rows; each `source_citation` is a 4-tuple

@@ -35,7 +35,7 @@ class RagService:
         client: Any | None = None,
     ) -> None:
         self._endpoint = endpoint or os.getenv("AZURE_AI_SEARCH_ENDPOINT")
-        self._index_name = index_name or os.getenv("AZURE_AI_SEARCH_INDEX", self.DEFAULT_INDEX)
+        self._index_name = index_name or os.getenv("AZURE_AI_SEARCH_INDEX") or self.DEFAULT_INDEX
         self._client = client or self._build_client()
 
     def _build_client(self) -> Any | None:

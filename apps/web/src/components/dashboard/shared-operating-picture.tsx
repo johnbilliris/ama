@@ -10,6 +10,7 @@ interface SharedOperatingPictureProps {
 
 export function SharedOperatingPicture({ dashboard, signals }: SharedOperatingPictureProps) {
   const safeSignals = Array.isArray(signals) ? signals : [];
+  const degradedSources = dashboard.signalSummary.degradedSources ?? [];
   return (
     <section className="sop-layout">
       <header className="sop-header">
@@ -20,9 +21,14 @@ export function SharedOperatingPicture({ dashboard, signals }: SharedOperatingPi
         <p className="sop-status">
           Status: {dashboard.incident.status} · Severity: {dashboard.incident.severity}
         </p>
+        {dashboard.incident.frameworkContext && dashboard.incident.frameworkContext.length > 0 ? (
+          <p className="sop-status">
+            Frameworks: {dashboard.incident.frameworkContext.map((framework) => framework.name).join(", ")}
+          </p>
+        ) : null}
       </header>
 
-      <DegradedModeBanner contradictedCount={dashboard.signalSummary.contradictedCount} />
+      <DegradedModeBanner degradedSources={degradedSources} />
       <SourceHealthPanel {...dashboard.signalSummary} />
 
       <section className="sop-columns">
@@ -41,6 +47,21 @@ export function SharedOperatingPicture({ dashboard, signals }: SharedOperatingPi
         </article>
 
         <article className="sop-panel">
+          <h2 className="sop-panel-title">Recommendations</h2>
+          <ul className="sop-list">
+            {dashboard.activeRecommendations.map((recommendation) => (
+              <li key={recommendation.recommendation_id} className="sop-list-item">
+                <strong>{recommendation.summary}</strong>
+                <div className="signal-meta">
+                  {recommendation.status}
+                  {recommendation.requiresManualReview ? " · manual review" : ""}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="sop-panel">
           <h2 className="sop-panel-title">Agencies</h2>
           <ul className="sop-list">
             {dashboard.participatingOrganisations.map((organisation) => (
@@ -49,6 +70,24 @@ export function SharedOperatingPicture({ dashboard, signals }: SharedOperatingPi
                 <div className="agency-status">{organisation.status}</div>
               </li>
             ))}
+          </ul>
+        </article>
+
+        <article className="sop-panel">
+          <h2 className="sop-panel-title">Active tasks</h2>
+          <ul className="sop-list">
+            {dashboard.activeTasks.length === 0 ? (
+              <li className="sop-list-item">No active tasks</li>
+            ) : (
+              dashboard.activeTasks.map((task) => (
+                <li key={task.task_id} className="sop-list-item">
+                  <strong>{task.title}</strong>
+                  <div className="signal-meta">
+                    {task.priority} · {task.status}
+                  </div>
+                </li>
+              ))
+            )}
           </ul>
         </article>
       </section>

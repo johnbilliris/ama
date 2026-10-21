@@ -194,7 +194,7 @@ class BaseAgentExecutor:
         facade_cls = getattr(mod, cls_name)
         self._facade = facade_cls()
         if self.output_schema is None:
-            self.output_schema = self._facade.output_schema
+            type(self).output_schema = self._facade.output_schema
         return self._facade
 
     # ----- Execution -----------------------------------------------------

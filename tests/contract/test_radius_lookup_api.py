@@ -8,7 +8,7 @@ from fastapi.testclient import TestClient
 
 @pytest.fixture
 def _env(monkeypatch):
-    monkeypatch.setenv("ENVIRONMENT", "local")
+    monkeypatch.setenv("AMA_ENVIRONMENT", "local")
     monkeypatch.setenv("MANAGEMENT_API_KEY", "test-key")
 
 

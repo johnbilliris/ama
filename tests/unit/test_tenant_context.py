@@ -1,4 +1,4 @@
-from app.core.tenant_context import TenantContext, get_current_tenant, set_current_tenant
+from app.core.tenant_context import TenantContext, get_current_tenant, reset_current_tenant, set_current_tenant
 
 
 class TestTenantContext:
@@ -28,7 +28,10 @@ class TestTenantContext:
 
     def test_contextvars_round_trip(self):
         ctx = TenantContext(agency_id="agency-1", jurisdiction_ids=("nsw",), tenant_id="live")
-        set_current_tenant(ctx)
-        retrieved = get_current_tenant()
-        assert retrieved is not None
-        assert retrieved.tenant_id == "live"
+        token = set_current_tenant(ctx)
+        try:
+            retrieved = get_current_tenant()
+            assert retrieved is not None
+            assert retrieved.tenant_id == "live"
+        finally:
+            reset_current_tenant(token)

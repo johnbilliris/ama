@@ -1,305 +1,164 @@
-<mxfile host="Electron" agent="spec-001-fallback">
+<mxfile host="Electron" agent="remediation-source-updated; export=pending-drawio">
   <diagram name="SEC-02" id="sec02-rbac">
-    <mxGraphModel dx="1144" dy="857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" math="0" shadow="0">
+    <mxGraphModel dx="1144" dy="857" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Role" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="80" as="geometry" />
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=14;fontStyle=1;" value="SEC-02 — AppRole permission matrix. Authority: apps/api/app/auth/rbac_registry.py (APP_ROLES, ROLE_TO_AIIMS_FUNCTIONS, _ROUTE_FAMILY_ALLOWLIST) and apps/api/app/middleware/rbac_check.py (_PROTECTED_PREFIXES)." vertex="1">
+          <mxGeometry height="40" width="1500" x="40" y="20" as="geometry" />
         </mxCell>
-        <mxCell id="h1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Read incidents" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="80" as="geometry" />
+        <mxCell id="h0" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="AppRole (closed set of 11)" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="h2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Write incidents" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="80" as="geometry" />
+        <mxCell id="h1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="AIIMS function scope (persona pairing)" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="h3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Approve alerts" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="80" as="geometry" />
+        <mxCell id="h2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#82b366;strokeColor=#82b366;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="ROUTE-ENFORCED — allowlisted prefixes rejected with 403 when absent" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="h4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Publish alerts" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="80" as="geometry" />
+        <mxCell id="h3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d79b00;strokeColor=#d79b00;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="INTENDED ONLY — business right with no distinct protected route" vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="70" as="geometry" />
         </mxCell>
-        <mxCell id="h5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="View audit log" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="80" as="geometry" />
+        <mxCell id="r1a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="incident-commander" vertex="1">
+          <mxGeometry height="60" width="230" x="40" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="h6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Manage killswitches" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="80" as="geometry" />
+        <mxCell id="r1b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="control" vertex="1">
+          <mxGeometry height="60" width="250" x="270" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="h7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Admin" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="80" as="geometry" />
+        <mxCell id="r1c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/alerts/; /api/outcomes/sc-001..sc-005/evaluate; /api/recovery/handover; /api/offline/replay" vertex="1">
+          <mxGeometry height="60" width="620" x="520" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="h8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#6c8ebf;strokeColor=#6c8ebf;fontColor=#ffffff;fontStyle=1;fontSize=11;" value="Read recommendations" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="80" as="geometry" />
+        <mxCell id="r1d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Incident command authority. NOT an administrator: the admin branch and X-Impersonate-Persona are reserved for system-administrator." vertex="1">
+          <mxGeometry height="60" width="400" x="1140" y="120" as="geometry" />
         </mxCell>
-        <mxCell id="r1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Incident Commander" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="116" as="geometry" />
+        <mxCell id="r2a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="planning-officer" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="180" as="geometry" />
         </mxCell>
-        <mxCell id="c1_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="116" as="geometry" />
+        <mxCell id="r2b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="planning" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="180" as="geometry" />
         </mxCell>
-        <mxCell id="c1_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="116" as="geometry" />
+        <mxCell id="r2c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/outcomes/sc-001/evaluate; /api/outcomes/sc-002/evaluate; /api/offline/replay" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="180" as="geometry" />
         </mxCell>
-        <mxCell id="c1_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="116" as="geometry" />
+        <mxCell id="r2d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Planning products and situation assessment; no alert publication route." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="180" as="geometry" />
         </mxCell>
-        <mxCell id="c1_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="116" as="geometry" />
+        <mxCell id="r3a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="operations-officer" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="230" as="geometry" />
         </mxCell>
-        <mxCell id="c1_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="116" as="geometry" />
+        <mxCell id="r3b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="operations" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="230" as="geometry" />
         </mxCell>
-        <mxCell id="c1_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="116" as="geometry" />
+        <mxCell id="r3c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/outcomes/sc-001/evaluate; /api/outcomes/sc-002/evaluate; /api/outcomes/sc-003/evaluate; /api/offline/replay" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="230" as="geometry" />
         </mxCell>
-        <mxCell id="c1_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="116" as="geometry" />
+        <mxCell id="r3d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Audit-log read IS route-enforced for every operational role, including this one." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="230" as="geometry" />
         </mxCell>
-        <mxCell id="c1_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="116" as="geometry" />
+        <mxCell id="r4a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="logistics-officer" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="r2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Operations" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="152" as="geometry" />
+        <mxCell id="r4b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="logistics" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="c2_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="152" as="geometry" />
+        <mxCell id="r4c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/outcomes/sc-003/evaluate; /api/outcomes/sc-004/evaluate; /api/offline/replay" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="c2_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="152" as="geometry" />
+        <mxCell id="r4d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Resource and supply coordination; no alerts route." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="280" as="geometry" />
         </mxCell>
-        <mxCell id="c2_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="152" as="geometry" />
+        <mxCell id="r5a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="public-information-officer" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="c2_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="152" as="geometry" />
+        <mxCell id="r5b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="public-information" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="c2_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="152" as="geometry" />
+        <mxCell id="r5c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/alerts/; /api/outcomes/sc-002/evaluate; /api/offline/replay" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="c2_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="152" as="geometry" />
+        <mxCell id="r5d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="The /api/alerts/ family is a single prefix: approve and publish are not separately allowlisted. Publication is additionally gated in the publication service, not by RBAC alone." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="330" as="geometry" />
         </mxCell>
-        <mxCell id="c2_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="152" as="geometry" />
+        <mxCell id="r6a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="field-coordinator" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="380" as="geometry" />
         </mxCell>
-        <mxCell id="c2_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="152" as="geometry" />
+        <mxCell id="r6b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="operations" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="380" as="geometry" />
         </mxCell>
-        <mxCell id="r3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Planning" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="188" as="geometry" />
+        <mxCell id="r6c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/outcomes/sc-001/evaluate; /api/outcomes/sc-003/evaluate; /api/offline/replay" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="380" as="geometry" />
         </mxCell>
-        <mxCell id="c3_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="188" as="geometry" />
+        <mxCell id="r6d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Shares the operations AIIMS function with operations-officer; route scope is narrower." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="380" as="geometry" />
         </mxCell>
-        <mxCell id="c3_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="188" as="geometry" />
+        <mxCell id="r7a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="observer-auditor" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="c3_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="188" as="geometry" />
+        <mxCell id="r7b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="control, planning, operations, logistics, public-information" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="c3_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="188" as="geometry" />
+        <mxCell id="r7c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list (common prefixes only)" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="c3_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="188" as="geometry" />
+        <mxCell id="r7d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Read-only observation across five AIIMS functions; no actuation route." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="430" as="geometry" />
         </mxCell>
-        <mxCell id="c3_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="188" as="geometry" />
+        <mxCell id="r8a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="risk-manager" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="c3_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="188" as="geometry" />
+        <mxCell id="r8b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="planning" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="c3_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="188" as="geometry" />
+        <mxCell id="r8c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/outcomes/sc-001/evaluate; /api/outcomes/sc-004/evaluate" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="r4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Logistics" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="224" as="geometry" />
+        <mxCell id="r8d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="No offline-replay route; risk register management has no separate protected prefix." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="480" as="geometry" />
         </mxCell>
-        <mxCell id="c4_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="224" as="geometry" />
+        <mxCell id="r9a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="resilience-planner" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="530" as="geometry" />
         </mxCell>
-        <mxCell id="c4_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="224" as="geometry" />
+        <mxCell id="r9b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="planning" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="530" as="geometry" />
         </mxCell>
-        <mxCell id="c4_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="224" as="geometry" />
+        <mxCell id="r9c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/outcomes/sc-005/evaluate; /api/recovery/handover" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="530" as="geometry" />
         </mxCell>
-        <mxCell id="c4_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="224" as="geometry" />
+        <mxCell id="r9d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Shares recovery handover authority with incident-commander." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="530" as="geometry" />
         </mxCell>
-        <mxCell id="c4_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="224" as="geometry" />
+        <mxCell id="r10a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" value="executive-leader" vertex="1">
+          <mxGeometry height="50" width="230" x="40" y="580" as="geometry" />
         </mxCell>
-        <mxCell id="c4_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="224" as="geometry" />
+        <mxCell id="r10b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="control" vertex="1">
+          <mxGeometry height="50" width="250" x="270" y="580" as="geometry" />
         </mxCell>
-        <mxCell id="c4_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="224" as="geometry" />
+        <mxCell id="r10c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/alerts/; /api/outcomes/sc-001/evaluate; /api/outcomes/sc-005/evaluate" vertex="1">
+          <mxGeometry height="50" width="620" x="520" y="580" as="geometry" />
         </mxCell>
-        <mxCell id="c4_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="224" as="geometry" />
+        <mxCell id="r10d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Shares the control AIIMS function with incident-commander but is not the incident controller." vertex="1">
+          <mxGeometry height="50" width="400" x="1140" y="580" as="geometry" />
         </mxCell>
-        <mxCell id="r5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Public Information" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="260" as="geometry" />
+        <mxCell id="r11a" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;fontStyle=1;" value="system-administrator (separate from command authority)" vertex="1">
+          <mxGeometry height="70" width="230" x="40" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="c5_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="260" as="geometry" />
+        <mxCell id="r11b" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;" value="none of its own; inherits the impersonation target's function set when X-Impersonate-Persona is present" vertex="1">
+          <mxGeometry height="70" width="250" x="270" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="c5_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="260" as="geometry" />
+        <mxCell id="r11c" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;align=left;spacingLeft=6;" value="/api/auth/whoami; /api/audit/list; /api/alerts/; /api/outcomes/ (whole family); /api/offline/replay; /api/recovery/handover" vertex="1">
+          <mxGeometry height="70" width="620" x="520" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="c5_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="260" as="geometry" />
+        <mxCell id="r11d" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;align=left;spacingLeft=6;" value="Only role permitted to send X-Impersonate-Persona; impersonation is paired with an audit write. Administration is NOT incident command." vertex="1">
+          <mxGeometry height="70" width="400" x="1140" y="630" as="geometry" />
         </mxCell>
-        <mxCell id="c5_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="260" as="geometry" />
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff9cc;strokeColor=#d6b656;fontSize=11;align=left;spacingLeft=10;" value="Enforcement conditions. RbacCheckMiddleware only evaluates requests whose path starts with a protected prefix: /api/alerts/, /api/outcomes/, /api/audit/list, /api/auth/whoami, /api/offline/replay, /api/recovery/handover. Unprotected paths bypass the matrix entirely. A missing AppRole claim yields 401; a role outside the closed set, a disallowed prefix, a missing persona_id, or a persona whose AIIMS function is outside the role's scope yields 403." vertex="1">
+          <mxGeometry height="80" width="1500" x="40" y="715" as="geometry" />
         </mxCell>
-        <mxCell id="c5_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="260" as="geometry" />
+        <mxCell id="n2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontSize=11;align=left;spacingLeft=10;" value="Role-label aliases. Operator-facing labels such as IC, Operations, Planning, Logistics, PIO and Auditor map to incident-commander, operations-officer, planning-officer, logistics-officer, public-information-officer and observer-auditor respectively. Claim normalisation accepts app_role, appRole, or the first entry of roles." vertex="1">
+          <mxGeometry height="60" width="1500" x="40" y="805" as="geometry" />
         </mxCell>
-        <mxCell id="c5_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="260" as="geometry" />
-        </mxCell>
-        <mxCell id="c5_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="260" as="geometry" />
-        </mxCell>
-        <mxCell id="c5_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="260" as="geometry" />
-        </mxCell>
-        <mxCell id="r6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Field Coordinator" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="c6_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="296" as="geometry" />
-        </mxCell>
-        <mxCell id="r7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Resilience Planner" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="c7_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="332" as="geometry" />
-        </mxCell>
-        <mxCell id="r8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Executive Leader" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="c8_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="368" as="geometry" />
-        </mxCell>
-        <mxCell id="r9" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Observer/Auditor" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="c9_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="404" as="geometry" />
-        </mxCell>
-        <mxCell id="r10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6c8ebf;fontSize=10;" value="Risk Manager" vertex="1">
-          <mxGeometry height="36" width="180" x="140" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="320" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="410" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="500" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_4" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="590" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_5" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="680" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="770" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_7" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#cccccc;fontSize=10;" value="" vertex="1">
-          <mxGeometry height="36" width="90" x="860" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="c10_8" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;fontStyle=1;" value="✓" vertex="1">
-          <mxGeometry height="36" width="90" x="950" y="440" as="geometry" />
+        <mxCell id="n3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#9ca3af;fontSize=11;dashed=1;align=left;spacingLeft=10;" value="UNVERIFIED in this pass: production activation state of the spec-035 auth stack (AMA_ENABLE_PRODUCTION_AUTH), cloud-side EasyAuth configuration, and Entra app-role assignment in the directory. Test-principal injection is an isolated test mechanism and is never production evidence." vertex="1">
+          <mxGeometry height="60" width="1500" x="40" y="875" as="geometry" />
         </mxCell>
       </root>
     </mxGraphModel>

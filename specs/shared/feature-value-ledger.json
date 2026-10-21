@@ -5,8 +5,8 @@
   "published_at_utc": "2026-05-11T17:30:00Z",
   "published_by": "spec-037-implementer",
   "metadata": {
-    "manual_row_count": 37,
-    "total_row_count": 37,
+    "manual_row_count": 38,
+    "total_row_count": 38,
     "manual_row_ratio": 1.0,
     "manual_row_ratio_threshold": 0.5,
     "link_check_status": "passed",
@@ -764,6 +764,30 @@
         "review_cadence": "quarterly",
         "automation_target": "spec-028 capstone-alignment + spec-037 evidence pack",
         "evidence_status": "Validated"
+      }
+    },
+    {
+      "spec_id": "040-success-criteria",
+      "spec_title": "Measurable Success-Criteria Evidence Harness",
+      "tag": "delivery-hygiene",
+      "cross_link_to_metric_trace": {
+        "kind": "governance_hub",
+        "ref": "specs/shared/capstone-metric-trace.md"
+      },
+      "provenance": {
+        "tag": "manual",
+        "source": "spec-040 evidence harness contract",
+        "owner": "Capstone Reviewer",
+        "review_cadence": "quarterly",
+        "automation_target": "OpenAPI evidence endpoints and append-only audit",
+        "evidence_status": "Validated"
+      },
+      "evidence_exports": {
+        "capstone_attribution": false,
+        "measurement_method": "/api/v1/evidence/measurement-method",
+        "latest_scorecard": "/api/v1/evidence/scorecards/latest",
+        "audit_trace": "/api/v1/evidence/audit/{value_id}",
+        "media_type": "application/json"
       }
     }
   ],

@@ -9,7 +9,7 @@ class AuditExportRequest(BaseModel):
     """Request body for POST /governance/dashboard/audit/export."""
 
     format: ExportFormat
-    filter_params: dict = Field(default_factory=dict)
+    filter_params: dict[str, object] = Field(default_factory=dict)
     record_ids: list[str] = Field(default_factory=list)
 
 

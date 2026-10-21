@@ -19,6 +19,7 @@ specs:
 This view maps platform capabilities and AIIMS roles to each PPRR phase so Resilience Planners can identify which system functions are active during Prevention, Preparedness, Response, and Recovery.
 
 > Aligns with constitution §PPRR — FR-024.
+> Phase overlap reminder: Preparedness/Response and Response/Recovery overlaps are expected and incident-specific.
 
 ## PPRR Phase Notes
 
@@ -32,6 +33,7 @@ This view maps platform capabilities and AIIMS roles to each PPRR phase so Resil
 ## FR Notes
 
 - **FR-024**: PPRR phase alignment documented with agent active-phase mapping.
+- Role labels in the source diagram and this table must stay synchronized whenever AIIMS assignments change.
 
 ## Related Pages
 

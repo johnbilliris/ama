@@ -1,0 +1,105 @@
+{
+  "status": "COMPLETE",
+  "gate": "PASSED",
+  "discoveredAt": "2026-09-18",
+  "discoveryMethod": "Azure Policy assignment API through Azure MCP",
+  "subscription": {
+    "displayName": "ME-MngEnvMCAP035973-prbillir-2",
+    "subscriptionId": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+    "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3"
+  },
+  "queries": [
+    {
+      "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b",
+      "assignmentCount": 11
+    },
+    {
+      "scope": null,
+      "assignmentCount": 3
+    }
+  ],
+  "portalValidation": {
+    "status": "VERIFIED",
+    "assignmentCount": 11,
+    "matchesApi": true,
+    "confirmedAt": "2026-09-18",
+    "confirmationMethod": "authorized operator checked inherited assignments in Azure Portal"
+  },
+  "managementGroupInheritance": "VERIFIED_8",
+  "latestQueryEvidence": {
+    "tenantId": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+    "effectiveAssignmentCount": 11,
+    "directAssignmentCount": 3,
+    "inheritedAssignmentCount": 8,
+    "portalEffectiveAssignmentCount": 11
+  },
+  "policyExemption": {
+    "tagName": "SecurityControl",
+    "tagValue": "Ignore",
+    "source": "assignment-defined AllowedTagName/AllowedTagValue defaults",
+    "scope": "tagged development workload resources",
+    "reason": "Container Apps Azure Files mounts require a storage account key and do not support identity-based access"
+  },
+  "constraints": [
+    {
+      "assignment": "Microsoft Azure region access restriction blocking West Europe region",
+      "effect": "Deny",
+      "azurePropertyPath": "resource.location",
+      "bicepPropertyPath": "location",
+      "requiredValue": "not westeurope",
+      "compliance": "australiaeast"
+    },
+    {
+      "assignment": "MCAPSGov Deny Policies",
+      "effect": "Deny",
+      "azurePropertyPath": "cognitiveServicesDeployment.sku.name",
+      "bicepPropertyPath": "sku.name",
+      "requiredValue": "not ProvisionedManaged",
+      "compliance": "GlobalStandard"
+    },
+    {
+      "assignment": "MCAPSGov Deploy and Modify Policies",
+      "effect": "Modify",
+      "azurePropertyPath": "storageAccount.allowSharedKeyAccess",
+      "bicepPropertyPath": "properties.allowSharedKeyAccess",
+      "requiredValue": false,
+      "applies": false,
+      "exclusion": "SecurityControl=Ignore"
+    },
+    {
+      "assignment": "MCAPSGov Deploy and Modify Policies",
+      "effect": "Modify",
+      "azurePropertyPath": "serviceBus.disableLocalAuth",
+      "bicepPropertyPath": "properties.disableLocalAuth",
+      "requiredValue": true,
+      "applies": false,
+      "exclusion": "SecurityControl=Ignore"
+    },
+    {
+      "assignment": "MCAPSGov Deploy and Modify Policies",
+      "effect": "Modify",
+      "azurePropertyPath": "cosmosDb.disableLocalAuth",
+      "bicepPropertyPath": "properties.disableLocalAuth",
+      "requiredValue": true,
+      "applies": false,
+      "exclusion": "SecurityControl=Ignore"
+    },
+    {
+      "assignment": "MCAPSGov Deploy and Modify Policies",
+      "effect": "Modify",
+      "azurePropertyPath": "dataService.publicNetworkAccess",
+      "bicepPropertyPath": "properties.publicNetworkAccess",
+      "requiredValue": "Disabled",
+      "applies": false,
+      "exclusion": "SecurityControl=Ignore"
+    },
+    {
+      "assignment": "MCAPSGov Deploy and Modify Policies",
+      "effect": "DeployIfNotExists",
+      "azurePropertyPath": "resource.diagnosticSettings",
+      "bicepPropertyPath": "diagnosticSettings",
+      "requiredValue": "policy-deployed where applicable"
+    }
+  ],
+  "deploymentBlockers": []
+}

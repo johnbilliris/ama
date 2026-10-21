@@ -1,0 +1,66 @@
+- generic [active] [ref=f5e1]:
+  - generic [ref=f5e2]:
+    - banner [ref=f5e3]:
+      - generic [ref=f5e4]:
+        - link "Autonomous Disaster Response Coordination Hub home" [ref=f5e5] [cursor=pointer]:
+          - /url: /
+          - generic [aria-hidden] [ref=f5e6]: ⚡
+          - generic [ref=f5e7]: Autonomous Disaster Response Coordination Hub
+        - navigation "Main navigation" [ref=f5e9]:
+          - link "Disaster Map" [ref=f5e10] [cursor=pointer]:
+            - /url: /
+            - generic [aria-hidden] [ref=f5e11]: 🗺️
+            - text: Disaster Map
+          - link "Workspaces" [ref=f5e12] [cursor=pointer]:
+            - /url: /workspaces
+            - generic [aria-hidden] [ref=f5e13]: 👥
+            - text: Workspaces
+          - link "Sectors" [ref=f5e14] [cursor=pointer]:
+            - /url: /sectors
+            - generic [aria-hidden] [ref=f5e15]: 🏛️
+            - text: Sectors
+          - link "Governance" [ref=f5e16] [cursor=pointer]:
+            - /url: /governance
+            - generic [aria-hidden] [ref=f5e17]: 🛡️
+            - text: Governance
+          - link "Preparedness" [ref=f5e18] [cursor=pointer]:
+            - /url: /preparedness
+            - generic [aria-hidden] [ref=f5e19]: 📋
+            - text: Preparedness
+          - link "Simulations" [ref=f5e20] [cursor=pointer]:
+            - /url: /simulations
+            - generic [aria-hidden] [ref=f5e21]: 🧪
+            - text: Simulations
+          - link "Help" [ref=f5e22] [cursor=pointer]:
+            - /url: /help
+            - generic [aria-hidden] [ref=f5e23]: ❓
+            - text: Help
+    - main [ref=f5e24]:
+      - generic [ref=f5e25]:
+        - generic [ref=f5e27]:
+          - generic [ref=f5e28]:
+            - searchbox "Search incidents by keyword" [ref=f5e30]
+            - button "Hide Filters" [expanded] [ref=f5e31] [cursor=pointer]
+          - paragraph [ref=f5e32]: Loading incidents…
+        - generic [ref=f5e35]:
+          - generic:
+            - paragraph: Loading incidents…
+    - contentinfo [ref=f5e36]:
+      - generic [ref=f5e37]:
+        - generic [ref=f5e38]:
+          - generic [aria-hidden] [ref=f5e39]: ⚡
+          - generic [ref=f5e40]: Autonomous Disaster Response Coordination Hub
+        - paragraph [ref=f5e41]: We acknowledge the Traditional Owners of Country throughout Australia and recognise their continuing connection to land, waters, and culture.
+        - generic [ref=f5e42]:
+          - link "Governance" [ref=f5e43] [cursor=pointer]:
+            - /url: /governance
+          - generic [aria-hidden] [ref=f5e44]: ·
+          - link "Preparedness" [ref=f5e45] [cursor=pointer]:
+            - /url: /preparedness
+          - generic [aria-hidden] [ref=f5e46]: ·
+          - link "Help" [ref=f5e47] [cursor=pointer]:
+            - /url: /help
+        - paragraph [ref=f5e48]: Built for the Azure Master Architect Program
+  - button "Open Help Assistant" [ref=f5e49] [cursor=pointer]:
+    - generic [aria-hidden] [ref=f5e50]: 💬
+    - generic [ref=f5e51]: Help

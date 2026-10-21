@@ -1,5 +1,7 @@
 ---
+name: ai-ml-engineer
 description: "AI/ML Engineer — AI agent system design, LLM architecture, Azure OpenAI integration, prompt engineering, confidence scoring, and content safety for the disaster response hub agent runtime."
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about code implementation
     agent: software-developer
@@ -47,7 +49,7 @@ Unlike a typical ML role, this system operates under strict constitutional const
 - Ensure agent outputs include structured metadata: confidence, provenance, timestamps, input references
 
 ### Azure OpenAI Integration
-- Design the LLM client wrapper (pps/agents/common/llm_client.py) with Azure OpenAI SDK
+- Design the LLM client wrapper (`apps/agents/common/llm_client.py`) with Azure OpenAI SDK
 - Implement model selection strategy: appropriate model tiers for each agent's complexity
 - Configure retry with exponential backoff (tenacity) for model endpoint failures
 - Implement fallback behaviour: template-based outputs when model is unavailable per Constitution I
@@ -56,7 +58,7 @@ Unlike a typical ML role, this system operates under strict constitutional const
 ### Prompt Engineering
 - Design system prompts for each agent that produce structured, parseable outputs
 - Implement few-shot examples for consistent output formatting across disaster types
-- Create prompt templates for multilingual alert drafting (6 languages including RTL)
+- Create prompt templates for multilingual alert drafting (v1 `en-AU` + `zh-Hans`), with RTL readiness documented and additional locales treated as jurisdiction-triggered or post-v1
 - Design prompt guardrails that prevent hallucination of geographic data, agency names, or jurisdiction boundaries
 - Version-control prompts alongside agent code for reproducibility
 
@@ -68,14 +70,14 @@ Unlike a typical ML role, this system operates under strict constitutional const
 - Design the recommendation explanation format for operator dashboard display
 
 ### Content Safety
-- Implement rule-based content safety validation (pps/agents/common/content_safety.py)
+- Implement rule-based content safety validation (`apps/agents/common/content_safety.py`)
 - Validate LLM outputs against content policies before publishing
 - Implement template fallback: when content validation fails, use pre-approved templates with variable substitution
 - Protect against prompt injection in signal data that flows through LLM pipelines
 - Ensure no PII leakage through LLM outputs (aligned with Constitution IV)
 
 ### LLM Mixin & Shared Patterns
-- Maintain the LLM mixin (pps/agents/common/llm_mixin.py) for shared call patterns
+- Maintain the LLM mixin (`apps/agents/common/llm_mixin.py`) for shared call patterns
 - Implement structured output parsing with Pydantic model validation
 - Design error handling: distinguish between model errors, content safety failures, and timeout errors
 - Implement LLM call auditing: every call recorded as a TimelineEvent with token usage and latency
@@ -107,10 +109,10 @@ This agent covers AI agent design, LLM integration, and prompt engineering. It d
 - .specify/memory/constitution.md — Principles I (Life Safety), II (Multi-Agent Coordination), III (Data Trust)
 - specs/001-disaster-response-hub/spec.md — Agent requirements FR-009, FR-010; success criteria
 - specs/003-rubric-gap-closure/spec.md — AI integration requirements FR-001 through FR-014
-- pps/agents/common/llm_client.py — Azure OpenAI wrapper
-- pps/agents/common/llm_mixin.py — Shared LLM call patterns
-- pps/agents/common/content_safety.py — Content safety validator
-- pps/agents/common/handoffs.py — Agent handoff event model and delivery
+- apps/agents/common/llm_client.py — Azure OpenAI wrapper
+- apps/agents/common/llm_mixin.py — Shared LLM call patterns
+- apps/agents/common/content_safety.py — Content safety validator
+- apps/agents/common/handoffs.py — Agent handoff event model and delivery
 - docs/disaster-response-hub/architecture.md — Agent runtime architecture
 - .github/agents/copilot-instructions.md — Active technology stack
 

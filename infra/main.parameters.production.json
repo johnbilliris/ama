@@ -3,6 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "environmentName":       { "value": "drh-production" },
+    "environmentTier":       { "value": "prod" },
     "location":              { "value": "australiaeast" },
     "principalType":         { "value": "ServicePrincipal" },
     "developerIpAddress":    { "value": "" },

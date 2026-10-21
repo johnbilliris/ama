@@ -5,6 +5,8 @@ Every named capability has ≥1 published chain with valid originating_spec_path
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from app.main import create_app
 from app.services.evidence._clients import reset_registry
@@ -41,3 +43,7 @@ def test_every_capability_has_chain(client, cap_id):
     assert len(body["kpis_moved"]) >= 1
     assert len(body["assumptions"]) >= 1
     assert len(body["threats_to_validity"]) >= 1
+    source = Path(body["originating_spec_path"])
+    assert source.is_file()
+    assert f"**{body['originating_requirement']}**" in source.read_text(encoding="utf-8")
+    assert all(assumption["resolved"] is False for assumption in body["assumptions"])

@@ -31,6 +31,7 @@ if (-not (Test-Path $specsDir)) { throw "specs directory not found at: $specsDir
 
 $rows = @()
 $rows += 'Spec,Assumptions,Personas,Hypotheses,OutOfScope,NeedsClarificationCount'
+$specCount = 0
 
 Get-ChildItem -Path $specsDir -Directory |
     Where-Object { $_.Name -match '^\d{3}-' } |
@@ -38,6 +39,7 @@ Get-ChildItem -Path $specsDir -Directory |
     ForEach-Object {
         $specPath = Join-Path $_.FullName 'spec.md'
         if (-not (Test-Path $specPath)) { return }
+        $specCount++
         $content = Get-Content -Path $specPath -Raw
 
         $hasAsm = [regex]::IsMatch($content, '(?m)^## Assumptions\s*$')
@@ -48,5 +50,9 @@ Get-ChildItem -Path $specsDir -Directory |
 
         $rows += "{0},{1},{2},{3},{4},{5}" -f $_.Name, $hasAsm, $hasPer, $hasHyp, $hasOos, $clarCount
     }
+
+if ($specCount -eq 0) {
+    throw "No numbered spec.md files found under: $specsDir"
+}
 
 $rows -join "`n"

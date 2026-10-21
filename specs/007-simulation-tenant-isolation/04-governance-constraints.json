@@ -1,0 +1,45 @@
+{
+  "spec": "007-simulation-tenant-isolation",
+  "generatedAt": "2026-09-16T11:41:52Z",
+  "status": "GOVERNANCE-BLOCKED",
+  "discovery": {
+    "subscription": {
+      "name": "AI Impact Analyzer",
+      "id": "879c3e12-a379-45c7-b1b1-5a44f3cc2713"
+    },
+    "tenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+    "method": "azure-policy-assignment-list-scoped-and-subscription-wide",
+    "queryTimestamp": "2026-09-16T03:01:23Z",
+    "restApiTotalAssignments": 0,
+    "subscriptionScopedAssignments": 0,
+    "managementGroupInheritedAssignments": "UNVERIFIED",
+    "portalParity": "UNVERIFIED",
+    "policyEffects": "UNVERIFIED",
+    "tagPolicyRequirements": "UNVERIFIED",
+    "securityPolicyRequirements": "UNVERIFIED",
+    "notes": [
+      "Authenticated exact-scope and subscription-wide queries both returned zero assignments.",
+      "Zero returned is not treated as zero effective until Portal parity and inheritance completeness are confirmed.",
+      "No Bicep change is authorized while this gate is blocked."
+    ]
+  },
+  "blockedFindings": [
+    {
+      "id": "AUD-004",
+      "requiredChange": "Narrow Cosmos data-plane RBAC to the approved database or container boundary"
+    },
+    {
+      "id": "AUD-019",
+      "requiredChange": "Apply approved immutable retention to the simulation audit destination"
+    },
+    {
+      "id": "AUD-022",
+      "requiredChange": "Verify retained report, audit, and seed evidence on approved immutable storage"
+    }
+  ],
+  "blockers": [
+    "Management-group inherited policy completeness is not verified.",
+    "Azure Portal assignment-count parity is not verified.",
+    "Policy effects and required adaptations are not classified."
+  ]
+}

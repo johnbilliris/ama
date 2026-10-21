@@ -13,6 +13,7 @@ thin factory that:
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from typing import Any
@@ -37,7 +38,7 @@ class CheckpointStorageWithErrorWrapping:
 
     async def save_checkpoint(self, *args: Any, **kwargs: Any) -> Any:
         try:
-            return await self._inner.save_checkpoint(*args, **kwargs)
+            return await asyncio.to_thread(self._inner.save, *args, **kwargs)
         except Exception as exc:  # noqa: BLE001
             run_id = kwargs.get("run_id") or (args[0] if args else None)
             raise CheckpointStoreUnavailableError(
@@ -49,7 +50,7 @@ class CheckpointStorageWithErrorWrapping:
 
     async def load_checkpoint(self, *args: Any, **kwargs: Any) -> Any:
         try:
-            return await self._inner.load_checkpoint(*args, **kwargs)
+            return await asyncio.to_thread(self._inner.load, *args, **kwargs)
         except Exception as exc:  # noqa: BLE001
             raise CheckpointStoreUnavailableError(
                 f"Failed to load checkpoint from Cosmos: {exc}",

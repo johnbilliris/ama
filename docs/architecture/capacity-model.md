@@ -1,5 +1,5 @@
 ---
-purpose: Capacity model documenting production baseline throughput, resource sizing, and SLO linkage for the Disaster Response Coordination Hub.
+purpose: Capacity planning model documenting estimated throughput, resource sizing, and SLO linkage for the Disaster Response Coordination Hub.
 personas:
   - Technical-Build
   - Technical-Quality
@@ -14,9 +14,9 @@ specs:
 
 > **Migration**: This file is at the repository root of `docs/architecture/`. See known-gaps entry `CAP-MIG-01` for the follow-up migration to `deployment/` or `governance/`.
 
-**Purpose**: published capacity numbers tied to FR-O06 SLOs and FR-A02 partitioning math. Closes spec-032 FR-R03.
+**Purpose**: planning estimates tied to FR-O06 SLOs and FR-A02 partitioning math. These values are not measured production results and do not close an operational capacity claim by themselves.
 
-## Headline numbers (production baseline)
+## Headline numbers (planning estimates)
 
 | Workload | Sustained throughput | Peak throughput | Constraint |
 | --- | ---: | ---: | --- |
@@ -75,4 +75,4 @@ Per spec-032 FR-A02 + `cosmos-partitioning.md`:
 
 ## Failover capacity
 
-Australia Southeast (paired region): provisioned at 50% of primary baseline; will scale to 100% within 60 minutes of an automatic failover (RTO compliance per FR-D01). DR drill verifies (FR-D01 + dr-drill.yml workflow).
+Australia Southeast (paired region): provisioned at 50% of primary baseline; will scale to 100% within 60 minutes of an operator-led failover drill or incident failover (RTO compliance per FR-D01).

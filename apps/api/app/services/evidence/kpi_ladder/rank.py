@@ -7,6 +7,7 @@ efficiency indicators regardless of magnitude. Used by every rollup view.
 from __future__ import annotations
 
 from collections.abc import Iterable
+from typing import Any
 
 from ..models.kpi import IndicatorDefinition
 
@@ -18,7 +19,9 @@ def life_safety_first(indicators: Iterable[IndicatorDefinition]) -> list[Indicat
     return sorted(indicators, key=lambda i: (_TIER_ORDER.get(i.life_safety_tier, 99), i.name))
 
 
-def life_safety_first_dicts(rows: Iterable[dict]) -> list[dict]:
+def life_safety_first_dicts(
+    rows: Iterable[dict[str, Any]],
+) -> list[dict[str, Any]]:
     """Same ranking applied to raw dicts."""
     return sorted(
         rows,

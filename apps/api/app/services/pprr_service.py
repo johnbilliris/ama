@@ -35,7 +35,7 @@ class PprrService:
         authorising_user: str,
         overlap_active: bool = False,
         overlap_end_expected_at: str | None = None,
-    ) -> dict:
+    ) -> dict[str, object]:
         if incident_id not in INCIDENTS:
             msg = f"Incident '{incident_id}' not found"
             raise KeyError(msg)
@@ -52,7 +52,7 @@ class PprrService:
             raise ValueError(msg)
 
         previous_phase = current_phase
-        incident.pprr_phase = target_phase  # type: ignore[assignment]
+        incident.pprr_phase = target_phase
 
         payload = build_phase_transition_payload(
             source_phase=previous_phase,
@@ -80,7 +80,7 @@ class PprrService:
             "event_id": event.event_id,
         }
 
-    def get_phase_info(self, incident_id: str) -> dict:
+    def get_phase_info(self, incident_id: str) -> dict[str, object]:
         if incident_id not in INCIDENTS:
             msg = f"Incident '{incident_id}' not found"
             raise KeyError(msg)

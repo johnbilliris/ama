@@ -7,9 +7,40 @@ Spec: Edge cases section
 """
 
 from datetime import UTC, datetime
+from typing import TypedDict
 
 
-def handle_overlapping_programs(program_a: dict, program_b: dict) -> dict:
+class SuccessStandard(TypedDict, total=False):
+    indicator_id: str
+    stakeholder_label: str
+    threshold_value: float
+
+
+class ProgramRecord(TypedDict, total=False):
+    standards_of_success: list[SuccessStandard]
+
+
+class IndicatorRecord(TypedDict, total=False):
+    indicator_id: str
+    last_updated_at: str | datetime
+    value: float | None
+    target_value: float | None
+
+
+class PlanRecord(TypedDict, total=False):
+    hierarchy_level: str
+    parent_plan_id: str | None
+    title: str
+
+
+class StandardConflict(TypedDict):
+    indicator_id: str
+    standard_count: int
+    stakeholder_labels: list[str]
+    values: list[float | None]
+
+
+def handle_overlapping_programs(program_a: ProgramRecord, program_b: ProgramRecord) -> dict[str, object]:
     """Support linking programs to shared indicator data."""
     shared_indicators = set(i.get("indicator_id") for i in program_a.get("standards_of_success", [])) & set(
         i.get("indicator_id") for i in program_b.get("standards_of_success", [])
@@ -22,7 +53,7 @@ def handle_overlapping_programs(program_a: dict, program_b: dict) -> dict:
     }
 
 
-def handle_indicator_unavailable(indicator: dict, staleness_days: int = 7) -> dict:
+def handle_indicator_unavailable(indicator: IndicatorRecord, staleness_days: int = 7) -> dict[str, object]:
     """Display last-known value with staleness indicator."""
     last_updated = indicator.get("last_updated_at")
     is_stale = False
@@ -44,7 +75,7 @@ def handle_indicator_unavailable(indicator: dict, staleness_days: int = 7) -> di
     }
 
 
-def handle_outcome_regression(indicator: dict, *, closure_threshold: float = 0.9) -> dict:
+def handle_outcome_regression(indicator: IndicatorRecord, *, closure_threshold: float = 0.9) -> dict[str, object]:
     """Flag regression after program closure and assess sustainability."""
     value = indicator.get("value")
     target = indicator.get("target_value")
@@ -61,14 +92,14 @@ def handle_outcome_regression(indicator: dict, *, closure_threshold: float = 0.9
     }
 
 
-def handle_conflicting_standards(standards: list[dict]) -> dict:
+def handle_conflicting_standards(standards: list[SuccessStandard]) -> dict[str, object]:
     """Support multiple standards per indicator with stakeholder labels."""
-    grouped: dict[str, list] = {}
+    grouped: dict[str, list[SuccessStandard]] = {}
     for s in standards:
         iid = s.get("indicator_id", "")
         grouped.setdefault(iid, []).append(s)
 
-    conflicts = {}
+    conflicts: dict[str, StandardConflict] = {}
     for iid, group in grouped.items():
         if len(group) > 1:
             conflicts[iid] = {
@@ -84,10 +115,10 @@ def handle_conflicting_standards(standards: list[dict]) -> dict:
     }
 
 
-def handle_plan_hierarchy_conflict(plans: list[dict]) -> dict:
+def handle_plan_hierarchy_conflict(plans: list[PlanRecord]) -> dict[str, object]:
     """Flag inconsistencies between plans at different hierarchy levels."""
     issues = []
-    plans_by_level: dict[str, list] = {}
+    plans_by_level: dict[str, list[PlanRecord]] = {}
     for p in plans:
         level = p.get("hierarchy_level", "unknown")
         plans_by_level.setdefault(level, []).append(p)

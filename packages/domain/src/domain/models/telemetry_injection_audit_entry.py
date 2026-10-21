@@ -426,7 +426,18 @@ class SyntheticDeliveryDetails(BaseModel):
     )
 
 
-class SubAgentTimeoutDetails(BaseModel):
+class InferenceProvenanceDetails(BaseModel):
+    """Optional provenance on agent events, including unavailable submission."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+    model_id: str | None = None
+    model_version: str | None = None
+    inference_attempted: bool | None = Field(default=None, strict=True)
+    inference_outcome: Literal["succeeded", "failed", "not_attempted", "unknown"] | None = None
+    error: str | None = None
+
+
+class SubAgentTimeoutDetails(InferenceProvenanceDetails):
     model_config = ConfigDict(extra="forbid", frozen=True)
     correlation_id: str
     sub_agent: str
@@ -435,7 +446,7 @@ class SubAgentTimeoutDetails(BaseModel):
     soft_ack_emitted: bool | None = None
 
 
-class SubAgentCancelDetails(BaseModel):
+class SubAgentCancelDetails(InferenceProvenanceDetails):
     model_config = ConfigDict(extra="forbid", frozen=True)
     correlation_id: str
     sub_agent: str
@@ -443,7 +454,7 @@ class SubAgentCancelDetails(BaseModel):
     elapsed_ms: float | None = None
 
 
-class SubAgentDegradedDetails(BaseModel):
+class SubAgentDegradedDetails(InferenceProvenanceDetails):
     model_config = ConfigDict(extra="forbid", frozen=True)
     correlation_id: str
     sub_agent: str

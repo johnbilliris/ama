@@ -22,8 +22,8 @@ Capture the full log under `docs/runbooks/help/azd-up-smoke-{YYYY-MM-DD}.log`.
    UI; audit log carries `user_input_redacted="[REDACTED]"`.
 5. Toggle network offline — verify cached articles still load and chat
    banner shows "Chat unavailable — please contact support".
-6. Trigger snapshot publish (`gh workflow run help-snapshot.yml`); after
-   completion run rollback per `snapshot-publish-rollback.md`.
+6. Run the snapshot publish procedure from `snapshot-publish-rollback.md`; after
+   completion run the rollback procedure from the same runbook.
 
 ## Sign-off
 Operator records pass/fail per step; if any fail, file an incident and

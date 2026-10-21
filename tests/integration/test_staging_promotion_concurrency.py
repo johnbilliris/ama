@@ -7,11 +7,8 @@ exceptions, TWO distinct ``staging_promotion.refused`` audit envelopes,
 TWO distinct ``staging_promotion_correlation_id`` UUIDs, and (when the
 helper is invoked via two subprocesses) TWO non-zero process exits.
 
-Concurrent invocations on the SAME ref are queued by the workflow-level
-``concurrency:`` block in ``.github/workflows/staging-promotion.yml``
-(T-AA37); concurrent invocations on DIFFERENT refs (cross-ref races)
-DO race — and that is the case this test exercises.
-"""
+This test exercises the cross-ref race case directly: concurrent helper invocations must remain independent and produce distinct refusal envelopes.
+"""  # noqa: E501
 
 from __future__ import annotations
 

@@ -41,14 +41,14 @@ param tags object = {}
 // Cycle 3 / T-AA38 / A3-02 / PD-C3-03 isolation guarantee (v) — the
 // ``Simulation.Coordinator`` test identity is granted Cosmos Data
 // Contributor scoped EXCLUSIVELY to the ``tnt-stg-smoke`` test tenant.
-// The smoke-injection job in ``.github/workflows/staging-promotion.yml``
-// runs as this principal; without scope-isolation, a leaked credential
+// The smoke-injection release-gate exercise runs as this principal;
+// without scope-isolation, a leaked credential
 // could write into production-tenant containers. The role-assignment
 // resource below is asserted by
 // ``tests/contract/test_smoke_tenant_isolation.py`` (T-AA39) to ensure
 // the principal has exactly one assignment with the smoke-tenant
 // scope and zero production-tenant assignments.
-@description('Object id of the `Simulation.Coordinator` test-identity Entra ID enterprise app. Required for the `tnt-stg-smoke`-scoped role assignment that authorises the staging-promotion smoke-injection job (T-AA38). Set to empty string to skip provisioning the assignment in non-staging deployments.')
+@description('Object id of the `Simulation.Coordinator` test-identity Entra ID enterprise app. Required for the `tnt-stg-smoke`-scoped role assignment that authorises the smoke-injection release-gate exercise (T-AA38). Set to empty string to skip provisioning the assignment in non-staging deployments.')
 param coordinatorPrincipalId string = ''
 
 @description('Tenant id of the dedicated smoke-injection test tenant. Defaults to the contract value `tnt-stg-smoke`. Used as the partition-key scope for the `Simulation.Coordinator` role assignment.')

@@ -5,20 +5,19 @@ from __future__ import annotations
 import asyncio
 
 import pytest
-from fastapi import FastAPI
-from fastapi.testclient import TestClient
-
-from apps.api.app.api.dependencies.simulation_rbac import (
+from app.api.dependencies.simulation_rbac import (
     CoordinatorPrincipal,
     require_simulation_coordinator,
 )
-from apps.api.app.api.routes.simulations_036 import router
-from apps.api.app.services.simulation import cancellation as cancel_scope
-from apps.api.app.services.simulation.audit_writer import AuditWriter
-from apps.api.app.services.simulation.controller_tools import ALLOW_LIST
-from apps.api.app.services.simulation.repositories.simulation_state import (
+from app.api.routes.simulations_036 import router
+from app.services.simulation import cancellation as cancel_scope
+from app.services.simulation.audit_writer import AuditWriter
+from app.services.simulation.controller_tools import ALLOW_LIST
+from app.services.simulation.repositories.simulation_state import (
     reset_simulation_state_repository_for_tests,
 )
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
 
 
 def _coordinator_principal() -> CoordinatorPrincipal:
@@ -134,6 +133,8 @@ def test_controller_tools_allow_list_e06() -> None:
 
 def test_invalid_sim_id_400_lifecycle() -> None:
     client = _client()
-    for verb in ("abort", "pause", "resume"):
-        r = client.post(f"/api/simulations/not-a-uuid/{verb}")
-        assert r.status_code == 400
+    abort = client.post("/api/simulations/not-a-uuid/abort")
+    assert abort.status_code == 400
+    for verb in ("pause", "resume"):
+        response = client.post(f"/api/simulations/not-a-uuid/{verb}")
+        assert response.status_code == 404

@@ -166,7 +166,7 @@ async def update_withdrawal(
     _require_incident(incident_id)
     _require_stage(stage_id)
     stage = EVACUATION_STAGES[stage_id]
-    updates: dict = {}
+    updates: dict[str, object] = {}
     if payload.population_moved is not None:
         updates["population_moved"] = payload.population_moved
     if payload.vulnerable_status is not None:
@@ -184,7 +184,7 @@ async def update_shelter(
     _require_incident(incident_id)
     _require_stage(stage_id)
     stage = EVACUATION_STAGES[stage_id]
-    updates: dict = {}
+    updates: dict[str, object] = {}
     if payload.occupancy is not None:
         updates["current_shelter_occupancy"] = payload.occupancy
     if payload.capacity is not None:
@@ -202,7 +202,7 @@ async def update_return(
     _require_incident(incident_id)
     _require_stage(stage_id)
     stage = EVACUATION_STAGES[stage_id]
-    updates: dict = {}
+    updates: dict[str, object] = {}
     if payload.safety_conditions_met is not None:
         updates["safety_conditions_met"] = payload.safety_conditions_met
     if payload.certifier is not None:

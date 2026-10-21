@@ -10,14 +10,49 @@ FRs: FR-029, FR-030 | Research: R-008
 
 import logging
 import os
-from typing import Any
+from typing import Any, TypedDict
+
+
+class MEFrameworkDocument(TypedDict, total=False):
+    id: str
+    framework_id: str
+    model_id: str
+    report_id: str
+    incident_id: str
+    document_type: str
+    program_name: str
+    affected_community_definition: str
+    status: str
+    created_at: str
+    created_by: str
+    updated_at: str | None
+    selected_outcomes: list[dict[str, object]]
+    program_logic_id: str | None
+    active_evaluation_domains: list[str]
+    standards_of_success: list[dict[str, object]]
+    indicator_collection_schedule: list[dict[str, object]]
+    evaluation_reports: list[dict[str, object]]
+    model_type: str
+    resources_inputs: list[dict[str, object]]
+    activities: list[dict[str, object]]
+    outputs: list[dict[str, object]]
+    intermediate_outcomes: list[dict[str, object]]
+    final_outcomes: list[dict[str, object]]
+    outcome_chain_links: list[dict[str, object]]
+    timeline_months: int | None
+    evaluation_period_start: str
+    evaluation_period_end: str
+    generated_by: str
+    domain_findings: dict[str, dict[str, object]]
+    summary: str
+
 
 logger = logging.getLogger(__name__)
 
 
 def _build_cosmos_client() -> Any:
     """Build a CosmosClient from the ``COSMOS_ENDPOINT`` env var."""
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
@@ -36,7 +71,7 @@ class MEFrameworkRepository:
     def __init__(self, cosmos_client: Any = None, database_name: str = "disaster-hub"):
         self._db_name = database_name
         self._container_name = "recovery-programmes"
-        self._in_memory: dict[str, dict[str, Any]] = {}
+        self._in_memory: dict[str, MEFrameworkDocument] = {}
 
         if cosmos_client is not None:
             self._client = cosmos_client
@@ -62,7 +97,7 @@ class MEFrameworkRepository:
     # M&E Framework CRUD
     # ------------------------------------------------------------------
 
-    async def create_framework(self, framework_doc: dict) -> dict:
+    async def create_framework(self, framework_doc: MEFrameworkDocument) -> MEFrameworkDocument:
         """Upsert an M&E framework document."""
         container = self._get_container()
         if container:
@@ -73,7 +108,7 @@ class MEFrameworkRepository:
             self._in_memory[key] = framework_doc
         return framework_doc
 
-    async def get_framework(self, framework_id: str, incident_id: str) -> dict | None:
+    async def get_framework(self, framework_id: str, incident_id: str) -> MEFrameworkDocument | None:
         """Read a single framework by id with partition key ``incident_id``."""
         container = self._get_container()
         if container:
@@ -83,7 +118,7 @@ class MEFrameworkRepository:
                 return None
         return self._in_memory.get(framework_id)
 
-    async def update_framework(self, framework_doc: dict) -> dict:
+    async def update_framework(self, framework_doc: MEFrameworkDocument) -> MEFrameworkDocument:
         """Upsert an updated framework document."""
         return await self.create_framework(framework_doc)
 
@@ -91,7 +126,7 @@ class MEFrameworkRepository:
         self,
         incident_id: str | None = None,
         status: str | None = None,
-    ) -> list[dict]:
+    ) -> list[MEFrameworkDocument]:
         """Query frameworks with optional incident and status filters."""
         container = self._get_container()
         if container:
@@ -123,7 +158,7 @@ class MEFrameworkRepository:
     # Program Logic
     # ------------------------------------------------------------------
 
-    async def create_program_logic(self, logic_doc: dict) -> dict:
+    async def create_program_logic(self, logic_doc: MEFrameworkDocument) -> MEFrameworkDocument:
         """Upsert a program-logic model document."""
         container = self._get_container()
         if container:
@@ -135,7 +170,7 @@ class MEFrameworkRepository:
             self._in_memory[key] = logic_doc
         return logic_doc
 
-    async def get_program_logic(self, model_id: str, incident_id: str) -> dict | None:
+    async def get_program_logic(self, model_id: str, incident_id: str) -> MEFrameworkDocument | None:
         """Read a program-logic model by id with partition key ``incident_id``."""
         container = self._get_container()
         if container:
@@ -149,7 +184,7 @@ class MEFrameworkRepository:
     # Evaluation Reports
     # ------------------------------------------------------------------
 
-    async def create_evaluation_report(self, report_doc: dict) -> dict:
+    async def create_evaluation_report(self, report_doc: MEFrameworkDocument) -> MEFrameworkDocument:
         """Upsert an evaluation report document."""
         container = self._get_container()
         if container:
@@ -161,7 +196,7 @@ class MEFrameworkRepository:
             self._in_memory[key] = report_doc
         return report_doc
 
-    async def get_evaluation_report(self, report_id: str, incident_id: str) -> dict | None:
+    async def get_evaluation_report(self, report_id: str, incident_id: str) -> MEFrameworkDocument | None:
         """Read an evaluation report by id with partition key ``incident_id``."""
         container = self._get_container()
         if container:
@@ -175,7 +210,7 @@ class MEFrameworkRepository:
         self,
         framework_id: str,
         incident_id: str,
-    ) -> list[dict]:
+    ) -> list[MEFrameworkDocument]:
         """List evaluation reports for a given framework within an incident."""
         container = self._get_container()
         if container:

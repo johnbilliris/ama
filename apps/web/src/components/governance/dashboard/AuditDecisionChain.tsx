@@ -87,7 +87,7 @@ export function AuditDecisionChain({
                   </div>
                   {step.rationale && (
                     <p className="mt-1 text-xs text-gray-600 italic">
-                      "{step.rationale}"
+                      &quot;{step.rationale}&quot;
                     </p>
                   )}
                 </div>

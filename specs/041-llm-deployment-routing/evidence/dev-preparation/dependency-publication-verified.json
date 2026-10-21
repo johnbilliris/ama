@@ -1,0 +1,30 @@
+{
+  "complete": true,
+  "completed_at": "2026-10-20T04:29:27.213585+00:00",
+  "original_attempt": "dependency-publication.json",
+  "original_review": "dependency-prepublication-review.json",
+  "reconciliation": "Docker containerd Id/Descriptor is an OCI index, not its image config. Exact tested index bytes and its unique linux/amd64 child bind the original built config. No image changed or republished.",
+  "cloud_writes_during_reconciliation": 0,
+  "applications": {
+    "api": {
+      "image": "crdevw3uq6w.azurecr.io/ama/api@sha256:82846c07343adebdba8298377e2f89fbbf3a0c263f7babe4cc65f2e76942c919",
+      "local_image_index": "sha256:82846c07343adebdba8298377e2f89fbbf3a0c263f7babe4cc65f2e76942c919",
+      "manifest_digest": "sha256:82846c07343adebdba8298377e2f89fbbf3a0c263f7babe4cc65f2e76942c919",
+      "platform_manifest_digest": "sha256:60d15b49ce253648fcb7a5f60aedb56405ce3d55d371ab7e197b8b5556b9a839",
+      "approved_config_digest": "sha256:f199b4888b3cf92eca4a7234dcae35c9822ffe0cce9aae459330e8d16ad749f3",
+      "verified_config_digest": "sha256:f199b4888b3cf92eca4a7234dcae35c9822ffe0cce9aae459330e8d16ad749f3"
+    },
+    "agents": {
+      "tag": "llm041-held-20261020t010013",
+      "local_image_reference": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "approved_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "manifest_digest": "sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "platform_manifest_digest": "sha256:05ce1eba08436789c064de0e6f007739397fd0f09bb8d1842bb586a8801ac729",
+      "verified_config_digest": "sha256:ac7290a1e0a6eb1a40788743effee0ca4335afd1c6e6e9b551196af027327a97",
+      "image": "crdevw3uq6w.azurecr.io/ama/agents@sha256:92afedf6c373c0c71da8aa8c28c09feba5828ffe8d1ae5b0d700ad8e7f38efa5",
+      "registry_manifest_verified": true
+    }
+  },
+  "new_grants": 0,
+  "foundry_writes": 0
+}

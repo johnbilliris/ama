@@ -6,10 +6,12 @@ check → output formatting. Target: ≤15s (NFR-001).
 FRs: FR-001–004 | Research: R-007
 """
 
+from planning.models import PlanCompleteness, PlanDocument
+
 from packages.domain.src.domain.models.emergency_plan import PLAN_SECTION_SLUGS, PLANNING_PRINCIPLES
 
 
-def compute_completeness(plan_doc: dict) -> dict:
+def compute_completeness(plan_doc: PlanDocument) -> PlanCompleteness:
     """Compute section and principle completeness for a plan.
 
     Returns completeness metrics including missing sections and unchecked principles.
@@ -41,7 +43,7 @@ def compute_completeness(plan_doc: dict) -> dict:
     }
 
 
-def validate_plan_for_endorsement(plan_doc: dict) -> tuple[bool, list[str]]:
+def validate_plan_for_endorsement(plan_doc: PlanDocument) -> tuple[bool, list[str]]:
     """Check if a plan meets minimum requirements for endorsement.
 
     Returns (is_ready, list_of_issues).

@@ -334,7 +334,6 @@ During a major disaster, the LLM service used for generating alert content becom
 - **spec 007 (Simulation & Tenant Isolation)**: Defines the tenant isolation model that the Communication Agent must respect for simulation vs. live processing and delivery.
 - **spec 012 (Risk Assessment Agent)**: Defines the upstream agent that produces handoffs consumed by the Communication Agent. The handoff payload format (`recommendationId`, `summary`, `explanation`, `assessmentId`) and escalation criteria (confidence ≥ 0.7 for public alerts) are defined in spec 012.
 
-
 ## Personas
 
 Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
@@ -347,7 +346,7 @@ Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` sch
 
 Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
 
-- **HYP-006**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-006.md` (created in feature 028 polish).
+- **HYP-006**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/008-communication-agent/evidence/HYP-006.md`.
 
 ## Out of Scope
 
@@ -357,7 +356,6 @@ Items explicitly deferred from this spec; promotion to in-scope requires the nam
 - **SCP-020**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
 - **SCP-021**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
 
-
 ## Capstone-Aligned Requirements (Feature 028 / FR-006)
 
 - **FR-CAP-008-001** [DEFERRED]: Multilingual language-pack plugin support with at least one non-English language pack per capstone country: **Philippines** (Filipino + regional languages), **Japan** (Japanese), **Bangladesh** (Bangla). Each language pack has the following preconditions: (i) content-safety classifier in target language; (ii) human back-translation audit on >=1 % of public-facing alerts; (iii) accessibility QA per `specs/020-disaster-mapper-ui` and the accessibility-tester actor.
@@ -365,7 +363,6 @@ Items explicitly deferred from this spec; promotion to in-scope requires the nam
 - **FR-CAP-008-002** [DEFERRED]: Multilingual misinformation-detection inherits the spec-010 fallback rule (when language-specific classifier confidence is below threshold, fall back to the conservative English-baseline classifier and flag for human review).
 - **FR-CAP-008-003**: `defers-to:` 018 (warning-tier approval timeout escalation; spec 018 is authoritative for portfolio-wide escalation timeout per FR-017 / T045).
 - **FR-CAP-008-004**: `supersedes:` `specs/006-data-ingestion-storage/spec.md` FR-024 (warning-tier multilingual authoring + delivery - formally relocated here per FR-016 / T044).
-
 
 ## Capstone-Country Hypotheses (Feature 028 / US2)
 
@@ -381,3 +378,17 @@ Items explicitly deferred from this spec; promotion to in-scope requires the nam
   - **Falsification**: true-positive rate < 65% on the labelled bn-BD validation corpus during BD monsoon Apr-Sep.
   - **Evidence stub**: `specs/008-communication-agent/evidence/HYP-029.md` (created by feature 028 / US2 / T034..T038).
 
+## Implementation Contract Resolution (2026-09-17)
+
+The decisions in [contracts/contract-resolution.v2.json](contracts/contract-resolution.v2.json) resolve implementation ambiguities without claiming external operational approval:
+
+- A replacement is persisted first; its predecessor is superseded only after confirmed replacement delivery.
+- Deduplication is tenant-scoped and distinguishes in-flight work, completed handoffs, and new authoritative assessment/change identities.
+- All failed or unconfigured delivery operations produce `delivery_failed`; provider acceptance remains `delivering` until confirmation.
+- SMS truncation preserves required actions and help links and uses GSM-7 or UCS-2 segment limits.
+- Embedding outages produce an unmeasured back-translation result and no fabricated confidence penalty.
+- Spec 018 owns timeout policy: Emergency Warning uses 5 minutes and lower tiers use 15 minutes; no escalation auto-approves.
+- The standalone FastAPI service is the compatibility runtime. MAF integration must invoke its existing safety, persistence, approval, and delivery boundaries rather than replace them.
+- Configuration and metric inventories are schema-derived and are not governed by stale fixed-count prose.
+
+Human operational/template approval and Azure deployment evidence remain unverified.

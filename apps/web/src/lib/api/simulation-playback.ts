@@ -1,4 +1,7 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+import { getApiBaseUrl } from "@/lib/api/base-url";
+import { simulationAuthHeaders } from "./simulation-auth";
+
+const API_BASE_URL = getApiBaseUrl();
 
 export interface PlaybackEvent {
   id: string;
@@ -27,9 +30,10 @@ export interface PlaybackSnapshot {
 }
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const auth = await simulationAuthHeaders();
   const response = await fetch(`${API_BASE_URL}${path}`, {
     cache: "no-store",
-    headers: { "Content-Type": "application/json", ...init?.headers },
+    headers: { "Content-Type": "application/json", ...auth, ...init?.headers },
     ...init,
   });
   if (!response.ok) {

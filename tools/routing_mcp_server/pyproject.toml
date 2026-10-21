@@ -8,10 +8,15 @@ version = "1.0.0"
 description = "Routing service exposed as an MCP server (spec 033, T062, ADR-033-04)"
 requires-python = ">=3.12"
 dependencies = [
-  "mcp>=1.27.0",
+  "mcp>=1.28.1,<2",
   "uvicorn>=0.34.0",
   "pydantic>=2.10.0",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["routing_mcp_server"]
+
+[[tool.uv.index]]
+name = "microsoft-package-feed-proxy"
+url = "https://packagefeedproxy.microsoft.io/pypi/simple"
+default = true

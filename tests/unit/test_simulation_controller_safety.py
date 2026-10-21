@@ -4,7 +4,7 @@ import asyncio
 
 import pytest
 from app.clients.outbound_http import SimAwareHttpClient, SimEgressBlocked
-from app.core.tenant_context import TenantContext, set_current_tenant
+from app.core.tenant_context import TenantContext, reset_current_tenant, set_current_tenant
 from app.services.simulation.controller_service import SimulationControllerService
 from app.services.simulation.controller_tools import ALLOW_LIST, is_allowed
 from app.services.simulation.rate_limiter import RateLimiter
@@ -76,7 +76,7 @@ def test_controller_refuses_jailbreaks(message):
 
 def test_sim_egress_blocks_outbound_http():
     reset_default_singleton_for_tests()
-    set_current_tenant(
+    token = set_current_tenant(
         TenantContext(agency_id="ses", jurisdiction_ids=("nsw",), tenant_id="sim-12345678901234567890123456789012")
     )
 
@@ -87,19 +87,22 @@ def test_sim_egress_blocks_outbound_http():
         finally:
             await client.aclose()
 
-    with pytest.raises(SimEgressBlocked):
-        asyncio.run(run())
+    try:
+        with pytest.raises(SimEgressBlocked):
+            asyncio.run(run())
 
-    svc = get_synthetic_delivery_service()
-    records = asyncio.run(svc.list_for_tenant("sim-12345678901234567890123456789012"))
-    assert len(records) == 1
-    assert records[0].block_reason == "http-wrapper-gate"
-    assert records[0].channel == "email"
+        svc = get_synthetic_delivery_service()
+        records = asyncio.run(svc.list_for_tenant("sim-12345678901234567890123456789012"))
+        assert len(records) == 1
+        assert records[0].block_reason == "http-wrapper-gate"
+        assert records[0].channel == "email"
+    finally:
+        reset_current_tenant(token)
 
 
 def test_sim_egress_does_not_block_live_tenant():
     reset_default_singleton_for_tests()
-    set_current_tenant(TenantContext(agency_id="ses", jurisdiction_ids=("nsw",), tenant_id="live"))
+    token = set_current_tenant(TenantContext(agency_id="ses", jurisdiction_ids=("nsw",), tenant_id="live"))
 
     async def run():
         client = SimAwareHttpClient(channel="sms")
@@ -109,8 +112,67 @@ def test_sim_egress_does_not_block_live_tenant():
         finally:
             await client.aclose()
 
-    # should not raise
-    asyncio.run(run())
-    svc = get_synthetic_delivery_service()
-    records = asyncio.run(svc.list_for_tenant("live"))
-    assert len(records) == 0
+    try:
+        # should not raise
+        asyncio.run(run())
+        svc = get_synthetic_delivery_service()
+        records = asyncio.run(svc.list_for_tenant("live"))
+        assert len(records) == 0
+    finally:
+        reset_current_tenant(token)
+
+
+def test_sim_egress_blocks_when_tenant_context_is_missing():
+    reset_default_singleton_for_tests()
+
+    async def run():
+        client = SimAwareHttpClient(channel="http", tenant_resolver=lambda: (_ for _ in ()).throw(LookupError()))
+        try:
+            await client.post("https://example.com/", json={"msg": "unknown origin"})
+        finally:
+            await client.aclose()
+
+    with pytest.raises(SimEgressBlocked, match="tenant=unresolved"):
+        asyncio.run(run())
+
+    records = asyncio.run(get_synthetic_delivery_service().list_for_tenant("unresolved"))
+    assert len(records) == 1
+    assert records[0].block_reason == "http-wrapper-gate"
+
+
+def test_monitoring_dedup_isolated_by_tenant_scope():
+    from apps.agents.monitoring.dedup import SignalDeduplicator
+
+    deduplicator = SignalDeduplicator()
+
+    assert deduplicator.is_duplicate("sig-shared", scope="live") is False
+    assert deduplicator.is_duplicate("sig-shared", scope="sim-drill") is False
+    assert deduplicator.is_duplicate("sig-shared", scope="live") is True
+    assert deduplicator.is_duplicate("sig-shared", scope="sim-drill") is True
+
+    def test_controller_rejects_chat_when_simulation_is_paused():
+        class _PausedTenant:
+            status = "Paused"
+            clock_paused = True
+
+        class _Repository:
+            async def get_by_tenant_id(self, tenant_id):  # noqa: ANN001, ANN202, ARG002
+                return _PausedTenant()
+
+        service = SimulationControllerService(simulation_repository=_Repository())
+
+        async def collect():
+            return [
+                event
+                async for event in service.stream_turn(
+                    tenant_id="sim-12345678-1234-1234-1234-123456789012",
+                    simulation_id="sim-12345678-1234-1234-1234-123456789012",
+                    user_oid="participant-1",
+                    user_message="continue",
+                )
+            ]
+
+        events = asyncio.run(collect())
+        assert len(events) == 1
+        assert events[0].event == "error"
+        assert events[0].data["code"] == "lifecycle_state_conflict"

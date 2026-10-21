@@ -16,8 +16,18 @@ from planning.audit import build_section_edit_audit, build_transition_audit
 from planning.config import PlanningConfig
 from planning.models import (
     CreatePlanRequest,
+    PlanActivationHandoff,
+    PlanActivationHandoffResult,
+    PlanActivationRecord,
     PlanActivationRequest,
+    PlanCompleteness,
+    PlanDocument,
+    PlanHierarchy,
+    PlanSection,
+    PlanSummary,
     PlanTransitionRequest,
+    PlanTransitionResult,
+    ProcessStep,
     UpdateSectionRequest,
     UpdateStepRequest,
 )
@@ -44,19 +54,19 @@ class PlanningAgent:
 
     def __init__(self, config: PlanningConfig | None = None):
         self._config = config or PlanningConfig()
-        self._plans: dict[str, dict] = {}
-        self._audit_log: list[dict] = []
+        self._plans: dict[str, PlanDocument] = {}
+        self._audit_log: list[dict[str, str | bool]] = []
 
     # ------------------------------------------------------------------
     # CRUD helpers
     # ------------------------------------------------------------------
 
-    def create_plan(self, request: CreatePlanRequest) -> dict:
+    def create_plan(self, request: CreatePlanRequest) -> PlanDocument:
         plan_id = uuid4().hex
         now = datetime.now(UTC).isoformat()
 
         # Build initial plan sections (empty)
-        plan_sections: dict[str, dict] = {}
+        plan_sections: dict[str, PlanSection] = {}
         for slug in PLAN_SECTION_SLUGS:
             plan_sections[slug] = {
                 "section_slug": slug,
@@ -68,7 +78,7 @@ class PlanningAgent:
             }
 
         # Build initial 9-step process tracking
-        process_steps: dict[int, dict] = {}
+        process_steps: dict[int, ProcessStep] = {}
         for step_num, step_name in PLANNING_STEPS.items():
             process_steps[step_num] = {
                 "step_number": step_num,
@@ -79,7 +89,7 @@ class PlanningAgent:
                 "notes": "",
             }
 
-        plan_doc = {
+        plan_doc: PlanDocument = {
             "plan_id": plan_id,
             "title": request.title,
             "region_id": request.region_id,
@@ -102,13 +112,13 @@ class PlanningAgent:
         logger.info("Created plan %s: %s", plan_id, request.title)
         return plan_doc
 
-    def get_plan(self, plan_id: str) -> dict | None:
+    def get_plan(self, plan_id: str) -> PlanDocument | None:
         return self._plans.get(plan_id)
 
-    def list_plans(self) -> list[dict]:
+    def list_plans(self) -> list[PlanDocument]:
         return list(self._plans.values())
 
-    def update_section(self, plan_id: str, section_slug: str, title: str, content: str) -> dict:
+    def update_section(self, plan_id: str, section_slug: str, title: str, content: str) -> PlanDocument:
         plan = self._plans.get(plan_id)
         if plan is None:
             raise KeyError(f"Plan '{plan_id}' not found")
@@ -140,7 +150,9 @@ class PlanningAgent:
 
         return plan
 
-    def transition_plan(self, plan_id: str, target_state: str, user_role: str, reason: str = "") -> dict:
+    def transition_plan(
+        self, plan_id: str, target_state: str, user_role: str, reason: str = ""
+    ) -> PlanTransitionResult:
         plan = self._plans.get(plan_id)
         if plan is None:
             raise KeyError(f"Plan '{plan_id}' not found")
@@ -172,7 +184,7 @@ class PlanningAgent:
             "transitioned_by": user_role,
         }
 
-    def get_completeness(self, plan_id: str) -> dict:
+    def get_completeness(self, plan_id: str) -> PlanCompleteness:
         plan = self._plans.get(plan_id)
         if plan is None:
             raise KeyError(f"Plan '{plan_id}' not found")
@@ -180,12 +192,12 @@ class PlanningAgent:
         completeness["plan_id"] = plan_id
         return completeness
 
-    def get_hierarchy(self, region_id: str) -> list[dict]:
+    def get_hierarchy(self, region_id: str) -> list[PlanDocument]:
         return [p for p in self._plans.values() if p.get("region_id") == region_id]
 
     def update_process_step(
         self, plan_id: str, step_number: int, is_complete: bool, notes: str, completed_by: str
-    ) -> dict:
+    ) -> PlanDocument:
         plan = self._plans.get(plan_id)
         if plan is None:
             raise KeyError(f"Plan '{plan_id}' not found")
@@ -193,7 +205,7 @@ class PlanningAgent:
             raise ValueError(f"Invalid step number: {step_number}. Must be 1–9.")
 
         now = datetime.now(UTC).isoformat()
-        step = plan["process_steps"].get(step_number, {})
+        step: ProcessStep = plan["process_steps"].get(step_number, {})
         step.update(
             {
                 "step_number": step_number,
@@ -209,7 +221,7 @@ class PlanningAgent:
 
         return plan
 
-    async def handle_plan_activation_handoff(self, handoff_event: dict) -> dict:
+    async def handle_plan_activation_handoff(self, handoff_event: PlanActivationHandoff) -> PlanActivationHandoffResult:
         """Process a plan activation handoff from incident management."""
         plan_id = handoff_event.get("payload", {}).get("plan_id")
         activated_by = handoff_event.get("payload", {}).get("activated_by", "system")
@@ -217,7 +229,7 @@ class PlanningAgent:
         return {"status": "processed", "plan_id": plan_id, "activated_by": activated_by}
 
 
-def _to_summary(plan_doc: dict) -> dict:
+def _to_summary(plan_doc: PlanDocument) -> PlanSummary:
     """Convert a full plan document to a summary response dict."""
     return {
         "plan_id": plan_doc["plan_id"],
@@ -264,16 +276,16 @@ def create_app(
     # ------------------------------------------------------------------
 
     @app.post("/plans", status_code=201)
-    async def create_plan(request: CreatePlanRequest) -> dict:
+    async def create_plan(request: CreatePlanRequest) -> PlanSummary:
         plan_doc = _agent.create_plan(request)
         return _to_summary(plan_doc)
 
     @app.get("/plans")
-    async def list_plans() -> list[dict]:
+    async def list_plans() -> list[PlanSummary]:
         return [_to_summary(p) for p in _agent.list_plans()]
 
     @app.get("/plans/by-region/{region_id}/hierarchy")
-    async def get_hierarchy(region_id: str) -> dict:
+    async def get_hierarchy(region_id: str) -> PlanHierarchy:
         plans = _agent.get_hierarchy(region_id)
         return {
             "region_id": region_id,
@@ -281,14 +293,14 @@ def create_app(
         }
 
     @app.get("/plans/{plan_id}")
-    async def get_plan(plan_id: str) -> dict:
+    async def get_plan(plan_id: str) -> PlanSummary:
         plan = _agent.get_plan(plan_id)
         if plan is None:
             raise HTTPException(status_code=404, detail=f"Plan '{plan_id}' not found")
         return _to_summary(plan)
 
     @app.put("/plans/{plan_id}/sections/{section_slug}")
-    async def update_section(plan_id: str, section_slug: str, request: UpdateSectionRequest) -> dict:
+    async def update_section(plan_id: str, section_slug: str, request: UpdateSectionRequest) -> PlanSummary:
         try:
             plan = _agent.update_section(plan_id, section_slug, request.title, request.content)
         except KeyError as exc:
@@ -298,7 +310,7 @@ def create_app(
         return _to_summary(plan)
 
     @app.post("/plans/{plan_id}/transition")
-    async def transition_plan(plan_id: str, request: PlanTransitionRequest) -> dict:
+    async def transition_plan(plan_id: str, request: PlanTransitionRequest) -> PlanTransitionResult:
         try:
             result = _agent.transition_plan(plan_id, request.target_state, request.user_role, request.reason)
         except KeyError as exc:
@@ -308,14 +320,14 @@ def create_app(
         return result
 
     @app.get("/plans/{plan_id}/completeness")
-    async def get_completeness(plan_id: str) -> dict:
+    async def get_completeness(plan_id: str) -> PlanCompleteness:
         try:
             return _agent.get_completeness(plan_id)
         except KeyError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
 
     @app.put("/plans/{plan_id}/process/steps/{step_number}")
-    async def update_process_step(plan_id: str, step_number: int, request: UpdateStepRequest) -> dict:
+    async def update_process_step(plan_id: str, step_number: int, request: UpdateStepRequest) -> PlanSummary:
         try:
             plan = _agent.update_process_step(
                 plan_id, step_number, request.is_complete, request.notes, request.completed_by
@@ -333,7 +345,7 @@ def create_app(
     plans_store = _agent._plans
 
     @app.post("/plans/{plan_id}/activate", status_code=200)
-    async def activate_plan(plan_id: str, request: PlanActivationRequest):
+    async def activate_plan(plan_id: str, request: PlanActivationRequest) -> dict[str, object]:
         plan = plans_store.get(plan_id)
         if not plan:
             raise HTTPException(status_code=404, detail="Plan not found")
@@ -346,7 +358,7 @@ def create_app(
         # Transition to activated
         plan["lifecycle_state"] = "activated"
         plan["updated_at"] = datetime.now(UTC).isoformat()
-        activation_record = {
+        activation_record: PlanActivationRecord = {
             "incident_id": request.incident_id,
             "activated_at": datetime.now(UTC).isoformat(),
             "activated_by": request.activated_by,
@@ -363,7 +375,7 @@ def create_app(
         }
 
     @app.post("/plans/{plan_id}/post-event-review", status_code=200)
-    async def trigger_post_event_review(plan_id: str):
+    async def trigger_post_event_review(plan_id: str) -> dict[str, str]:
         plan = plans_store.get(plan_id)
         if not plan:
             raise HTTPException(status_code=404, detail="Plan not found")

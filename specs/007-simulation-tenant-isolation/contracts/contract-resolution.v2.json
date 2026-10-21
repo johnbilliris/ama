@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "feature": "007-simulation-tenant-isolation",
+  "contractVersion": 2,
+  "resolvedAt": "2026-09-16",
+  "decisions": [
+    {
+      "id": "SIM-STATUS-CASING",
+      "owner": "simulation-api",
+      "status": "RESOLVED",
+      "decision": "Title-Case lifecycle values are canonical and case-sensitive",
+      "compatibility": "Version 1 lowercase examples are superseded",
+      "acceptanceImpact": "API, persistence, and UI use the same values"
+    },
+    {
+      "id": "SIM-REPORT-MISSING",
+      "owner": "exercise-report-service",
+      "status": "RESOLVED",
+      "decision": "GET never generates a report and returns 404 when absent",
+      "compatibility": "Removes generate-on-read behavior",
+      "acceptanceImpact": "No false report success or unstable identity"
+    },
+    {
+      "id": "SIM-ARCHIVE-ASYNC",
+      "owner": "simulation-service",
+      "status": "RESOLVED",
+      "decision": "Archive returns 202 Archiving and executes a resumable report-first job",
+      "compatibility": "Clients poll tenant detail for Archived",
+      "acceptanceImpact": "Terminal success follows evidence persistence and cleanup"
+    },
+    {
+      "id": "SIM-TTL-IDLE",
+      "owner": "simulation-service",
+      "status": "RESOLVED",
+      "decision": "TTL is measured from last accepted simulation activity",
+      "compatibility": "created_at remains the initial activity timestamp",
+      "acceptanceImpact": "24-hour notice and auto-archive use expires_at"
+    },
+    {
+      "id": "SIM-COUNTERS",
+      "owner": "simulation-repository",
+      "status": "RESOLVED",
+      "decision": "Signal, recommendation, and storage counters update at durable write reservation boundaries",
+      "compatibility": "Counter-only UI animation is removed",
+      "acceptanceImpact": "List/detail counters are tenant-scoped and budget-enforced"
+    }
+  ]
+}

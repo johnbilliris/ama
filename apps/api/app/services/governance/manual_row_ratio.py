@@ -45,7 +45,7 @@ def emit_metric(artefact_id: str, publication_id: str, ratio: float) -> None:
     """
     environment = os.environ.get("AMA_ENV", "dev")
     try:
-        from opentelemetry import metrics  # type: ignore
+        from opentelemetry import metrics
 
         meter = metrics.get_meter("ama.evidence_pack")
         gauge = meter.create_gauge(

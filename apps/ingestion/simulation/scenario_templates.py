@@ -1,5 +1,10 @@
 from typing import Any
 
+from apps.ingestion.simulation.scenario_source_matrix import (
+    activated_sources_for_scenario,
+    validate_template_sources,
+)
+
 BUSHFIRE_TEMPLATE: dict[str, Any] = {
     "name": "bushfire",
     "description": "Multi-phase bushfire scenario from detection through de-escalation",
@@ -35,13 +40,7 @@ BUSHFIRE_TEMPLATE: dict[str, Any] = {
             "params": {"severity": "low", "alert_level": "Advice"},
         },
     ],
-    "activated_sources": [
-        "bom-warnings",
-        "ga-sentinel-hotspots",
-        "nsw-rfs-fires-near-me",
-        "epa-air-quality",
-        "twitter-disaster",
-    ],
+    "activated_sources": activated_sources_for_scenario("bushfire"),
 }
 
 FLOOD_TEMPLATE: dict[str, Any] = {
@@ -79,13 +78,7 @@ FLOOD_TEMPLATE: dict[str, Any] = {
             "params": {"severity": "moderate", "water_level": 5.0},
         },
     ],
-    "activated_sources": [
-        "bom-warnings",
-        "bom-flood-warnings",
-        "bom-river-gauges",
-        "nsw-ses-flood",
-        "twitter-disaster",
-    ],
+    "activated_sources": activated_sources_for_scenario("flood"),
 }
 
 CYCLONE_TEMPLATE: dict[str, Any] = {
@@ -117,12 +110,7 @@ CYCLONE_TEMPLATE: dict[str, Any] = {
             "params": {"severity": "moderate", "category": 1, "wind_speed": 70},
         },
     ],
-    "activated_sources": [
-        "bom-warnings",
-        "himawari-satellite",
-        "bom-river-gauges",
-        "twitter-disaster",
-    ],
+    "activated_sources": activated_sources_for_scenario("cyclone"),
 }
 
 SEVERE_STORM_TEMPLATE: dict[str, Any] = {
@@ -148,12 +136,7 @@ SEVERE_STORM_TEMPLATE: dict[str, Any] = {
             "params": {"severity": "moderate"},
         },
     ],
-    "activated_sources": [
-        "bom-warnings",
-        "bom-radar",
-        "bom-observations",
-        "twitter-disaster",
-    ],
+    "activated_sources": activated_sources_for_scenario("severe_storm"),
 }
 
 SCENARIO_TEMPLATES: dict[str, dict[str, Any]] = {
@@ -162,3 +145,10 @@ SCENARIO_TEMPLATES: dict[str, dict[str, Any]] = {
     "cyclone": CYCLONE_TEMPLATE,
     "severe_storm": SEVERE_STORM_TEMPLATE,
 }
+
+for scenario_type, template in SCENARIO_TEMPLATES.items():
+    phase_sources: list[str] = []
+    for phase in template.get("phases", []):
+        if isinstance(phase, dict):
+            phase_sources.extend([value for value in phase.get("sources", []) if isinstance(value, str)])
+    validate_template_sources(scenario_type, phase_sources)

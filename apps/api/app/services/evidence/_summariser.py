@@ -19,8 +19,9 @@ def summarise_blocks(blocks: list[str], *, max_chars: int = 800) -> str:
     try:
         from apps.agents.common import llm_client  # noqa: WPS433
 
-        if hasattr(llm_client, "summarise"):
-            text = llm_client.summarise(raw, max_chars=max_chars)  # type: ignore[attr-defined]
+        summarise = getattr(llm_client, "summarise", None)
+        if callable(summarise):
+            text = summarise(raw, max_chars=max_chars)
             if isinstance(text, str) and text.strip():
                 return text.strip()
     except Exception as exc:  # pragma: no cover

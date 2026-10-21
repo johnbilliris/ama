@@ -14,6 +14,12 @@ def correlation_id_dep(
     response: Response,
     incoming: str | None = Header(default=None, alias=HEADER_NAME),
 ) -> str:
-    cid = incoming or request.headers.get(HEADER_NAME) or uuid.uuid4().hex
+    cid = (
+        getattr(request.state, "correlation_id", None)
+        or incoming
+        or request.headers.get(HEADER_NAME)
+        or uuid.uuid4().hex
+    )
+    request.state.correlation_id = cid
     response.headers[HEADER_NAME] = cid
     return cid

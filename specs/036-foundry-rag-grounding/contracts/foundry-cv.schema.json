@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/johnbilliris/ama/specs/036-foundry-rag-grounding/contracts/foundry-cv.schema.json",
   "title": "Foundry Carve-Out Registry — Spec 036 amend-loop schema",
-  "description": "Spec-036 amend-loop EXTENSION of the spec-032 carve-out registry schema at `infra/parameters/foundry-carveout.schema.json`. This file is the spec-036 contract anchor for the environment-aware quorum rule introduced in R3 Cluster A4 / Pass 2 Q-P2-03. It MUST be kept in sync with `infra/parameters/foundry-carveout.schema.json` (which is the runtime authority for CD enforcement). Differences from the spec-032 schema: (a) `environment` enum added at registry-row level; (b) `min_approvers_prod` (default 3) and `min_approvers_dev` (default 2) added at registry-root level; (c) the OPA rego at `infra/policy/rego/foundry_carveout.rego` MUST gain a matching `input.environment` discriminator (planned amend-loop bug-fix in Phase F-A4 — line 29 currently uses `< 2` which violates FR-RAG-CV-01 prod 3-approver requirement).",
+  "description": "Spec-036 environment-aware quorum contract, aligned with the runtime registry schema. Normal floors remain prod 3 and dev/staging 2. The project-lead-authorised quorum_waiver permits one approver across all environments until its inclusive UTC expiry; PowerShell and OPA enforce expiry. Other approval and deployment controls remain unchanged.",
   "type": "object",
   "required": ["version", "last_reviewed", "reviewer_quorum", "deployments"],
   "additionalProperties": false,
@@ -18,9 +18,25 @@
       "format": "date"
     },
     "reviewer_quorum": {
-      "description": "Minimum reviewer count for any registry mutation. Spec 032 baseline: 2. Spec-036 amend-loop tightens this to environment-aware via `min_approvers_prod` / `min_approvers_dev` below; existing `reviewer_quorum >= 2` retained as the lower bound.",
+      "description": "Normal registry quorum, retained for use without an active explicit quorum_waiver. Environment-specific normal floors are set by min_approvers_prod and min_approvers_dev.",
       "type": "integer",
       "minimum": 2
+    },
+    "quorum_waiver": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["scope", "approved_by", "approval_reference", "expires_on"],
+      "properties": {
+        "scope": {"const": "all_environments"},
+        "approved_by": {"type": "string", "minLength": 3},
+        "approval_reference": {"type": "string", "minLength": 30},
+        "expires_on": {
+          "description": "Inclusive UTC expiry of the approval-count exception, not the model review window.",
+          "type": "string",
+          "format": "date",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+        }
+      }
     },
     "min_approvers_prod": {
       "description": "Minimum `approver_identities[]` count required when `environment == 'prod'`. Spec-036 R3 Cluster A4 / Pass 2 Q-P2-03: MUST be `>= 3`. The OPA rego at `infra/policy/rego/foundry_carveout.rego` enforces this via the `input.environment` discriminator (planned bug-fix at line 29).",
@@ -64,9 +80,9 @@
           },
           "business_justification": {"type": "string", "minLength": 30},
           "approver_identities": {
-            "description": "Non-placeholder Entra IDs. The minItems floor is environment-aware: prod >= min_approvers_prod (default 3); dev/staging >= min_approvers_dev (default 2). Schema-level lower bound is 2 for backward compat with spec-032; OPA enforces the environment-aware floor at runtime.",
+            "description": "Real approver identities. One is permitted only under the explicit unexpired quorum waiver; otherwise the normal environment-aware floors apply.",
             "type": "array",
-            "minItems": 2,
+            "minItems": 1,
             "items": {"type": "string", "minLength": 3}
           },
           "review_date": {
@@ -76,17 +92,30 @@
           },
           "data_minimisation_required": {"type": "boolean", "const": true},
           "classification_filter_required": {"type": "boolean", "const": true}
-        },
-        "allOf": [
-          {
-            "$comment": "Environment-aware approver-count rule. Schema cannot conditionally enforce minItems via if/then on a sibling property in JSON-Schema 2020-12 portable across all validators, so the OPA rego at `infra/policy/rego/foundry_carveout.rego` carries the binding rule. This allOf documents the intent for downstream tooling.",
-            "if": {"properties": {"environment": {"const": "prod"}}, "required": ["environment"]},
-            "then": {"properties": {"approver_identities": {"minItems": 3}}}
-          }
-        ]
+        }
       }
     }
   },
+  "allOf": [
+    {
+      "if": {"not": {"required": ["quorum_waiver"]}},
+      "then": {
+        "properties": {
+          "deployments": {
+            "items": {
+              "properties": {"approver_identities": {"minItems": 2}},
+              "allOf": [
+                {
+                  "if": {"properties": {"environment": {"const": "prod"}}, "required": ["environment"]},
+                  "then": {"properties": {"approver_identities": {"minItems": 3}}}
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ],
   "examples": [
     {
       "version": 2,

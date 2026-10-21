@@ -8,29 +8,48 @@ FRs: FR-014, SC-009
 
 import logging
 from datetime import UTC, datetime
+from typing import Protocol
 from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
 
+class ContentSafetyResult(Protocol):
+    passed: bool
+
+
+class ContentSafetyValidator(Protocol):
+    def validate(self, *, text: str) -> ContentSafetyResult: ...
+
+
 class EvaluationService:
     """Generates evaluation reports across 5 KEQ domains."""
 
-    def __init__(self, content_safety=None):
+    def __init__(self, content_safety: ContentSafetyValidator | None = None) -> None:
         self._content_safety = content_safety
+
+    @staticmethod
+    def _required_string(framework: dict[str, object], field: str) -> str:
+        value = framework.get(field)
+        if not isinstance(value, str):
+            raise ValueError(f"Framework {field} must be a string")
+        return value
 
     def generate_report(
         self,
         *,
-        framework: dict,
+        framework: dict[str, object],
         period_start: str,
         period_end: str,
         generated_by: str = "manual",
         created_by: str = "",
-    ) -> dict:
+    ) -> dict[str, object]:
         report_id = f"er-{uuid4().hex[:12]}"
-        domain_findings = {}
-        for domain in framework.get("active_evaluation_domains", []):
+        raw_domains = framework.get("active_evaluation_domains", [])
+        if not isinstance(raw_domains, list) or any(not isinstance(domain, str) for domain in raw_domains):
+            raise ValueError("Framework active_evaluation_domains must be a list of strings")
+        domain_findings: dict[str, dict[str, object]] = {}
+        for domain in raw_domains:
             domain_findings[domain] = {
                 "evaluation_domain": domain,
                 "questions_addressed": [],
@@ -50,8 +69,8 @@ class EvaluationService:
 
         return {
             "report_id": report_id,
-            "framework_id": framework["framework_id"],
-            "incident_id": framework["incident_id"],
+            "framework_id": self._required_string(framework, "framework_id"),
+            "incident_id": self._required_string(framework, "incident_id"),
             "evaluation_period_start": period_start,
             "evaluation_period_end": period_end,
             "domain_findings": domain_findings,

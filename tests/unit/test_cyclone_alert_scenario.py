@@ -3,6 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 from common.handoffs import AgentHandoffEvent
+from communication.approval import ApprovalWorkflow
 from communication.config import CommunicationConfig
 from communication.models import (
     AlertStatus,
@@ -10,6 +11,7 @@ from communication.models import (
     UrgencyLevel,
 )
 from communication.pipeline import CommunicationProcessingPipeline
+from communication.repository import CommunicationAlertRepository
 
 
 class TestCycloneAlertScenario:
@@ -24,6 +26,9 @@ class TestCycloneAlertScenario:
             scope_key="INC-CYCLONE-2025",
             confidence=0.95,
             payload={
+                "recommendationId": "rec-cyclone",
+                "assessmentId": "assess-cyclone",
+                "explanation": "Category 5 cyclone requires public warning",
                 "hazard_type": "cyclone",
                 "severity": "extreme",
                 "urgency": "immediate",
@@ -35,6 +40,48 @@ class TestCycloneAlertScenario:
                     {"level": 2, "boundary": {}, "population_estimate": 15000},
                 ],
             },
+        )
+
+    def _pipeline(self, config: CommunicationConfig | None = None) -> CommunicationProcessingPipeline:
+        runtime_config = config or CommunicationConfig()
+        repository = CommunicationAlertRepository()
+
+        class _Store:
+            def __init__(self, record):
+                self.record = record
+
+            def read_item(self, item, partition_key):
+                return self.record
+
+        class _Publisher:
+            async def publish(self, payload):
+                return None
+
+        approval = ApprovalWorkflow(
+            config=runtime_config,
+            service_bus_client=_Publisher(),
+            alert_repository=repository,
+        )
+        return CommunicationProcessingPipeline(
+            config=runtime_config,
+            incident_store=_Store({"id": "INC-CYCLONE-2025", "tenant_id": "live", "commander_chain": ["ic-1"]}),
+            recommendation_store=_Store({"id": "rec-cyclone", "incident_id": "INC-CYCLONE-2025", "tenant_id": "live"}),
+            assessment_store=_Store(
+                {
+                    "id": "assess-cyclone",
+                    "incident_id": "INC-CYCLONE-2025",
+                    "tenant_id": "live",
+                    "hazard_type": "cyclone",
+                    "severity": "extreme",
+                    "location": "Cairns, QLD",
+                    "zones": [
+                        {"id": "zone-1", "level": 1, "boundary": {}, "population_estimate": 5000},
+                        {"id": "zone-2", "level": 2, "boundary": {}, "population_estimate": 15000},
+                    ],
+                }
+            ),
+            alert_repository=repository,
+            approval_workflow=approval,
         )
 
     @patch("communication.translator.MultilingualTranslator._generate_with_fallback")
@@ -52,7 +99,7 @@ class TestCycloneAlertScenario:
         }
 
         config = CommunicationConfig()
-        pipeline = CommunicationProcessingPipeline(config=config)
+        pipeline = self._pipeline(config)
 
         event = self._build_cyclone_handoff()
         alert = pipeline.process_handoff(event)
@@ -76,7 +123,7 @@ class TestCycloneAlertScenario:
             "content_safety_result": "passed",
         }
 
-        pipeline = CommunicationProcessingPipeline()
+        pipeline = self._pipeline()
         alert = pipeline.process_handoff(self._build_cyclone_handoff())
 
         assert alert is not None
@@ -97,7 +144,7 @@ class TestCycloneAlertScenario:
         }
 
         config = CommunicationConfig()
-        pipeline = CommunicationProcessingPipeline(config=config)
+        pipeline = self._pipeline(config)
         alert = pipeline.process_handoff(self._build_cyclone_handoff())
 
         assert alert is not None
@@ -146,7 +193,7 @@ class TestCycloneAlertScenario:
             "content_safety_result": "passed",
         }
 
-        pipeline = CommunicationProcessingPipeline()
+        pipeline = self._pipeline()
         alert = pipeline.process_handoff(self._build_cyclone_handoff())
 
         assert alert is not None

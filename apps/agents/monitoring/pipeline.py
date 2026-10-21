@@ -14,14 +14,16 @@ Each stage produces audit records (MonitoringDecisionRecord) and emits metrics.
 from __future__ import annotations
 
 import hashlib
+import inspect
 import logging
 import time
+from collections.abc import Awaitable, Callable
 
 from app.validators.signal_envelope import SignalEnvelope
 from common.async_bridge import run_async  # noqa: F401 — kept for downstream pipeline compatibility
 from common.content_safety import ContentSafetyValidator
 from common.handoffs import AgentHandoffEvent, deliver_handoff_with_retry
-from monitoring.agent import MonitoringAgent
+from monitoring.agent import MonitoringAgent, Tier2Decision
 from monitoring.audit import AuditWriter
 from monitoring.config import MonitoringConfig
 from monitoring.dedup import SignalDeduplicator
@@ -30,6 +32,24 @@ from monitoring.models import DecisionType, MonitoringDecisionRecord
 from pydantic import ValidationError
 
 logger = logging.getLogger(__name__)
+
+
+def _persist_dead_letter_entry(handoff: AgentHandoffEvent) -> str:
+    from app.services.dead_letter_service import DeadLetterService
+
+    entry = DeadLetterService().create_entry(
+        entry_type="handoff_failure",
+        correlation_id=f"handoff:{handoff.handoff_id}",
+        original_payload=handoff.model_dump(mode="json"),
+        failure_reason=handoff.failure_reason or "handoff delivery exhausted",
+        failure_code="MAX_RETRIES_EXCEEDED",
+        source_service=handoff.source_agent,
+        target_service=handoff.target_agent,
+        tenant_scope_key=handoff.scope_key,
+        incident_id=handoff.incident_id,
+        retry_count=max(handoff.retry_count, 0),
+    )
+    return entry.entry_id
 
 
 def _build_scope_key(tenant_id: str, incident_id: str | None, signal_id: str) -> str:
@@ -51,8 +71,10 @@ class SignalProcessingPipeline:
         audit_writer: AuditWriter | None = None,
         agent: MonitoringAgent | None = None,
         content_safety: ContentSafetyValidator | None = None,
-        deliver_fn=None,
-        on_dead_letter_fn=None,
+        signal_store: object | None = None,
+        signal_repository: object | None = None,
+        deliver_fn: Callable[[AgentHandoffEvent], Awaitable[None]] | None = None,
+        on_dead_letter_fn: Callable[[AgentHandoffEvent], str] | None = None,
     ) -> None:
         self._config = config or MonitoringConfig()
         self._deduplicator = deduplicator or SignalDeduplicator(window_minutes=self._config.signal_dedup_window_minutes)
@@ -61,7 +83,8 @@ class SignalProcessingPipeline:
         self._agent = agent or MonitoringAgent(config=self._config)
         self._content_safety = content_safety or ContentSafetyValidator()
         self._deliver_fn = deliver_fn
-        self._on_dead_letter_fn = on_dead_letter_fn or (lambda h: f"dl-{h.handoff_id}")
+        self._on_dead_letter_fn = on_dead_letter_fn or _persist_dead_letter_entry
+        self._signal_repository = signal_repository or signal_store
 
         # Counters for metrics
         self._signal_count = 0
@@ -76,7 +99,7 @@ class SignalProcessingPipeline:
     # Stage 1: Input Validation
     # ------------------------------------------------------------------
 
-    def _validate(self, raw: dict, signal_id: str, tenant_id: str) -> SignalEnvelope | None:
+    def _validate(self, raw: dict[str, object], signal_id: str, tenant_id: str) -> SignalEnvelope | None:
         # RAG-OPTOUT [FR-RAG-NS-02]: BoM live-feed signals are authoritative; doctrine grounding lives on the downstream escalation call. ADR: docs/decisions/036-foundry-rag-grounding/02-rag-optout-bom-live.md  # noqa: E501
         """Stage 1: Validate incoming signal via Pydantic."""
         try:
@@ -106,7 +129,7 @@ class SignalProcessingPipeline:
 
     def _deduplicate(self, signal_id: str, envelope: SignalEnvelope, tenant_id: str) -> bool:
         """Stage 2: Check for duplicates.  Returns True if signal should continue."""
-        if self._deduplicator.is_duplicate(signal_id):
+        if self._deduplicator.is_duplicate(signal_id, scope=tenant_id):
             self._dedup_discard_count += 1
             scope_key = _build_scope_key(tenant_id, envelope.incidentId, signal_id)
             record = MonitoringDecisionRecord(
@@ -123,7 +146,7 @@ class SignalProcessingPipeline:
             self._write_audit(record)
             logger.debug("Stage 2 duplicate discarded: %s", signal_id)
             return False
-        self._deduplicator.mark_seen(signal_id)
+        self._deduplicator.mark_seen(signal_id, scope=tenant_id)
         return True
 
     # ------------------------------------------------------------------
@@ -167,16 +190,23 @@ class SignalProcessingPipeline:
 
     async def _evaluate_misinformation(
         self, signal_id: str, envelope: SignalEnvelope, tenant_id: str
-    ) -> tuple[str | None, float]:
+    ) -> tuple[Tier2Decision, float]:
         """Stage 4: Conditional misinformation check for escalated signals.
 
-        Returns (classification, suspicious_penalty).
-        classification is None if stage was skipped.
+        Returns (tier2_decision, suspicious_penalty).
         """
         if envelope.validationStatus != "escalated":
-            return None, 0.0
+            return (
+                Tier2Decision(
+                    decision="tier2_skipped",
+                    rationale="validation status not escalated",
+                    decision_id=f"tier2-skip-{signal_id}",
+                ),
+                0.0,
+            )
 
-        classification = await self._agent.evaluate_escalated_signal(envelope)
+        tier2_decision = await self._agent.evaluate_escalated_signal(envelope)
+        classification = tier2_decision.decision
         scope_key = _build_scope_key(tenant_id, envelope.incidentId, signal_id)
         suspicious_penalty = 0.0
 
@@ -197,7 +227,7 @@ class SignalProcessingPipeline:
                 tenant_id=tenant_id,
             )
             self._write_audit(record)
-            return classification, 0.0
+            return tier2_decision, 0.0
 
         if classification == "suspicious":
             suspicious_penalty = self._config.suspicious_confidence_penalty
@@ -216,7 +246,7 @@ class SignalProcessingPipeline:
                 tenant_id=tenant_id,
             )
             self._write_audit(record)
-            return classification, suspicious_penalty
+            return tier2_decision, suspicious_penalty
 
         if classification == "credible":
             record = MonitoringDecisionRecord(
@@ -234,7 +264,7 @@ class SignalProcessingPipeline:
                 tenant_id=tenant_id,
             )
             self._write_audit(record)
-            return classification, 0.0
+            return tier2_decision, 0.0
 
         # llm_timeout, llm_unavailable, held_for_review → fail-safe-CLOSED
         llm_class = classification if classification in ("llm_timeout", "llm_unavailable") else "llm_timeout"
@@ -253,7 +283,62 @@ class SignalProcessingPipeline:
             tenant_id=tenant_id,
         )
         self._write_audit(record)
-        return classification, 0.0
+        return tier2_decision, 0.0
+
+    @staticmethod
+    def _status_for_tier2_decision(decision: str, existing_status: str) -> str:
+        if decision == "misinformation":
+            return "rejected"
+        if decision in {"llm_timeout", "llm_unavailable", "held_for_review", "malformed_response"}:
+            return "escalated"
+        if decision in {"credible", "suspicious", "tier2_skipped"}:
+            return "validated"
+        return existing_status
+
+    async def _persist_validation_decision(
+        self,
+        *,
+        signal_id: str,
+        tenant_id: str,
+        envelope: SignalEnvelope,
+        tier2_decision: Tier2Decision,
+    ) -> bool:
+        repository = self._signal_repository
+        if repository is None or not hasattr(repository, "update_validation_decision"):
+            return True
+
+        status = self._status_for_tier2_decision(tier2_decision.decision, envelope.validationStatus)
+        updater = getattr(repository, "update_validation_decision")
+        kwargs = {
+            "signal_id": signal_id,
+            "scope": tenant_id,
+            "validation_status": status,
+            "rationale": tier2_decision.rationale,
+            "decision_id": tier2_decision.decision_id,
+            "decision": tier2_decision.decision,
+        }
+        try:
+            outcome = updater(**kwargs)
+        except TypeError:
+            try:
+                outcome = updater(
+                    signal_id, status, tier2_decision.rationale, tier2_decision.decision_id, tier2_decision.decision
+                )
+            except Exception:
+                logger.exception("Failed to persist monitoring decision for signal %s", signal_id)
+                return False
+        except Exception:
+            logger.exception("Failed to persist monitoring decision for signal %s", signal_id)
+            return False
+
+        if inspect.isawaitable(outcome):
+            try:
+                outcome = await outcome
+            except Exception:
+                logger.exception("Failed to await monitoring decision persistence for signal %s", signal_id)
+                return False
+
+        return bool(outcome)
 
     # ------------------------------------------------------------------
     # Stage 5: Signal Summarisation
@@ -290,14 +375,17 @@ class SignalProcessingPipeline:
         self,
         signal_id: str,
         envelope: SignalEnvelope,
+        tier2_decision: Tier2Decision,
         suspicious_penalty: float,
         tenant_id: str,
     ) -> AgentHandoffEvent | None:
         """Stage 6: Escalation decision based on effectiveConfidence."""
         handoff = self._agent.build_high_risk_handoff(
             envelope,
+            tier2_decision=tier2_decision,
             suspicious_penalty=suspicious_penalty,
             tenant_id=tenant_id,
+            signal_id=signal_id,
         )
         scope_key = _build_scope_key(tenant_id, envelope.incidentId, signal_id)
         effective_confidence = max(0.0, envelope.confidenceScore * envelope.freshnessScore - suspicious_penalty)
@@ -365,7 +453,7 @@ class SignalProcessingPipeline:
 
     async def process_signal(
         self,
-        raw: dict,
+        raw: dict[str, object],
         signal_id: str,
         tenant_id: str = "live",
     ) -> MonitoringDecisionRecord | None:
@@ -389,16 +477,48 @@ class SignalProcessingPipeline:
         self._assess_freshness(signal_id, envelope, tenant_id)
 
         # Stage 4: Misinformation Evaluation (conditional)
-        classification, suspicious_penalty = await self._evaluate_misinformation(signal_id, envelope, tenant_id)
+        tier2_decision, suspicious_penalty = await self._evaluate_misinformation(signal_id, envelope, tenant_id)
+        persisted = await self._persist_validation_decision(
+            signal_id=signal_id,
+            tenant_id=tenant_id,
+            envelope=envelope,
+            tier2_decision=tier2_decision,
+        )
+        if not persisted:
+            scope_key = _build_scope_key(tenant_id, envelope.incidentId, signal_id)
+            self._write_audit(
+                MonitoringDecisionRecord(
+                    signal_id=signal_id,
+                    decision=DecisionType.held_for_review,
+                    confidence=envelope.confidenceScore,
+                    effective_confidence=envelope.confidenceScore * envelope.freshnessScore,
+                    freshness_score=envelope.freshnessScore,
+                    inputs={"tier2_decision": tier2_decision.model_dump(mode="json")},
+                    output={"action": "decision_persistence_failed"},
+                    agent_version=self._config.agent_version,
+                    reasoning_summary="Signal held for review — decision persistence failed",
+                    incident_scope_key=scope_key,
+                    tenant_id=tenant_id,
+                )
+            )
+            return None
+
+        classification = tier2_decision.decision
         # If blocked or held, stop processing
-        if classification in ("misinformation", "llm_timeout", "llm_unavailable", "held_for_review"):
+        if classification in (
+            "misinformation",
+            "llm_timeout",
+            "llm_unavailable",
+            "held_for_review",
+            "malformed_response",
+        ):
             return None
 
         # Stage 5: Signal Summarisation
         self._summarise(signal_id, envelope, tenant_id)
 
         # Stage 6: Confidence-Based Triage
-        handoff = await self._triage(signal_id, envelope, suspicious_penalty, tenant_id)
+        handoff = await self._triage(signal_id, envelope, tier2_decision, suspicious_penalty, tenant_id)
 
         elapsed_ms = round((time.perf_counter() - start) * 1000, 2)
         logger.info(

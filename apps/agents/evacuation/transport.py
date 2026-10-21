@@ -12,11 +12,20 @@ Four vulnerability categories are supported:
 
 from __future__ import annotations
 
+import hashlib
 import logging
 from typing import Any
 
 from evacuation.config import EvacuationConfig
-from evacuation.models import TransportRequirement, VulnerabilityCategory
+from evacuation.models import (
+    TransportCoordinationResult,
+    TransportCoordinationStatus,
+    TransportExclusionReason,
+    TransportGroupExclusion,
+    TransportPriority,
+    TransportRequirement,
+    VulnerabilityCategory,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +86,23 @@ class TransportCoordinator:
         facilities: list[dict[str, Any]],
         assembly_areas: list[dict[str, Any]],
     ) -> list[TransportRequirement]:
-        """Generate transport requirements for facilities within evacuation zones.
+        """Return actionable requests for legacy list callers."""
+        return self.coordinate_transport(
+            zones,
+            facilities,
+            assembly_areas,
+        ).requirements
+
+    def coordinate_transport(
+        self,
+        zones: list[dict[str, Any]],
+        facilities: list[dict[str, Any]] | None,
+        assembly_areas: list[dict[str, Any]],
+        incident_scope_key: str = "",
+        destination_allocations: list[dict[str, Any]] | None = None,
+        routes: list[dict[str, Any]] | None = None,
+    ) -> TransportCoordinationResult:
+        """Generate requests and reconcile identified vulnerable coverage.
 
         Args:
             zones: List of zone dicts with zone_number and boundary.
@@ -88,40 +113,141 @@ class TransportCoordinator:
             assembly_areas: List of assembly area dicts with ``assembly_area_id``,
                 ``name``, and ``coordinates``.
 
-        Returns:
-            List of TransportRequirement records sorted by priority.
+        Zone 3 facilities remain advisory inventory and never generate a
+        mandatory Resource Allocation request.
         """
+        if facilities is None:
+            return TransportCoordinationResult(
+                status=TransportCoordinationStatus.unavailable,
+                assumptions=["Facility registry unavailable; vulnerable transport needs are incomplete"],
+                uncovered_vulnerable_population_by_zone={
+                    int(zone.get("zone_number", 0)): int(zone.get("vulnerable_population", 0))
+                    for zone in zones
+                    if int(zone.get("zone_number", 0)) in {1, 2}
+                },
+            )
         if not facilities:
-            logger.info("No facility data available — skipping transport coordination")
-            return []
+            return TransportCoordinationResult(
+                status=TransportCoordinationStatus.complete,
+                assumptions=["Facility registry contains no vulnerable facilities"],
+                uncovered_vulnerable_population_by_zone={
+                    int(zone.get("zone_number", 0)): int(zone.get("vulnerable_population", 0))
+                    for zone in zones
+                    if int(zone.get("zone_number", 0)) in {1, 2}
+                },
+            )
 
         requirements: list[TransportRequirement] = []
+        exclusions: list[TransportGroupExclusion] = []
+        identified_by_zone: dict[int, int] = {}
+        assumptions: list[str] = []
+        remaining_vulnerable_capacity = {
+            (
+                int(allocation.get("zone_number", 0)),
+                str(allocation.get("assembly_area_id", "")),
+            ): int(allocation.get("assigned_vulnerable_population", 0))
+            for allocation in destination_allocations or []
+        }
 
-        for facility in facilities:
-            # Determine which zone the facility is in
-            zone_number = self._determine_facility_zone(facility, zones)
+        for facility in sorted(facilities, key=self._facility_sort_key):
+            facility_id = self._facility_id(facility)
+            facility_name = str(facility.get("name") or "Unknown facility")
+            population = self._facility_population(facility)
+            if population is None:
+                exclusions.append(
+                    TransportGroupExclusion(
+                        facility_id=facility_id,
+                        facility_name=facility_name,
+                        reason=TransportExclusionReason.invalid_population,
+                        details="Facility capacity must be a positive integer",
+                    )
+                )
+                continue
+            zone_number, location_error = self._locate_facility_zone(
+                facility,
+                zones,
+            )
+            if location_error:
+                exclusions.append(
+                    TransportGroupExclusion(
+                        facility_id=facility_id,
+                        facility_name=facility_name,
+                        estimated_individuals=population,
+                        reason=TransportExclusionReason.invalid_location,
+                        details=location_error,
+                    )
+                )
+                continue
             if zone_number is None:
-                continue  # Facility outside evacuation zones
-
-            # Find nearest assembly area
-            nearest_aa = self._find_nearest_assembly_area(facility, assembly_areas)
-            if nearest_aa is None:
+                exclusions.append(
+                    TransportGroupExclusion(
+                        facility_id=facility_id,
+                        facility_name=facility_name,
+                        estimated_individuals=population,
+                        reason=TransportExclusionReason.outside_affected_area,
+                        details="Facility is outside all exclusive zone memberships",
+                    )
+                )
                 continue
 
-            # Get vulnerability category
+            identified_by_zone[zone_number] = identified_by_zone.get(zone_number, 0) + population
+            if zone_number == 3:
+                exclusions.append(
+                    TransportGroupExclusion(
+                        facility_id=facility_id,
+                        facility_name=facility_name,
+                        estimated_individuals=population,
+                        reason=TransportExclusionReason.advisory_only,
+                        zone_number=3,
+                        details="Zone 3 is advisory and creates no mandatory transport request",
+                    )
+                )
+                continue
+
             vuln_category = facility.get("vulnerability_category", "")
             if vuln_category not in VEHICLE_TYPE_MAP:
-                continue
-
-            # Compute vehicle requirement
-            capacity = facility.get("capacity", 0)
-            if capacity <= 0:
+                exclusions.append(
+                    TransportGroupExclusion(
+                        facility_id=facility_id,
+                        facility_name=facility_name,
+                        estimated_individuals=population,
+                        reason=TransportExclusionReason.unknown_category,
+                        zone_number=zone_number,
+                        details=f"Unsupported vulnerability category: {vuln_category or 'missing'}",
+                    )
+                )
                 continue
 
             vehicle_type = VEHICLE_TYPE_MAP[vuln_category]
             priority = PRIORITY_MAP[vuln_category]
             vehicle_capacity = VEHICLE_CAPACITY.get(vehicle_type, 50)
-            estimated_vehicles = max(1, -(-capacity // vehicle_capacity))  # Ceiling division
+            estimated_vehicles = -(-population // vehicle_capacity)
+            unresolved_destination_reason: str | None = None
+            selected_route_id = ""
+            if destination_allocations is None:
+                nearest_aa = self._find_nearest_assembly_area(
+                    facility,
+                    assembly_areas,
+                )
+            else:
+                nearest_aa, selected_route_id = self._find_allocated_destination(
+                    zone_number=zone_number,
+                    population=population,
+                    vehicle_type=vehicle_type,
+                    assembly_areas=assembly_areas,
+                    routes=routes or [],
+                    remaining_vulnerable_capacity=remaining_vulnerable_capacity,
+                )
+                if nearest_aa is None:
+                    unresolved_destination_reason = (
+                        "No route-backed compatible assembly area has sufficient verified allocated capacity"
+                    )
+            if nearest_aa is None:
+                assumptions.append(
+                    f"Transport request for {facility_id} has an unresolved "
+                    "destination: "
+                    + (unresolved_destination_reason or "No assembly area is available for transport coordination")
+                )
 
             # Gather special considerations
             special = list(SPECIAL_CONSIDERATIONS.get(vuln_category, []))
@@ -130,9 +256,11 @@ class TransportCoordinator:
                 if s not in special:
                     special.append(s)
 
-            # Build notes field with all contextual info
-            facility_name = facility.get("name", "Unknown facility")
-            dest_name = nearest_aa.get("name", nearest_aa.get("assembly_area_id", ""))
+            dest_name = (
+                nearest_aa.get("name", nearest_aa.get("assembly_area_id", ""))
+                if nearest_aa is not None
+                else "Unresolved"
+            )
             coords = facility.get("coordinates", {})
             coord_str = f"({coords.get('lat', 0):.4f}, {coords.get('lng', 0):.4f})" if coords else ""
             special_str = ", ".join(special) if special else "none"
@@ -141,16 +269,40 @@ class TransportCoordinator:
                 f"Priority: {priority} | "
                 f"Pickup: {facility_name} {coord_str} | "
                 f"Destination: {dest_name} | "
-                f"Individuals: {capacity} | "
+                f"Individuals: {population} | "
                 f"Zone: {zone_number} | "
                 f"Considerations: {special_str}"
             )
 
             requirement = TransportRequirement(
+                requirement_id=self._requirement_id(
+                    incident_scope_key,
+                    facility_id,
+                    vuln_category,
+                    vehicle_type,
+                ),
+                facility_id=facility_id,
+                facility_name=facility_name,
                 category=VulnerabilityCategory(vuln_category),
                 vehicle_type=vehicle_type,
+                estimated_individuals=population,
                 quantity_required=estimated_vehicles,
-                estimated_trips=max(1, estimated_vehicles),
+                estimated_trips=1,
+                pickup_location={
+                    "lat": float(coords["lat"]),
+                    "lng": float(coords["lng"]),
+                },
+                destination_assembly_area_id=str(
+                    nearest_aa.get("assembly_area_id", "") if nearest_aa is not None else ""
+                ),
+                destination_assembly_area_name=str(dest_name),
+                destination_route_id=selected_route_id,
+                destination_resolved=nearest_aa is not None,
+                unresolved_destination_reason=unresolved_destination_reason,
+                priority_level=TransportPriority(priority),
+                origin_zone=zone_number,
+                phase_number=1 if zone_number == 1 else 3,
+                special_considerations=special,
                 notes=notes,
             )
             requirements.append(requirement)
@@ -159,11 +311,171 @@ class TransportCoordinator:
         requirements.sort(
             key=lambda r: (
                 _PRIORITY_ORDER.get(PRIORITY_MAP.get(r.category.value, "high"), 3),
-                _zone_from_notes(r.notes),
+                r.origin_zone,
+                r.facility_id,
             )
         )
 
-        return requirements
+        uncovered_by_zone: dict[int, int] = {}
+        for zone in zones:
+            zone_number = int(zone.get("zone_number", 0))
+            if zone_number not in {1, 2}:
+                continue
+            vulnerable_population = int(zone.get("vulnerable_population", 0))
+            identified = identified_by_zone.get(zone_number, 0)
+            uncovered_by_zone[zone_number] = max(
+                0,
+                vulnerable_population - identified,
+            )
+            if identified > vulnerable_population:
+                assumptions.append(
+                    f"Zone {zone_number} facility population {identified} exceeds "
+                    f"the authoritative vulnerable estimate {vulnerable_population}"
+                )
+            elif uncovered_by_zone[zone_number]:
+                assumptions.append(
+                    f"Zone {zone_number} has {uncovered_by_zone[zone_number]} "
+                    "vulnerable people without facility-specific transport records"
+                )
+
+        status = (
+            TransportCoordinationStatus.complete
+            if (
+                not exclusions
+                and not any(uncovered_by_zone.values())
+                and not assumptions
+                and all(requirement.destination_resolved for requirement in requirements)
+            )
+            else TransportCoordinationStatus.partial
+        )
+        return TransportCoordinationResult(
+            status=status,
+            requirements=requirements,
+            exclusions=exclusions,
+            identified_population_by_zone=identified_by_zone,
+            uncovered_vulnerable_population_by_zone=uncovered_by_zone,
+            assumptions=assumptions,
+        )
+
+    @staticmethod
+    def _facility_sort_key(facility: dict[str, Any]) -> tuple[int, str]:
+        category = str(facility.get("vulnerability_category", ""))
+        return (
+            _PRIORITY_ORDER.get(PRIORITY_MAP.get(category, "high"), 3),
+            str(facility.get("facility_id") or facility.get("name") or ""),
+        )
+
+    def _find_allocated_destination(
+        self,
+        *,
+        zone_number: int,
+        population: int,
+        vehicle_type: str,
+        assembly_areas: list[dict[str, Any]],
+        routes: list[dict[str, Any]],
+        remaining_vulnerable_capacity: dict[tuple[int, str], int],
+    ) -> tuple[dict[str, Any] | None, str]:
+        area_by_id = {str(area.get("assembly_area_id", "")): area for area in assembly_areas}
+        route_metrics: dict[str, tuple[tuple[float, float, str], str]] = {}
+        for route in routes:
+            if int(route.get("origin_zone", route.get("zone_id", 0))) != zone_number:
+                continue
+            if not self._vehicle_route_compatible(vehicle_type, route):
+                continue
+            area_id = str(
+                route.get(
+                    "destination_assembly_area",
+                    route.get("assembly_area_id", ""),
+                )
+            )
+            metric = (
+                float(route.get("estimated_travel_time_loaded_min", 0)),
+                float(route.get("total_distance_km", route.get("distance_km", 0))),
+                str(route.get("route_id", "")),
+            )
+            candidate = (metric, str(route.get("route_id", "")))
+            route_metrics[area_id] = min(
+                route_metrics.get(area_id, candidate),
+                candidate,
+            )
+
+        candidates = []
+        for (allocation_zone, area_id), remaining in remaining_vulnerable_capacity.items():
+            if allocation_zone != zone_number or remaining < population:
+                continue
+            area = area_by_id.get(area_id)
+            if area is None or area_id not in route_metrics:
+                continue
+            if not self._vehicle_destination_compatible(vehicle_type, area):
+                continue
+            candidates.append(
+                (
+                    route_metrics[area_id][0],
+                    area_id,
+                    route_metrics[area_id][1],
+                    area,
+                )
+            )
+        if not candidates:
+            return None, ""
+        _, area_id, route_id, selected = min(candidates)
+        remaining_vulnerable_capacity[(zone_number, area_id)] -= population
+        return selected, route_id
+
+    @staticmethod
+    def _vehicle_destination_compatible(
+        vehicle_type: str,
+        assembly_area: dict[str, Any],
+    ) -> bool:
+        features = set(assembly_area.get("accessibility_features", []))
+        if vehicle_type in {"wheelchair_accessible_vehicle", "accessible_bus"}:
+            return "wheelchair_accessible" in features
+        if vehicle_type == "ambulance":
+            return "medical_facilities" in features
+        return True
+
+    @staticmethod
+    def _vehicle_route_compatible(
+        vehicle_type: str,
+        route: dict[str, Any],
+    ) -> bool:
+        suitability = route.get("vehicle_suitability", {})
+        if vehicle_type in {"wheelchair_accessible_vehicle", "accessible_bus"}:
+            return bool(suitability.get("accessible", False))
+        if vehicle_type in {"bus", "ambulance", "medical_transport"}:
+            return bool(suitability.get("standard", True))
+        return False
+
+    @staticmethod
+    def _facility_population(facility: dict[str, Any]) -> int | None:
+        value = facility.get("capacity")
+        if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+            return None
+        return value
+
+    @staticmethod
+    def _facility_id(facility: dict[str, Any]) -> str:
+        identifier = str(facility.get("facility_id") or "").strip()
+        if identifier:
+            return identifier
+        identity = "|".join(
+            [
+                str(facility.get("name") or "unknown"),
+                str((facility.get("coordinates") or {}).get("lat", "")),
+                str((facility.get("coordinates") or {}).get("lng", "")),
+            ]
+        )
+        return f"facility-{hashlib.sha256(identity.encode()).hexdigest()[:12]}"
+
+    @staticmethod
+    def _requirement_id(
+        incident_scope_key: str,
+        facility_id: str,
+        category: str,
+        vehicle_type: str,
+    ) -> str:
+        identity = "|".join([incident_scope_key, facility_id, category, vehicle_type])
+        return f"tr-{hashlib.sha256(identity.encode()).hexdigest()[:16]}"
 
     def _determine_facility_zone(
         self,
@@ -172,30 +484,45 @@ class TransportCoordinator:
     ) -> int | None:
         """Determine which evacuation zone a facility falls in.
 
-        Uses simple coordinate-based containment check via Shapely when available.
-        Falls back to nearest-zone assignment if geometric check fails.
+        Uses exclusive membership geometry and highest-priority boundary ownership.
         """
-        # Try geometric containment via Shapely
+        zone_number, _ = self._locate_facility_zone(facility, zones)
+        return zone_number
+
+    def _locate_facility_zone(
+        self,
+        facility: dict[str, Any],
+        zones: list[dict[str, Any]],
+    ) -> tuple[int | None, str | None]:
+        coordinates = facility.get("coordinates")
+        if not isinstance(coordinates, dict):
+            return None, "Facility coordinates are missing"
+        latitude = coordinates.get("lat")
+        longitude = coordinates.get("lng")
+        if not isinstance(latitude, (int, float)) or not isinstance(
+            longitude,
+            (int, float),
+        ):
+            return None, "Facility coordinates must contain numeric lat/lng"
+        if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            return None, "Facility coordinates are outside WGS84 bounds"
         try:
             from shapely.geometry import Point, shape
 
-            coords = facility.get("coordinates", {})
-            if coords:
-                point = Point(coords.get("lng", 0), coords.get("lat", 0))
-                for zone in sorted(zones, key=lambda z: z.get("zone_number", 99)):
-                    boundary = zone.get("boundary")
-                    if boundary:
-                        zone_poly = shape(boundary)
-                        if zone_poly.contains(point) or zone_poly.intersects(point.buffer(0.001)):
-                            return zone.get("zone_number")
-        except Exception:
-            pass
+            point = Point(longitude, latitude)
+            for zone in sorted(zones, key=lambda z: z.get("zone_number", 99)):
+                boundary = zone.get("membership_boundary") or zone.get("boundary")
+                if not boundary:
+                    continue
+                zone_poly = shape(boundary)
+                if zone_poly.is_empty or not zone_poly.is_valid:
+                    return None, "Zone membership geometry is invalid"
+                if zone_poly.covers(point):
+                    return int(zone.get("zone_number", 0)), None
+        except (TypeError, ValueError):
+            return None, "Zone membership geometry is malformed"
 
-        # Fallback: if zones are defined, assign to outermost zone
-        if zones:
-            return max(z.get("zone_number", 3) for z in zones)
-
-        return None
+        return None, None
 
     def _find_nearest_assembly_area(
         self,

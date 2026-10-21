@@ -18,18 +18,7 @@ def test_benchmark_seed_has_5_plus_cross_sector_rows():
 
     entries = seed_register()
     cross_sector = [
-        e
-        for e in entries
-        if e.jurisdiction == "AU"
-        and e.kind == "external_benchmark"
-        and e.kpi_id
-        in (
-            "bom_warning_lead_time",
-            "nema_comdisplan_adoption",
-            "icao_arff_response",
-            "saidi_saifi_reliability",
-            "aiims_span_of_control",
-        )
+        e for e in entries if e.jurisdiction == "AU" and e.kind == "external_benchmark" and e.category == "cross_sector"
     ]
     assert len(cross_sector) >= 5, f"Expected ≥5 cross-sector rows, got {len(cross_sector)}"
 
@@ -50,9 +39,30 @@ def test_benchmark_seed_citations_present():
 
     entries = seed_register()
     auto_entries = [e for e in entries if e.provenance == "auto"]
-    for entry in auto_entries[:10]:  # Check first 10 auto entries
+    for entry in auto_entries:
         assert entry.source_citation is not None, f"Auto entry {entry.id} missing citation"
-        assert entry.source_citation.org, f"Auto entry {entry.id} citation missing org"
+        assert entry.source_citation.organisation, f"Auto entry {entry.id} citation missing organisation"
         assert entry.source_citation.document, f"Auto entry {entry.id} citation missing document"
         assert entry.source_citation.year, f"Auto entry {entry.id} citation missing year"
         assert entry.source_citation.url, f"Auto entry {entry.id} citation missing url"
+
+
+def test_unavailable_rows_do_not_invent_targets():
+    from apps.api.app.services.evidence.benchmarks.seed import seed_register
+
+    for entry in seed_register():
+        if entry.not_available:
+            assert entry.target_value is None
+            assert entry.benchmark_type == "unavailable"
+
+
+def test_every_jurisdiction_has_each_required_category():
+    from apps.api.app.services.evidence.benchmarks.seed import (
+        JURISDICTIONS,
+        seed_register,
+    )
+
+    rows = seed_register()
+    for jurisdiction in JURISDICTIONS:
+        categories = {entry.category for entry in rows if entry.jurisdiction == jurisdiction}
+        assert categories == {"fire", "ambulance", "ses", "police"}

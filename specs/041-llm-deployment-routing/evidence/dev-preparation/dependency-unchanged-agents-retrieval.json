@@ -1,0 +1,10 @@
+{
+  "observed_at": "2026-10-20T04:51:23.646567+00:00",
+  "scope": "existing agents retrieval metadata only; no business invocation",
+  "result": {
+    "existing_agents_image_unchanged": true,
+    "search_configured": true,
+    "metadata_count_succeeded": true,
+    "document_count": 0
+  }
+}

@@ -13,15 +13,16 @@ specs:
 
 [→ Architecture index](../README.md)
 
-This page shows how jurisdiction filters enforce authority boundaries as an incident moves from suppression to recovery and then to community welfare coordination.
+This page shows how jurisdiction filters enforce authority boundaries as incidents move across suppression, recovery, and welfare coordination while preserving scope isolation (`live` versus `sim-*`).
 
 ![SECTOR-04: Jurisdiction-Filter Behaviour](jurisdiction-filter.png)
 
 ## Key Elements
 
 - FR-015 applies when the active lead agency changes and data visibility must follow authority.
-- spec-022 governs the filter rules shown at each authority boundary.
-- The hand-off example traces RFS suppression to SES recovery to local-government welfare.
+- spec-022 governs jurisdiction filtering and authority boundary handoff behavior.
+- The hand-off example traces RFS suppression to SES recovery to local-government welfare and highlights hazard-dependent authority changes.
+- Filter and partition controls are explicit: `scope` separates live/simulation, `jurisdictionId` gates regional data access, and `dataSourceId` identifies feed-level provenance.
 
 ## Related Pages
 

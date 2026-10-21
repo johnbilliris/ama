@@ -11,7 +11,7 @@ import logging
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from packages.domain.src.domain.models.audit_export import AuditExportJob
+from packages.domain.src.domain.models.audit_export import AuditExportJob, ExportFormat
 
 logger = logging.getLogger("audit_export_service")
 
@@ -28,8 +28,8 @@ class AuditExportService:
     def create_export_job(
         self,
         *,
-        format: str,
-        filter_params: dict,
+        format: ExportFormat,
+        filter_params: dict[str, object],
         record_ids: list[str],
         requested_by: str,
         tenant_id: str = "live",
@@ -59,7 +59,7 @@ class AuditExportService:
         """Get export job by ID."""
         return self._jobs.get(job_id)
 
-    def process_export(self, job_id: str, records: list[dict]) -> AuditExportJob:
+    def process_export(self, job_id: str, records: list[dict[str, object]]) -> AuditExportJob:
         # RAG-OPTOUT [FR-RAG-NS-09]: Observer-Auditor read-only path; serialises archived records without re-grounding to preserve byte-replay determinism. ADR: docs/decisions/036-foundry-rag-grounding/09-rag-optout-observer-auditor.md  # noqa: E501
         """Process an export job (synchronous simulation of async worker)."""
         job = self._jobs.get(job_id)
@@ -112,7 +112,7 @@ class AuditExportService:
 
         return job
 
-    def _generate_csv(self, records: list[dict]) -> str:
+    def _generate_csv(self, records: list[dict[str, object]]) -> str:
         """Generate CSV content from audit records."""
         if not records:
             return ""
@@ -122,11 +122,11 @@ class AuditExportService:
         writer.writerows(records)
         return output.getvalue()
 
-    def _generate_json(self, records: list[dict]) -> str:
+    def _generate_json(self, records: list[dict[str, object]]) -> str:
         """Generate JSON content from audit records."""
         return json.dumps({"records": records, "count": len(records)}, indent=2, default=str)
 
-    def _generate_pdf_placeholder(self, records: list[dict]) -> bytes:
+    def _generate_pdf_placeholder(self, records: list[dict[str, object]]) -> bytes:
         """Generate PDF content (placeholder — ReportLab in production)."""
         # In production, use ReportLab for formatted PDF generation
         logger.info("PDF export requested for %d records (placeholder)", len(records))

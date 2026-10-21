@@ -1,5 +1,19 @@
 using '../main.bicep'
 
+// Staging needs its own approved profile; Dev observations are not deployment authority here.
+var models = json(readEnvironmentVariable('AMA_STAGING_MODEL_PARAMETERS'))
+param reasoningModelName = models.reasoningModelName
+param reasoningModelVersion = models.reasoningModelVersion
+param draftingModelName = models.draftingModelName
+param draftingModelVersion = models.draftingModelVersion
+param simulationModelName = models.simulationModelName
+param simulationModelVersion = models.simulationModelVersion
+param reasoningVersionUpgradeOption = models.reasoningVersionUpgradeOption
+param draftingVersionUpgradeOption = models.draftingVersionUpgradeOption
+param simulationVersionUpgradeOption = models.simulationVersionUpgradeOption
+param embeddingVersionUpgradeOption = models.embeddingVersionUpgradeOption
+param deploymentOperatingStates = models.deploymentOperatingStates
+
 param subscriptionTopology = 'B'
 param environmentName = 'staging'
 param location = 'australiaeast'

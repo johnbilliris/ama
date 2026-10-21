@@ -79,17 +79,9 @@ const QUICK_START: HelpLink[] = [
       { slug: "accessibility-how-to", label: "Accessibility how-to" },
     ],
   },
-  {
-    href: "/simulations",
-    label: "Simulations",
-    description: "Tabletop and live-fire exercises with replay and warp playback.",
-    icon: "🎯",
-    cta: "Open simulations",
-    helpArticles: [
-      { slug: "screen-by-screen/simulation-control", label: "Simulation control" },
-      { slug: "playbooks/simulation", label: "Simulation playbook" },
-    ],
-  },
+  // AUD-017 / FR-022 — no simulation affordance is exposed from the live
+  // help catalogue. The exercise routes stay directly addressable and carry
+  // their own navigation under the /simulations layout.
 ];
 
 const REFERENCE_LINKS: HelpLink[] = [

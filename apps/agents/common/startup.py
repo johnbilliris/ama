@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from common.dead_letters import DeadLetterRedeliveryPoller, DeadLetterStore
+from common.dead_letters import DeadLetterRedeliveryPoller, DeadLetterStore, RedeliveryCallback
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ _poller: DeadLetterRedeliveryPoller | None = None
 
 async def start_background_services(
     dead_letter_store: DeadLetterStore | None = None,
-    deliver_fn=None,
+    deliver_fn: RedeliveryCallback | None = None,
 ) -> None:
     """Start background services on agent boot."""
     global _poller

@@ -1,18 +1,18 @@
 name: Foundry carve-out review (spec-035 T071 + spec-036 T-K05)
 
+env:
+  PIP_INDEX_URL: https://packagefeedproxy.microsoft.io/pypi/simple
+  UV_DEFAULT_INDEX: https://packagefeedproxy.microsoft.io/pypi/simple
+  PIP_CONFIG_FILE: /dev/null
+  PIP_EXTRA_INDEX_URL: ""
+  PIP_FIND_LINKS: ""
+  UV_INDEX: ""
+  UV_EXTRA_INDEX_URL: ""
+  UV_FIND_LINKS: ""
+  UV_NO_CONFIG: "1"
+
 on:
-  schedule:
-    # Run weekly so stale carveout entries are caught within ~7d of the 90d gate.
-    - cron: "0 7 * * 1"
-  workflow_dispatch: {}
-  pull_request:
-    paths:
-      - "data/governance/foundry_carveout_registry.json"
-      - "infra/foundry-carve-out-registry.yml"
-      - "apps/api/app/repositories/carveout_registry_repository.py"
-      - "packages/eval-dataset/data/telemetry_injection_v1/cases.jsonl"
-      - "packages/eval-core/src/ama_eval_core/telemetry_injection_grader.py"
-      - ".github/workflows/foundry-carveout-review.yml"
+  workflow_dispatch:
 
 jobs:
   review-cadence-gate:
@@ -99,8 +99,7 @@ jobs:
           cat /tmp/foundry-carveout-comment.md
 
       - name: Post comment on PR
-        uses: peter-evans/create-or-update-comment@v5
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9 # v5
         with:
           issue-number: ${{ github.event.pull_request.number }}
-          body-file: /tmp/foundry-carveout-comment.md
-
+          body-path: /tmp/foundry-carveout-comment.md

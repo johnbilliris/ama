@@ -1,0 +1,416 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:extension-list",
+  "title": "Spec Kit extension list output",
+  "type": "array",
+  "items": {
+    "$ref": "#/$defs/entry"
+  },
+  "$defs": {
+    "diagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "message", "source"],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "health": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "diagnostics"],
+      "properties": {
+        "state": {
+          "enum": ["healthy", "invalid"]
+        },
+        "diagnostics": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/diagnostic"
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "healthy"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "diagnostics": {
+                "type": "array",
+                "maxItems": 0
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "invalid"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "diagnostics": {
+                "type": "array",
+                "minItems": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "source": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "const": "local"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "const": "catalog"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind"],
+          "properties": {
+            "kind": {
+              "const": "combined"
+            }
+          }
+        }
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "source_sha256", "source_ordinal", "record_sha256"],
+      "properties": {
+        "kind": {
+          "enum": ["local", "catalog"]
+        },
+        "source_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "source_ordinal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "record_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "provides": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "templates", "scripts", "hooks"],
+      "properties": {
+        "commands": {"type": "integer", "minimum": 0},
+        "templates": {"type": "integer", "minimum": 0},
+        "scripts": {"type": "integer", "minimum": 0},
+        "hooks": {"type": "integer", "minimum": 0}
+      }
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "fallback_identity",
+        "source_locations",
+        "name",
+        "description",
+        "version",
+        "priority",
+        "enabled",
+        "source",
+        "evidence",
+        "provides",
+        "install_allowed",
+        "installed",
+        "installed_version",
+        "available_versions",
+        "activation_state",
+        "activation_diagnostic",
+        "health",
+        "conflict",
+        "conflict_reasons",
+        "catalog_sources"
+      ],
+      "properties": {
+        "id": {"type": ["string", "null"], "pattern": "^[a-z0-9-]+$"},
+        "fallback_identity": {"type": ["string", "null"]},
+        "source_locations": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "name": {"type": "string", "minLength": 1},
+        "description": {"type": ["string", "null"]},
+        "version": {"type": "string", "minLength": 1},
+        "priority": {"type": ["integer", "null"], "minimum": 1},
+        "enabled": {"type": ["boolean", "null"]},
+        "source": {"$ref": "#/$defs/source"},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/evidence"}
+        },
+        "provides": {"$ref": "#/$defs/provides"},
+        "install_allowed": {"type": ["boolean", "null"]},
+        "installed": {"type": "boolean"},
+        "installed_version": {"type": ["string", "null"]},
+        "available_versions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        },
+        "activation_state": {
+          "type": ["string", "null"],
+          "enum": ["disabled", "inactive", "active", "activation-failed", null]
+        },
+        "activation_diagnostic": {
+          "type": ["string", "null"]
+        },
+        "health": {"$ref": "#/$defs/health"},
+        "conflict": {"type": "boolean"},
+        "conflict_reasons": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "catalog_sources": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string"}
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "activation_state": {"const": "activation-failed"}
+            },
+            "required": ["activation_state"]
+          },
+          "then": {
+            "properties": {
+              "activation_diagnostic": {"type": "string", "minLength": 1}
+            }
+          },
+          "else": {
+            "properties": {
+              "activation_diagnostic": {"type": "null"}
+            }
+          }
+        },
+        {
+          "if": {"properties": {"id": {"type": "null"}}},
+          "then": {
+            "properties": {
+              "fallback_identity": {"type": "string", "minLength": 1},
+              "catalog_sources": {"type": "array", "maxItems": 0},
+              "available_versions": {"type": "array", "maxItems": 0},
+              "source": {
+                "type": "object",
+                "properties": {"kind": {"const": "local"}}
+              },
+              "health": {
+                "type": "object",
+                "properties": {
+                  "state": {"const": "invalid"},
+                  "diagnostics": {"type": "array", "minItems": 1}
+                }
+              }
+            }
+          },
+          "else": {"properties": {"fallback_identity": {"type": "null"}}}
+        },
+        {
+          "if": {"properties": {"installed": {"const": false}}},
+          "then": {
+            "properties": {
+              "installed_version": {"type": "null"},
+              "enabled": {"type": "null"},
+              "activation_state": {"type": "null"},
+              "source": {
+                "type": "object",
+                "properties": {"kind": {"const": "catalog"}}
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "enabled": {"type": "boolean"},
+              "activation_state": {
+                "enum": ["disabled", "inactive", "active", "activation-failed"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "type": "object",
+                "properties": {"kind": {"const": "local"}},
+                "required": ["kind"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "installed": {"const": true},
+              "source_locations": {"type": "array", "minItems": 1},
+              "catalog_sources": {"type": "array", "maxItems": 0},
+              "available_versions": {"type": "array", "maxItems": 0},
+              "install_allowed": {"type": "null"},
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    {"$ref": "#/$defs/evidence"},
+                    {"type": "object", "properties": {"kind": {"const": "local"}}}
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "type": "object",
+                "properties": {"kind": {"const": "catalog"}},
+                "required": ["kind"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "installed": {"const": false},
+              "source_locations": {"type": "array", "maxItems": 0},
+              "catalog_sources": {"type": "array", "minItems": 1},
+              "install_allowed": {"type": "boolean"},
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    {"$ref": "#/$defs/evidence"},
+                    {"type": "object", "properties": {"kind": {"const": "catalog"}}}
+                  ]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "type": "object",
+                "properties": {"kind": {"const": "combined"}},
+                "required": ["kind"]
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "installed": {"const": true},
+              "source_locations": {"type": "array", "minItems": 1},
+              "catalog_sources": {"type": "array", "minItems": 1},
+              "install_allowed": {"type": "boolean"},
+              "evidence": {
+                "type": "array",
+                "allOf": [
+                  {"contains": {"type": "object", "properties": {"kind": {"const": "local"}}, "required": ["kind"]}},
+                  {"contains": {"type": "object", "properties": {"kind": {"const": "catalog"}}, "required": ["kind"]}}
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {"properties": {"conflict": {"const": true}}},
+          "then": {
+            "properties": {
+              "conflict_reasons": {"type": "array", "minItems": 1},
+              "evidence": {"type": "array", "minItems": 2},
+              "health": {
+                "type": "object",
+                "properties": {
+                  "state": {"const": "invalid"},
+                  "diagnostics": {"type": "array", "minItems": 1}
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "conflict_reasons": {"type": "array", "maxItems": 0}
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "type": "object",
+                "properties": {"kind": {"const": "catalog"}},
+                "required": ["kind"]
+              },
+              "conflict": {"const": false}
+            }
+          },
+          "then": {
+            "properties": {
+              "health": {
+                "type": "object",
+                "properties": {
+                  "state": {"const": "healthy"},
+                  "diagnostics": {"type": "array", "maxItems": 0}
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

@@ -20,7 +20,7 @@ class AuditExportJob(BaseModel):
     requested_at: datetime
     format: ExportFormat
     status: Literal["queued", "processing", "complete", "failed"]
-    filter_params: dict = Field(
+    filter_params: dict[str, object] = Field(
         default_factory=dict,
         description="The search/filter parameters used to select records",
     )

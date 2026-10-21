@@ -93,12 +93,13 @@ The existing `raw-payloads` container already uses path prefixes (`bom-warnings/
 
 ## R9: Frontend Simulation Dashboard Approach
 
-**Decision**: The simulation dashboard reuses all existing dashboard components. The URL pattern is `/simulations/{tenantId}` which sets a client-side context that is included in all API calls. The persistent SIMULATION banner is a fixed-position component rendered when the route starts with `/simulations/`. The live dashboard at `/incidents` has no simulation-related UI elements.
+**Decision**: The simulation dashboard reuses all existing dashboard components. The URL pattern is `/simulations/{tenantId}` which sets a client-side context that is included in all API calls. The persistent SIMULATION banner is a fixed-position component rendered when the route starts with `/simulations/`. Live views never embed simulation data, controls, tenant selection, or mode switching. Local and Azure-hosted developer environments expose a navigation link to the separate `/simulations` management area.
 
-**Rationale**: Reusing dashboard components ensures simulation fidelity (FR-020) and reduces development effort. Route-based separation (not a toggle) ensures live operators never accidentally see simulation data.
+**Rationale**: Reusing dashboard components ensures simulation fidelity (FR-020) and reduces development effort. Route-based separation (not a toggle) ensures live operators never accidentally see simulation data, while a developer-only navigation entry keeps the implemented exercise capability discoverable during development and evaluation.
 
 **Alternatives Considered**:
-- Simulation toggle on the live dashboard — rejected per FR-022; live dashboard must not contain simulation UI elements.
+- Simulation toggle on the live dashboard — rejected per FR-022; live views must not switch tenant context or embed simulation data.
+- Hiding every route entry — rejected because it makes the required separate management area undiscoverable in developer environments without improving tenant isolation.
 - Separate deployed frontend for simulation — rejected; doubles deployment complexity for identical UI.
 
 ## R10: Exercise Report Generation

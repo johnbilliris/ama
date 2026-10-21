@@ -7,6 +7,7 @@ import json
 from datetime import UTC, datetime
 
 from ama_eval_core.models import (
+    ApprovalAction,
     ApprovalEntry,
     DatasetState,
     DistributionEntry,
@@ -63,7 +64,7 @@ def build_manifest(
             ApprovalEntry(
                 role="eval-author",
                 principal=published_by,
-                action="approve",
+                action=ApprovalAction.approve,
                 timestamp=now,
             )
         ],

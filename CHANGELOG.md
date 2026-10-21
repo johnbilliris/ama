@@ -37,7 +37,7 @@ All notable changes to this repo are documented here. The format follows [Keep a
 - **Z7 SLI** — map-overlay drift error budget (alert when `drift_budget_pct < 99.5 %`); inverse semantics handled in `tests/staging_gates.py::assert_sli_thresholds()`.
 - **`MIN_SAMPLES_PER_SLI_24H = 30`** sample-floor constant in `tests/staging_gates.py`; staging promotion fails closed (`StagingPromotionRefused`) if any SLI has <30 samples in the 24 h window (A2-02 / FR-069).
 - **Bicep alerts + Azure Monitor workbook** for Z6 + Z7 (`infra/bicep/modules/observability-alerts.bicep`, `infra/bicep/modules/observability-workbook-sim-slis.bicep`) (A2-02 / FR-069).
-- **Synthetic smoke-injection job** in `.github/workflows/staging-promotion.yml` — runs in `tnt-stg-smoke` tenant as `Simulation.Coordinator`, 5 categories × 8 events ≥ 40 floor; mitigates CHK117 / CHK137.
+- **Synthetic smoke-injection release-gate exercise** — runs in `tnt-stg-smoke` tenant as `Simulation.Coordinator`, 5 categories × 8 events ≥ 40 floor; mitigates CHK117 / CHK137.
 - **`SPEC_036_PROBLEM_JSON_ROUTES` allow-list** + middleware (`apps/api/app/middleware/spec_036_routes.py`) — 5 routes emit RFC 9457 problem+json on 4xx + 5xx (A2-05).
 - **`contracts/openapi-changelog.md`** — durable migration ledger for OpenAPI version bumps; v0.3.0 is the first row (A2-08).
 - **`evacuation` cascade alias** + `_MATRIX_TO_ROLE` (PascalCase→kebab-case) translation in `cascade_orchestrator.py` (A2-03).

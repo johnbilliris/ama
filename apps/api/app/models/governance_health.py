@@ -45,6 +45,8 @@ class ComplianceMatrixEntry(BaseModel):
     grace_period_reason: str | None = None
     grace_period_countdown_days: int | None = None
     category: str | None = None
+    data_source_type: str | None = None
+    degraded: bool = False
 
 
 class ComplianceMatrixResponse(BaseModel):
@@ -52,7 +54,7 @@ class ComplianceMatrixResponse(BaseModel):
 
     entries: list[ComplianceMatrixEntry]
     total_count: int
-    filters_applied: dict
+    filters_applied: dict[str, object]
     continuation_token: str | None = None
     page_size: int = Field(default=50)
 
@@ -63,8 +65,8 @@ class ComplianceDetailResponse(BaseModel):
     data_source_id: str
     data_source_name: str
     compliance_status: str
-    assessment_history: list[dict]
-    remediation_actions: list[dict]
+    assessment_history: list[dict[str, object]]
+    remediation_actions: list[dict[str, object]]
     related_audit_urls: list[str] = Field(default_factory=list)
 
 
@@ -109,7 +111,7 @@ class AuditTrailResponse(BaseModel):
 
     events: list[AuditEventSummary]
     total_count: int
-    filters_applied: dict
+    filters_applied: dict[str, object]
     continuation_token: str | None = None
     page_size: int = Field(default=50)
 
@@ -178,7 +180,7 @@ class OperationalReadinessResponse(BaseModel):
     total_plans: int
     overdue_plans_total: int
     exercise_completion_rate_pct: float = Field(ge=0.0, le=100.0)
-    exercise_breakdown: list[dict]
+    exercise_breakdown: list[dict[str, object]]
     overall_readiness_score: float = Field(ge=0.0, le=100.0)
     aiims_role_coverage: list[AIIMSRoleCoverage]
     overall_role_coverage_pct: float = Field(ge=0.0, le=100.0)
@@ -208,10 +210,10 @@ class RecoveryDomainDetail(BaseModel):
     """Detail panel for a recovery domain."""
 
     domain: str
-    outcome_targets: list[dict]
-    activity_completion_rates: list[dict]
-    community_indicators: list[dict]
-    me_evaluation_results: list[dict]
+    outcome_targets: list[dict[str, object]]
+    activity_completion_rates: list[dict[str, object]]
+    community_indicators: list[dict[str, object]]
+    me_evaluation_results: list[dict[str, object]]
 
 
 class RecoveryProgressResponse(BaseModel):
@@ -219,7 +221,7 @@ class RecoveryProgressResponse(BaseModel):
 
     domains: list[RecoveryDomainProgress] = Field(min_length=0, max_length=5)
     active_incident_id: str | None = None
-    available_incidents: list[dict]
+    available_incidents: list[dict[str, object]]
     has_active_recovery: bool
 
 
@@ -264,7 +266,7 @@ class AlertComplianceMetrics(BaseModel):
     avg_approval_latency_s: float = Field(ge=0.0)
     acceptable_threshold_s: float
     exceeds_threshold: bool
-    alerts_exceeding_threshold: list[dict]
+    alerts_exceeding_threshold: list[dict[str, object]]
     aws_tier_usage: dict[str, int]
     broadcast_reach_pct: float = Field(ge=0.0, le=100.0)
     principle_compliance: list[AWSPrincipleCompliance] = Field(min_length=10, max_length=10)
@@ -277,7 +279,7 @@ class RiskWarningResponse(BaseModel):
     risk_severity: RiskSeverityBreakdown
     treatment_closure_rate_pct: float = Field(ge=0.0, le=100.0)
     alert_compliance: AlertComplianceMetrics
-    top_risks: list[dict]
+    top_risks: list[dict[str, object]]
 
 
 class RiskDetailResponse(BaseModel):
@@ -288,8 +290,8 @@ class RiskDetailResponse(BaseModel):
     severity: str
     likelihood: str
     consequence: str
-    treatments: list[dict]
-    treatment_history: list[dict]
+    treatments: list[dict[str, object]]
+    treatment_history: list[dict[str, object]]
     related_audit_urls: list[str] = Field(default_factory=list)
 
 

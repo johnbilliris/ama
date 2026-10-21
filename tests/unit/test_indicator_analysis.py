@@ -206,8 +206,8 @@ class TestLLMEnrichment:
             {"domain": "economic", "indicator_name": "e", "trend": "negative"},
         ]
         result = svc.analyse_cross_domain_correlations(data)
-        assert "ai_summary" in result
-        assert result["content_safety_result"] == "not_validated"
+        assert "ai_summary" not in result
+        assert result["content_safety_result"] == "content_safety_unavailable"
 
 
 # ---------------------------------------------------------------------------

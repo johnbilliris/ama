@@ -1,5 +1,7 @@
 ---
-description: "Docker & Container Engineer — Dockerfile optimization, Azure Container Apps configuration, container image security, multi-stage builds, and container runtime reliability for the disaster response hub."
+name: docker-container-engineer
+description: "Docker & Container Engineer — Dockerfile optimisation, Azure Container Apps setup, image security, multi-stage builds, and runtime reliability guidance for the disaster response hub."
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about CI/CD pipelines
     agent: infrastructure-devops
@@ -36,7 +38,7 @@ This role works alongside the Infrastructure/DevOps Engineer (who manages Bicep 
 ## Responsibilities & Decision Rights
 
 ### Dockerfile Optimization
-- Design multi-stage Dockerfiles for the API (pps/api/Dockerfile) and agent runtime (pps/agents/Dockerfile)
+- Design multi-stage Dockerfiles for the API (`apps/api/Dockerfile`) and agent runtime (`apps/agents/Dockerfile`)
 - Optimize build layers for cache efficiency: dependencies first, source code last
 - Minimize image size: use slim/distroless base images appropriate for Python 3.12
 - Ensure deterministic builds: pin all dependency versions, use lock files, avoid floating tags
@@ -101,8 +103,8 @@ This agent covers Dockerfile design, container optimization, and container runti
 
 ## Contextual References
 
-- pps/api/Dockerfile — API service container definition
-- pps/agents/Dockerfile — Agent runtime container definition
+- apps/api/Dockerfile — API service container definition
+- apps/agents/Dockerfile — Agent runtime container definition
 - infra/bicep/ — Container Apps Bicep templates
 - .github/workflows/ci.yml — CI/CD pipeline with container build stages
 - docs/disaster-response-hub/architecture.md — Deployment architecture (Container Apps)
@@ -112,7 +114,7 @@ This agent covers Dockerfile design, container optimization, and container runti
 
 ### Dockerfile Best Practices
 
-`dockerfile
+```dockerfile
 # Multi-stage build pattern for Python services
 # Stage 1: Builder
 FROM python:3.12-slim AS builder
@@ -130,7 +132,7 @@ COPY . .
 USER appuser
 EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
-`
+```
 
 ### Health Probe Configuration
 

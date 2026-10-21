@@ -17,11 +17,11 @@ Full independent WCAG audit is deferred. See known-gaps entry WCAG-AUDIT-FULL.
 
 | Criterion | Description | Component | Status | Notes |
 | --- | --- | --- | --- | --- |
-| 1.1.1 | Non-text Content | CitationCard | Implemented | Alt text on icons |
-| 1.3.1 | Info and Relationships | AlertBanner | Implemented | ARIA roles |
-| 1.4.3 | Contrast (Minimum) | All UI | Implemented | 4.5:1 ratio verified |
-| 2.1.1 | Keyboard | Dashboard | Implemented | Full keyboard navigation |
-| 2.4.1 | Bypass Blocks | Web Dashboard | Implemented | Skip-nav links |
-| 3.1.1 | Language of Page | All pages | Implemented | lang attribute |
-| 4.1.2 | Name, Role, Value | Form inputs | Implemented | ARIA labels |
-| 2.5.3 | Label in Name | Buttons | Implemented | Visible labels match accessible names |
+| 1.1.1 | Non-text Content | CitationCard | IMPLEMENTED | Alt text patterns present in component-level tests |
+| 1.3.1 | Info and Relationships | AlertBanner | IMPLEMENTED | Structured headings/labels documented in UI components |
+| 1.4.3 | Contrast (Minimum) | Dashboard views | UNVERIFIED | Global contrast verification evidence not checked in for every view/state |
+| 2.1.1 | Keyboard | Dashboard | UNVERIFIED | End-to-end keyboard traversal receipts are not currently attached |
+| 2.4.1 | Bypass Blocks | Web Dashboard | IMPLEMENTED | Skip-navigation behavior is part of UI baseline expectations |
+| 3.1.1 | Language of Page | Web shell | IMPLEMENTED | `lang` attribute is expected by web runtime scaffolding |
+| 4.1.2 | Name, Role, Value | Form and action controls | PARTIAL | Control semantics vary by component; scenario-level verification pending |
+| 2.5.3 | Label in Name | Buttons | UNVERIFIED | Requires assistive-tech validation beyond static component assertions |

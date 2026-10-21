@@ -35,7 +35,7 @@ def main(argv: list[str] | None = None) -> int:
     names = [n.strip() for n in args.containers.split(",") if n.strip()]
 
     if args.account is None:
-        from app.services.evidence._clients import get_registry  # type: ignore[import-not-found]
+        from app.services.evidence._clients import get_registry
 
         reg = get_registry()
         for n in names:

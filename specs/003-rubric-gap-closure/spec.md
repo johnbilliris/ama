@@ -11,7 +11,7 @@
 
 - Q: Should this feature include work on remaining rubric gaps (Application Demo 4/5, Error Handling & Alerting 4/5, Performance & Reliability 4/5), or are they out of scope? → A: All rubric gaps are in scope.
 - Q: Which languages should the Communication agent produce by default in multilingual alert drafts? → A: All 6 supported languages (en-AU, zh-Hans, ar, vi, el, it) in every draft.
-- Q: What should happen to queued handoffs that cannot be delivered when the target agent's circuit is open? → A: Queue to the dead-letter store (FR-025) with 3 retries over 5 minutes, then mark as failed for operator review.
+- Q: What should happen to queued handoffs that cannot be delivered when the target agent's circuit is open? → A: Queue to the dead-letter store (FR-025) with a maximum of 3 total delivery attempts over 5 minutes (initial attempt + up to 2 retries), then mark as failed for operator review. Use `attempt_count` for total calls and `retry_count` for retries after the first call.
 - Q: How should performance regression testing coexist with the CI time budget? → A: Lightweight benchmark in CI (every PR, <60s); full load test on nightly schedule or manual trigger.
 - Q: What should happen when LLM-generated alert content fails content safety validation? → A: Fall back to the deterministic template output (same as FR-004), log the safety failure with flagged content for post-hoc review.
 
@@ -23,7 +23,7 @@ An incident commander activates an incident and ingests signals. The specialist 
 
 **Why this priority**: The rubric evaluation scored "AI model selection and deployment" at Satisfactory (3/5) and "Use of AI technologies" at Good (4/5). Both criteria cited the absence of actual model integration as the primary gap. Closing this gap has the highest point-per-effort impact on the overall grade.
 
-**Independent Test**: Can be fully tested by ingesting a set of mixed-provenance signals for a simulated bushfire incident and verifying that the Risk Assessment agent returns an LLM-generated explanation with cited signal IDs, and the Communication agent returns a multilingual alert draft in at least two languages, both within acceptable latency and token budgets.
+**Independent Test**: Can be fully tested by ingesting a set of mixed-provenance signals for a simulated bushfire incident and verifying that the Risk Assessment agent returns an LLM-generated explanation with cited signal IDs, and the Communication agent returns a multilingual alert draft in at least two languages, both within SC-defined latency and token budgets.
 
 **Acceptance Scenarios**:
 
@@ -63,7 +63,7 @@ During an active incident, when the Monitoring agent classifies an incoming sign
 1. **Given** the Monitoring agent receives a signal classified as high-risk, **When** it completes classification, **Then** it publishes a typed handoff to the Risk Assessment agent via the event bus, scoped to the incident's tenant.
 2. **Given** the Risk Assessment agent produces a recommendation of type public_alert with high confidence, **When** the recommendation is stored, **Then** it publishes a typed handoff to the Communication agent to draft an alert.
 3. **Given** any agent-to-agent handoff occurs, **When** the handoff is processed, **Then** a TimelineEvent is recorded with the source agent, target agent, scope key, confidence, and payload summary.
-4. **Given** the target agent's circuit breaker is open, **When** a handoff is attempted, **Then** the handoff is retried up to 3 times over 5 minutes; if all retries fail, the handoff is stored in the dead-letter store, the originating agent is notified, and the dashboard reflects the failed handoff status.
+4. **Given** the target agent's circuit breaker is open, **When** a handoff is attempted, **Then** delivery is attempted up to 3 total times over 5 minutes (initial attempt + up to 2 retries); if all attempts fail, the handoff is stored in the dead-letter store, the originating agent is notified, and the dashboard reflects the failed handoff status.
 
 ---
 
@@ -184,7 +184,7 @@ A platform engineer runs a load test suite that simulates 1,000 concurrent opera
 - **FR-011**: The Monitoring agent MUST automatically publish a typed handoff to the Risk Assessment agent when a signal is classified as high-risk, using the existing event bus and scoped to the incident tenant.
 - **FR-012**: The Risk Assessment agent MUST automatically publish a typed handoff to the Communication agent when a recommendation of type public_alert with high confidence is produced.
 - **FR-013**: Every agent-to-agent handoff MUST be recorded as a TimelineEvent in the audit trail, capturing source agent, target agent, scope key, confidence, and a payload summary.
-- **FR-014**: Handoff delivery MUST respect circuit breaker state; if the target agent's circuit is open, the handoff MUST be retried up to 3 times over a 5-minute window with exponential backoff. If all retries fail, the handoff MUST be stored in the dead-letter store (FR-025) and marked as failed for operator review.
+- **FR-014**: Handoff delivery MUST respect circuit breaker state; each handoff MUST be attempted up to 3 total times over a 5-minute window with exponential backoff (initial attempt + up to 2 retries). Runtime records MUST use `attempt_count` for total calls and `retry_count` for retries after the first call. If all attempts fail, the handoff MUST be stored in the dead-letter store (FR-025) and marked as failed for operator review.
 
 **Container Definitions**
 
@@ -206,7 +206,7 @@ A platform engineer runs a load test suite that simulates 1,000 concurrent opera
 **Error Handling and Alerting**
 
 - **FR-023**: The API MUST return structured JSON error responses for all failure modes, including correlation ID, HTTP status code, error category, and a non-leaking message.
-- **FR-024**: The API MUST implement retry policies with exponential backoff (up to 3 attempts) for transient failures against Cosmos DB and Redis.
+- **FR-024**: The API MUST implement retry policies with exponential backoff (up to 3 total attempts, initial call + up to 2 retries) for transient failures against Cosmos DB and Redis. Runtime counters MUST use `attempt_count` and `retry_count` consistently.
 - **FR-025**: Failed signal ingestion payloads and event bus deliveries MUST be stored in a dead-letter store with correlation ID, timestamp, and failure reason.
 - **FR-026**: Alert rules MUST be configured with action groups that deliver notifications to at least one operational target (email, webhook, or messaging channel).
 - **FR-027**: The Bicep latency alert rule MUST be completed and validated alongside the existing error-rate alert.
@@ -229,7 +229,7 @@ A platform engineer runs a load test suite that simulates 1,000 concurrent opera
 
 ### Assumptions
 
-- The Azure OpenAI resource and model deployment will be provisioned in an Australian Azure region or a region with acceptable latency, subject to model availability.
+- The Azure OpenAI resource and model deployment will be provisioned in constitution-bound Australian Azure regions. Any non-AU model endpoint is allowed only through the named, version-controlled Foundry carve-out policy with the required approval quorum.
 - The existing event bus abstraction in `event_bus.py` can be extended to support subscriber registration and delivery confirmation without replacing the current in-memory implementation during this feature scope. A production event broker (Azure Service Bus or Event Hubs) is a follow-on concern.
 - Content safety validation for language model outputs will use a rule-based approach initially (keyword filtering, length validation, language detection) rather than a separate AI content safety service.
 - The CI pipeline runs on GitHub Actions using the existing `ci.yml` workflow file, extended with additional steps.
@@ -242,15 +242,15 @@ A platform engineer runs a load test suite that simulates 1,000 concurrent opera
 - **SC-002**: The Communication agent produces multilingual alert drafts in all 6 supported languages (en-AU, zh-Hans, ar, vi, el, it) for every public_alert recommendation, within a 30-second total latency budget per complete draft set.
 - **SC-003**: Agent model-call failures result in a template-based fallback output within 2 seconds, with zero lost recommendations or alert drafts.
 - **SC-004**: The CI pipeline executes all test suites and quality checks on every PR, completing in under 10 minutes, and blocks merge on any failure.
-- **SC-005**: A high-risk signal triggers the full Monitoring → Risk Assessment → Communication handoff chain automatically within 30 seconds, with each handoff recorded as a timeline event.
+- **SC-005**: A high-risk signal triggers the full Monitoring → Risk Assessment → Communication chain automatically within 30 seconds, with exactly two logical handoff edges (Monitoring→Risk and Risk→Communication) recorded as timeline events; retries do not create additional logical handoff edges.
 - **SC-006**: Both container images build successfully from source, pass health checks, and run as non-root users.
 - **SC-007**: Infrastructure definitions pass a what-if validation deploying all application resources to an Australian Azure region with managed identity and monitoring integration.
 - **SC-008**: A recorded demo walkthrough and executive slide deck exist in the repository, covering the full incident workflow with before/after KPI comparisons.
 - **SC-009**: All API error responses include correlation ID and structured JSON body; no stack traces or internal details leak to clients.
-- **SC-010**: Transient storage/cache failures are retried up to 3 times with exponential backoff, with transparent recovery in 90%+ of transient failure scenarios.
+- **SC-010**: Transient storage/cache failures are retried with a maximum of 3 total attempts (initial call + up to 2 retries) using exponential backoff, with transparent recovery in 90%+ of transient failure scenarios and consistent `attempt_count`/`retry_count` reporting.
 - **SC-011**: Alert rules fire notifications to configured action group targets within 5 minutes of threshold breach.
 - **SC-012**: The full load test validates dashboard p95 <2s, read API p95 <500ms, and signal ingestion sustains 50,000/hour with <1% error rate on nightly/manual runs. The CI lightweight benchmark completes in <60 seconds and catches p95 regressions on every PR.
-- **SC-013**: The overall AMA rubric score improves from 55/60 to 60/60, with every criterion scored at Excellent (5/5).
+- **SC-013**: The overall AMA rubric score improves from 55/60 to 60/60, with every criterion scored at Excellent (5/5). This remains unverified until independent evaluator evidence is linked.
 
 ## Assumptions
 
@@ -264,25 +264,26 @@ Scoped to this spec's domain (AMA rubric uplift programme). Tagging follows `spe
 
 Authored against the `specs/027-spec-hardening/contracts/persona-profile.md` schema. AU-v1 personas are validated; PH / JP / BD entries are explicit placeholders pending capstone-reinterpretation (D-009) and SME validation per FR-023.
 
-- **PER-001**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` validated. `preconditions:` none.
-- **PER-002**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` validated. `preconditions:` none.
-- **PER-003** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via `ama-rubric-grader`-vetted SME interviews.
+- **PER-001**: cross-ref to `specs/001-disaster-response-hub/spec.md` AIIMS personas (Incident Commander / Planning Officer / Operations Officer / Logistics Officer / Public Information Officer) per `specs/027-spec-hardening/contracts/persona-profile.md`. `status:` unverified. `preconditions:` feature-local evidence link to signed persona validation.
+- **PER-002**: cross-ref to `specs/004-actor-github-agents/spec.md` actor catalogue covering all `.github/agents/technical/*.agent.md` actors. `status:` unverified. `preconditions:` feature-local evidence link to attributable consultation/sign-off.
+- **PER-003** [non-AU placeholder]: capstone-country operator personas for PH (NDRRMC), JP (Cabinet Office DRR / FDMA), BD (DDM / CPP volunteers). `status:` placeholder. `preconditions:` capstone-reinterpretation decision per D-009; SME validation via rubric-vetted SME interviews.
 
 ## Hypotheses
 
 Hypotheses use the FR-018 statement format (`If <condition> then <observable>`) and link to a structured evidence stub conforming to `specs/028-capstone-alignment/contracts/evidence-stub.contract.md`. Capstone-country hypotheses for this spec's agent ownership (where applicable) are allocated in feature 028 / US2.
 
-- **HYP-001**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence stub**: `specs/028-capstone-alignment/evidence/HYP-HYP-001.md` (created in feature 028 polish).
+- **HYP-001**: If the actors named in `specs/004-actor-github-agents/spec.md` consult on every change to this spec via the `agent` tool, then the AMA rubric criterion mean (Assumptions / Requirements / Personas / Hypotheses / Scope) for this spec rises by at least +1 band relative to the baseline captured in `specs/028-capstone-alignment/evidence/rubric-baseline.md`. **Falsification**: post-feature rubric snapshot shows a regression in any of those five criteria for this spec. **Evidence status**: unverified (no linked feature-local evidence stub in this spec scope).
 
 ## Out of Scope
 
-- This spec is delivery-hygiene / enabling infrastructure; capstone-outcome-critical-path ownership lives in specs all capstone-critical-path specs (001, 005, 006, 008, 009, 010, 011, 012, 014, 015, 018, 019, 020, 021, 022, 023).
+- This spec is delivery hygiene/enabling infrastructure. Capstone outcome critical-path ownership remains with specs 001, 005, 006, 008, 009, 010, 011, 012, 014, 015, 018, 019, 020, 021, 022, and 023.
 
 Items explicitly deferred from this spec; promotion to in-scope requires the named preconditions to clear. Cross-references to other specs use the canonical overlap phrasing (`authoritative for: <capability>` / `defers-to: <NNN> (<capability>)`).
 
 - **SCP-001** [DEFERRED]: Capstone-country variants (PH typhoon, JP earthquake, BD flood) of this spec's capabilities are out of scope until: (i) capstone-reinterpretation decision per D-009; (ii) per-country regulatory + data-sharing preconditions documented in `specs/005-data-source-governance/spec.md` clear; (iii) responsible technical agents (product-owner-ba, qa-test-engineer) sign off on country-specific calibration.
 - **SCP-002**: Constitutional-level changes (NON-NEGOTIABLE #1..#5) are not modified by this spec; any tension is documented as `[RISK]` in Assumptions, never resolved here.
 - **SCP-003**: Cross-spec authority disputes are arbitrated via `product-owner-ba` and the speckit governance flow; this spec does not unilaterally claim ownership of capabilities owned elsewhere. `defers-to:` 018 (recovery-phase indicators, triggers, phase-exit criteria); 008 (warning-tier authoring, multilingual delivery, misinformation defence) where applicable.
-- **SCP-004** [META]: This spec is delivery-hygiene / enabling infrastructure; capstone-outcome-critical-path ownership lives in specs (canonical list — see the verbatim bullet inserted by feature 028 / US4 elsewhere in this section). (See `specs/028-capstone-alignment/contracts/meta-spec-flag.contract.md`; the verbatim canonical bullet is added in US4.)
+- **SCP-004** [META]: This spec is classified as delivery hygiene/enabling infrastructure only; it does not claim capstone outcome critical-path ownership. Cross-spec ownership remains with the canonical list in this section and the meta-spec policy in `specs/028-capstone-alignment/contracts/meta-spec-flag.contract.md`.
+
 
 

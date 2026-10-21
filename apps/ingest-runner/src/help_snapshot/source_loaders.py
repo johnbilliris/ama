@@ -12,12 +12,16 @@ import glob
 import logging
 import os
 from pathlib import Path
+from types import ModuleType
 from typing import Any
 
+yaml: ModuleType | None = None
 try:
-    import yaml  # type: ignore[import-untyped]
+    import yaml as _yaml_module
 except ImportError:  # pragma: no cover
-    yaml = None  # type: ignore[assignment]
+    pass
+else:
+    yaml = _yaml_module
 
 logger = logging.getLogger(__name__)
 

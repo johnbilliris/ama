@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import time
+from collections.abc import Callable
 from datetime import UTC, datetime
 
 logger = logging.getLogger(__name__)
@@ -20,7 +21,7 @@ class ContentSafetyCircuitBreaker:
         self,
         trip_threshold: int = 3,
         cooldown_seconds: float = 60.0,
-        clock=None,
+        clock: Callable[[], float] | None = None,
     ) -> None:
         self.state: str = "closed"
         self.failure_count: int = 0

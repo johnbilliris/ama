@@ -3,9 +3,17 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from .base import EvalInput, EvalResult, ModelOutput, register
+
+
+def _context_text(doc: dict[str, object], limit: int | None = None) -> str:
+    content = doc.get("content", "")
+    if not isinstance(content, str):
+        raise TypeError("Retrieved evaluation context content must be a string")
+    return content if limit is None else content[:limit]
 
 
 def _tokens(text: str) -> set[str]:
@@ -18,17 +26,17 @@ def _groundedness(inp: EvalInput, out: ModelOutput) -> EvalResult:
     out_toks = _tokens(out.text)
     if not out_toks:
         return EvalResult(metric_id="groundedness", score=0.0, pass_=False, rationale="empty output")
-    ctx_toks: set[str] = set()
-    for doc in inp.retrieved_context:
-        ctx_toks |= _tokens(doc.get("content", ""))
-    overlap = out_toks & ctx_toks
-    score = len(overlap) / max(len(out_toks), 1)
+    relevant_docs = [doc for doc in inp.retrieved_context if doc.get("relevanceLabel") == "relevant"]
+    if not relevant_docs:
+        return EvalResult(metric_id="groundedness", score=1.0, pass_=True, rationale="no relevant context to assess")
+    supported_docs = sum(len(out_toks & _tokens(_context_text(doc))) >= 3 for doc in relevant_docs)
+    score = supported_docs / len(relevant_docs)
     return EvalResult(
         metric_id="groundedness",
         score=score,
         pass_=score >= 0.4,
-        rationale=f"{len(overlap)}/{len(out_toks)} output tokens supported",
-        evidence={"overlapCount": len(overlap)},
+        rationale=f"{supported_docs}/{len(relevant_docs)} relevant sources supported by 3+ shared terms",
+        evidence={"supportedSourceCount": supported_docs, "relevantSourceCount": len(relevant_docs)},
     )
 
 
@@ -39,7 +47,7 @@ def _context_recall(inp: EvalInput, out: ModelOutput) -> EvalResult:
     if not relevant:
         return EvalResult(metric_id="context-recall", score=1.0, pass_=True, rationale="no relevant docs")
     text = (out.text or "").lower()
-    cited = sum(1 for d in relevant if any(tok in text for tok in _tokens(d.get("content", "")[:80])))
+    cited = sum(1 for d in relevant if any(tok in text for tok in _tokens(_context_text(d, 80))))
     score = cited / len(relevant)
     return EvalResult(
         metric_id="context-recall",
@@ -56,7 +64,7 @@ def _context_precision(inp: EvalInput, out: ModelOutput) -> EvalResult:
     if not irrelevant:
         return EvalResult(metric_id="context-precision", score=1.0, pass_=True, rationale="no irrelevant")
     text = (out.text or "").lower()
-    over = sum(1 for d in irrelevant if any(tok in text for tok in _tokens(d.get("content", "")[:60])))
+    over = sum(1 for d in irrelevant if any(tok in text for tok in _tokens(_context_text(d, 60))))
     score = 1.0 - (over / max(len(irrelevant), 1))
     return EvalResult(
         metric_id="context-precision",
@@ -71,7 +79,7 @@ class _Eval:
     metric_id: str
     family: str
     tier: str
-    fn: callable
+    fn: Callable[[EvalInput, ModelOutput], EvalResult]
 
     def evaluate(self, inp: EvalInput, out: ModelOutput) -> EvalResult:
         return self.fn(inp, out)

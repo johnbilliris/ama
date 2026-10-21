@@ -1,10 +1,8 @@
 """Pytest path bootstrap for apps/api/tests/.
 
-When pytest is invoked with paths under ``apps/api/tests/`` (e.g. by the
-spec-035-gate workflow's ``pytest apps/api/tests/contract/spec_035 ...`` step),
-the repo-root ``tests/conftest.py`` is not loaded because it lives in a sibling
-tree. This conftest mirrors that bootstrap so first-party imports resolve the
-same way:
+When pytest is invoked with paths under ``apps/api/tests/``, the repo-root
+``tests/conftest.py`` is not loaded because it lives in a sibling tree. This
+conftest mirrors that bootstrap so first-party imports resolve the same way:
 
 * ``ROOT`` — enables ``from packages.domain.src...`` style imports used by
   ``apps/api/app/repositories/governance_repository.py`` and friends. The

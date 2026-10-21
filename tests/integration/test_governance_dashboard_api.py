@@ -220,6 +220,10 @@ class TestRiskWarningEndpoints:
         body = resp.json()
         assert len(body["alert_compliance"]["principle_compliance"]) == 10
 
+    def test_unknown_risk_detail_returns_not_found(self, client, auth_headers):
+        resp = client.get("/api/governance/dashboard/risk/unknown-risk", headers=auth_headers)
+        assert resp.status_code == 404
+
 
 # ---- T081: US7 Role Personalisation Endpoints ----
 

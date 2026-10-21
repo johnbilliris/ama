@@ -1,0 +1,267 @@
+name: ama-local
+
+x-cosmos-environment: &cosmos-environment
+  COSMOS_ENDPOINT: http://cosmos:8081
+  COSMOS_DATABASE: disaster-hub
+  COSMOS_AUTH_MODE: key
+  # This valid base64 dummy key is only for SDK request signing; emulator vNext does not enforce auth.
+  COSMOS_KEY: bG9jYWwtY29zbW9zLWVtdWxhdG9yLW9ubHk=
+
+services:
+  cosmos:
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-latest
+    command: ["--protocol", "http"]
+    ports:
+      - "127.0.0.1:8085:8081"
+      - "127.0.0.1:1234:1234"
+    volumes:
+      - cosmos-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - http://127.0.0.1:8080/ready
+      interval: 5s
+      timeout: 5s
+      retries: 40
+      start_period: 60s
+
+  cosmos-seed:
+    image: ama/api:local
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    environment: *cosmos-environment
+    depends_on:
+      cosmos:
+        condition: service_healthy
+    command:
+      - python
+      - scripts/seed_loader.py
+      - --cosmos-endpoint
+      - http://cosmos:8081
+      - --cosmos-database
+      - disaster-hub
+      - --ensure-local-cosmos-schema
+
+  api:
+    image: ama/api:local
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runtime
+    init: true
+    environment:
+      <<: *cosmos-environment
+      AGENTS_BASE_URL: http://agents:8080
+      AMA_ENABLE_PRODUCTION_AUTH: "0"
+      AMA_ENVIRONMENT: dev
+      AMA_ALLOW_ANONYMOUS_DEV_ACCESS: "1"
+      AMA_ALLOW_ANONYMOUS_INCIDENT_MAP: "1"
+      AMA_TEST_MODE: "1"
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+    depends_on:
+      cosmos-seed:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - --show-error
+        - http://127.0.0.1:8000/api/health/liveness
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  agents:
+    image: ama/agents:local
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: apps/agents/Dockerfile
+      target: dispatcher-runtime
+    init: true
+    environment:
+      AGENT_RUNTIME: local
+      AMA_AGENTS_RUNTIME: dispatcher
+      AMA_ENVIRONMENT: dev
+      PORT: "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - --show-error
+        - http://127.0.0.1:8080/health
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  evacuation:
+    image: ama/evacuation:local
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: apps/agents/Dockerfile
+      target: evacuation-runtime
+    init: true
+    environment:
+      AGENT_RUNTIME: local
+      AMA_AGENTS_RUNTIME: evacuation
+      AMA_ENVIRONMENT: dev
+      PORT: "8082"
+    ports:
+      - "127.0.0.1:8082:8082"
+    volumes:
+      - evacuation-data:/app/var/evacuation-agent
+    healthcheck:
+      test:
+        - CMD
+        - curl
+        - --fail
+        - --silent
+        - --show-error
+        - http://127.0.0.1:8082/live
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  ingestion:
+    image: ama/ingestion:local
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: apps/ingestion/Dockerfile
+      target: runtime
+    init: true
+    stop_grace_period: 45s
+    environment:
+      <<: *cosmos-environment
+      AMA_ENVIRONMENT: dev
+      PORT: "8081"
+      INGESTION_MAX_RECORDS_PER_CYCLE: ${INGESTION_MAX_RECORDS_PER_CYCLE}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_ACCOUNT_NAME: devstoreaccount1
+      # Azurite's public development key is only valid for this local emulator.
+      AZURITE_BLOB_CONNECTION_STRING: >-
+        DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;BlobEndpoint=http://azurite:10000/devstoreaccount1;
+    depends_on:
+      cosmos-seed:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      azurite:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8081:8081"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import socket; connection = socket.create_connection(("127.0.0.1", 8081), timeout=3); connection.close()
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+
+  web:
+    image: ama/web:local
+    platform: linux/arm64
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: runtime
+      args:
+        API_PROXY_UPSTREAM: http://api:8000/api
+        NEXT_PUBLIC_ALLOW_ANONYMOUS_INCIDENT_MAP: "1"
+        NEXT_PUBLIC_API_BASE_URL: /api
+        NEXT_PUBLIC_ENVIRONMENT: development
+        NPM_CONFIG_REGISTRY: https://packagefeedproxy.microsoft.io/npm/
+    init: true
+    env_file:
+      - path: apps/web/.env.local
+        required: false
+    environment:
+      API_PROXY_UPSTREAM: http://api:8000/api
+      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_PUBLIC_API_BASE_URL: /api
+      NEXT_PUBLIC_ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - 'fetch("http://127.0.0.1:3000").then(response => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))'
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite:3.35.0
+    command:
+      - azurite
+      - --blobHost
+      - 0.0.0.0
+      - --queueHost
+      - 0.0.0.0
+      - --tableHost
+      - 0.0.0.0
+      - --location
+      - /data
+    ports:
+      - "127.0.0.1:10000:10000"
+      - "127.0.0.1:10001:10001"
+      - "127.0.0.1:10002:10002"
+    volumes:
+      - azurite-data:/data
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - 'require("http").get("http://127.0.0.1:10000/devstoreaccount1?comp=list", response => process.exit(response.statusCode ? 0 : 1)).on("error", () => process.exit(1))'
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  azurite-data:
+  cosmos-data:
+  evacuation-data:
+  redis-data:

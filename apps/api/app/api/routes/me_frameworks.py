@@ -28,29 +28,29 @@ class CreateFrameworkInput(BaseModel):
 
 class SelectOutcomesInput(BaseModel):
     incident_id: str
-    outcomes: list[dict]
+    outcomes: list[dict[str, object]]
 
 
 class CreateProgramLogicInput(BaseModel):
     incident_id: str
     model_type: str = "ex_ante"
-    resources_inputs: list[dict] = []
-    activities: list[dict] = []
-    outputs: list[dict] = []
-    intermediate_outcomes: list[dict] = []
-    final_outcomes: list[dict] = []
-    outcome_chain_links: list[dict] = []
+    resources_inputs: list[dict[str, object]] = []
+    activities: list[dict[str, object]] = []
+    outputs: list[dict[str, object]] = []
+    intermediate_outcomes: list[dict[str, object]] = []
+    final_outcomes: list[dict[str, object]] = []
+    outcome_chain_links: list[dict[str, object]] = []
     timeline_months: int | None = None
 
 
 class SetStandardsInput(BaseModel):
     incident_id: str
-    standards: list[dict]
+    standards: list[dict[str, object]]
 
 
 class SetCollectionScheduleInput(BaseModel):
     incident_id: str
-    schedules: list[dict]
+    schedules: list[dict[str, object]]
 
 
 class MonitoringReportQuery(BaseModel):
@@ -71,7 +71,7 @@ class CreateEvaluationInput(BaseModel):
 
 
 @router.post("", status_code=201)
-async def create_framework(payload: CreateFrameworkInput) -> dict:
+async def create_framework(payload: CreateFrameworkInput) -> dict[str, object]:
     """Create a new M&E framework for an incident programme."""
     framework = await _service.create_framework(
         incident_id=payload.incident_id,
@@ -86,13 +86,13 @@ async def create_framework(payload: CreateFrameworkInput) -> dict:
 async def list_frameworks(
     incident_id: str | None = None,
     status: str | None = None,
-) -> list[dict]:
+) -> list[dict[str, object]]:
     """List M&E frameworks with optional filters."""
     return await _service.list_frameworks(incident_id=incident_id, status=status)
 
 
 @router.get("/{framework_id}")
-async def get_framework(framework_id: str, incident_id: str) -> dict:
+async def get_framework(framework_id: str, incident_id: str) -> dict[str, object]:
     """Retrieve a specific M&E framework."""
     fw = await _service.get_framework(framework_id, incident_id)
     if not fw:
@@ -101,7 +101,7 @@ async def get_framework(framework_id: str, incident_id: str) -> dict:
 
 
 @router.post("/{framework_id}/outcomes")
-async def select_outcomes(framework_id: str, payload: SelectOutcomesInput) -> dict:
+async def select_outcomes(framework_id: str, payload: SelectOutcomesInput) -> dict[str, object]:
     """Select outcomes from the catalogue for a framework."""
     try:
         return await _service.select_outcomes(
@@ -114,7 +114,7 @@ async def select_outcomes(framework_id: str, payload: SelectOutcomesInput) -> di
 
 
 @router.post("/{framework_id}/program-logic", status_code=201)
-async def create_program_logic(framework_id: str, payload: CreateProgramLogicInput) -> dict:
+async def create_program_logic(framework_id: str, payload: CreateProgramLogicInput) -> dict[str, object]:
     """Create a program logic model for a framework."""
     logic_data = payload.model_dump(exclude={"incident_id"})
     try:
@@ -128,7 +128,7 @@ async def create_program_logic(framework_id: str, payload: CreateProgramLogicInp
 
 
 @router.post("/{framework_id}/program-logic/ex-post", status_code=201)
-async def create_ex_post_program_logic(framework_id: str, body: dict) -> dict:
+async def create_ex_post_program_logic(framework_id: str, body: dict[str, object]) -> dict[str, object]:
     """Create ex-post program logic by reverse-engineering from existing outcomes."""
     return {
         "model_id": f"plm-expost-{framework_id}",
@@ -140,7 +140,7 @@ async def create_ex_post_program_logic(framework_id: str, body: dict) -> dict:
 
 
 @router.post("/{framework_id}/standards")
-async def set_standards(framework_id: str, payload: SetStandardsInput) -> dict:
+async def set_standards(framework_id: str, payload: SetStandardsInput) -> dict[str, object]:
     """Set standards of success for framework indicators."""
     try:
         return await _service.set_standards(
@@ -153,7 +153,7 @@ async def set_standards(framework_id: str, payload: SetStandardsInput) -> dict:
 
 
 @router.post("/{framework_id}/collection-schedule")
-async def set_collection_schedule(framework_id: str, payload: SetCollectionScheduleInput) -> dict:
+async def set_collection_schedule(framework_id: str, payload: SetCollectionScheduleInput) -> dict[str, object]:
     """Set indicator data-collection schedule."""
     try:
         return await _service.set_collection_schedule(
@@ -166,7 +166,7 @@ async def set_collection_schedule(framework_id: str, payload: SetCollectionSched
 
 
 @router.get("/{framework_id}/monitoring-report")
-async def get_monitoring_report(framework_id: str, incident_id: str) -> dict:
+async def get_monitoring_report(framework_id: str, incident_id: str) -> dict[str, object]:
     """Generate a monitoring report for the framework."""
     try:
         return await _service.generate_monitoring_report(framework_id, incident_id)
@@ -175,7 +175,7 @@ async def get_monitoring_report(framework_id: str, incident_id: str) -> dict:
 
 
 @router.post("/{framework_id}/evaluation", status_code=201)
-async def create_evaluation(framework_id: str, payload: CreateEvaluationInput) -> dict:
+async def create_evaluation(framework_id: str, payload: CreateEvaluationInput) -> dict[str, object]:
     """Generate an evaluation report."""
     try:
         return await _service.create_evaluation_report(

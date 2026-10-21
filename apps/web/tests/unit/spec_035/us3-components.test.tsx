@@ -74,7 +74,9 @@ describe("claims-velocity dashboard (T052)", () => {
     const closedHeader = screen.getByRole("button", { name: /Closed/ });
     fireEvent.click(closedHeader);
     fireEvent.click(closedHeader);
-    expect(closedHeader.getAttribute("aria-sort")).toMatch(/ascending|descending/);
+    const sortableHeader = closedHeader.closest("th");
+    expect(sortableHeader).not.toBeNull();
+    expect(sortableHeader?.getAttribute("aria-sort")).toMatch(/ascending|descending/);
   });
 });
 

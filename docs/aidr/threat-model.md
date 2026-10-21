@@ -18,7 +18,7 @@ invariant(s) it defends (see `.specify/memory/constitution.md` v1.2.0).
 | ID | Threat | Surface | STRIDE | Likelihood | Impact | Mitigation | Constitutional ref |
 |----|--------|---------|--------|------------|--------|------------|---------------------|
 | TM-001 | Tenant isolation bypass via cache key collision | Cosmos / Redis caches | I, T | Medium | High | Tenant-scoped cache keys (FR-058); `tenant_isolation.violation` audit | III. Transparency and Auditability |
-| TM-002 | Sub-agent stub leak into production | API runtime | T, I | Low | High | `simulation_stub_sweep.py` blocking CI gate; branch-protection enforces required check | I. Primacy of Life |
+| TM-002 | Sub-agent stub leak into production | API runtime | T, I | Low | High | Contract test rejects stub markers in production code | I. Primacy of Life |
 | TM-003 | Foundry carve-out drift (data-residency) | AOAI deployments outside AU | I, R | Medium | High | `infra/foundry/carveout-registry.json` + 6-monthly review workflow; `azure-openai-deployments.bicep` AVM | II. Australian Data Residency |
 | TM-004 | Public-warning watermark stripped before broadcast | Synthetic delivery surface | T, R | Low | High | `public_warning_watermark_guard.py` + `public_artefact_guard.py` post-parse filters; `audit.watermark.applied` envelope | I. Primacy of Life |
 | TM-005 | Telemetry-injection path emits real warnings | Live agents during exercise | I, T, E | Low | Catastrophic | `synthetic_signal=True` Pydantic Literal + `[SIMULATION]` chat-receipt prefix gate (FR-035); `audit_writer` records every emit | I. Primacy of Life |
@@ -101,10 +101,9 @@ and to the FR/checklist item that pins the mitigation.
      Action Groups `ag-sim-sre-warn` (Slack) and `ag-sim-sre-prod` (PagerDuty).
   2. KQL template (`infra/observability/sli-kql.json`) with 100 % sampling for
      life-safety SLIs (Z1, Z2, Z5).
-  3. Workflow gate (`.github/workflows/staging-promotion.yml`) that blocks promotion
-     on any breach detected by `tests/staging_gates.py`.
+  3. `tests/staging_gates.py` refuses promotion on any breach.
   4. End-to-end contract test (`tests/e2e/test_staging_promotion_gates.py`) asserts the
-     gate refuses promotion on synthetic breach inputs.
+     release gate refuses promotion on synthetic breach inputs.
 - **Test evidence**: `tests/devops/test_observability_alerts_bicep.py`,
   `tests/e2e/test_staging_promotion_gates.py`,
   `tests/devops/test_sev0_egress_alert.py`.

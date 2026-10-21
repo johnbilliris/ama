@@ -26,6 +26,8 @@ import os
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+from app.core.async_io import run_blocking
+
 from packages.domain.src.domain.models.synthetic_signal import SyntheticSignal
 
 logger = logging.getLogger(__name__)
@@ -34,7 +36,7 @@ logger = logging.getLogger(__name__)
 def _build_cosmos_client() -> Any:
     """Build a CosmosClient from the ``COSMOS_ENDPOINT`` env var."""
 
-    from azure.cosmos import CosmosClient
+    from app.core.cosmos import create_cosmos_client as CosmosClient
     from azure.identity import DefaultAzureCredential
 
     endpoint = os.environ["COSMOS_ENDPOINT"]
@@ -83,7 +85,7 @@ class SyntheticSignalsRepository:
             # the Bicep partition path still resolves.
             doc.setdefault("simulationId", signal.simulation_id)
             doc["id"] = signal.signal_id
-            container.upsert_item(doc)
+            await run_blocking(container.upsert_item, doc)
         else:
             self._in_memory[(signal.simulation_id, signal.signal_id)] = signal
         return signal
@@ -108,11 +110,13 @@ class SyntheticSignalsRepository:
                 {"name": "@sim", "value": simulation_id},
                 {"name": "@cutoff", "value": cutoff.isoformat()},
             ]
-            items = list(
-                container.query_items(
-                    query,
-                    parameters=params,
-                    partition_key=simulation_id,
+            items = await run_blocking(
+                lambda: list(
+                    container.query_items(
+                        query,
+                        parameters=params,
+                        partition_key=simulation_id,
+                    )
                 )
             )
             return [SyntheticSignal.model_validate(item) for item in items]

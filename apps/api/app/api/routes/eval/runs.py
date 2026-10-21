@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from ama_eval_core.audit import AuditAction
-from ama_eval_core.models import EvaluationRun, ModelUnderTest, RunStatus
+from ama_eval_core.models import EvaluationRun, ModelUnderTest, RunMode, RunStatus
 from ama_eval_core.policy import RunRequest, check_run_against_policy
 from app.middleware.eval_role_guard import (
     EvalPrincipal,
@@ -38,7 +38,7 @@ class CreateRunRequest(BaseModel):
     models: list[dict[str, Any]] = Field(min_length=1)
     metricSetVersion: str = "1.0.0"
     policyVersion: str = "1.0.0"
-    mode: str = "ad-hoc"
+    mode: Literal["ad-hoc", "scheduled-baseline", "pr-fast-subset", "progressive-delivery-full"] = "ad-hoc"
     estimatedCostAud: float = 0.0
     estimatedDurationMinutes: int = 60
     changeRef: str | None = None
@@ -116,7 +116,7 @@ async def create_run(
     run = EvaluationRun(
         runId=run_id,
         status=RunStatus.queued,
-        mode=body.mode,
+        mode=RunMode(body.mode),
         datasetId=body.datasetId,
         datasetVersion=body.datasetVersion,
         models=[ModelUnderTest(**m) for m in body.models],
@@ -141,12 +141,13 @@ async def create_run(
     from app.services import eval_job_trigger
 
     subset = body.datasetSubset or {}
+    raw_max_cases = subset.get("maxCases")
     eval_job_trigger.start_run_execution(
         run_id=run_id,
         dataset_id=body.datasetId,
         dataset_version=body.datasetVersion,
         mode=body.mode,
-        max_cases=int(subset.get("maxCases")) if subset.get("maxCases") else None,
+        max_cases=int(raw_max_cases) if raw_max_cases else None,
     )
 
     return RunSummary(

@@ -11,7 +11,13 @@
  */
 import type { LifecycleEventType } from "@/lib/sse";
 
-type LifecycleStatus = "active" | "paused" | "aborted" | "archived" | "completed";
+export type LifecycleStatus =
+  | "active"
+  | "paused"
+  | "aborted"
+  | "archived"
+  | "completed"
+  | "unknown";
 
 const STATUS_BY_EVENT: Record<LifecycleEventType, LifecycleStatus> = {
   "lifecycle.scenario_started": "active",
@@ -56,17 +62,34 @@ const STATUS_META: Record<
     aria: "Simulation exercise completed",
     icon: "✓",
   },
+  unknown: {
+    label: "Status pending",
+    tone: "bg-slate-100 text-slate-900 ring-slate-300",
+    aria: "Simulation exercise status pending",
+    icon: "…",
+  },
 };
 
 interface SimulationBannerProps {
   /** Latest `lifecycle.*` event, if any. */
   lifecycleEvent?: { event_type: LifecycleEventType; reason?: string; actor?: string };
+  /**
+   * AUD-018 — resolved lifecycle status from the owning route. Takes
+   * precedence over `lifecycleEvent` so a route that knows the tenant is
+   * Archived never advertises "Active". Pass `"unknown"` while loading.
+   */
+  status?: LifecycleStatus;
 }
 
-export function SimulationBanner({ lifecycleEvent }: SimulationBannerProps = {}) {
-  const status: LifecycleStatus = lifecycleEvent
-    ? (STATUS_BY_EVENT[lifecycleEvent.event_type] ?? "active")
-    : "active";
+export function SimulationBanner({
+  lifecycleEvent,
+  status: statusOverride,
+}: SimulationBannerProps = {}) {
+  const status: LifecycleStatus =
+    statusOverride ??
+    (lifecycleEvent
+      ? (STATUS_BY_EVENT[lifecycleEvent.event_type] ?? "active")
+      : "active");
   const meta = STATUS_META[status];
   const isAlert = status === "paused" || status === "aborted";
   return (

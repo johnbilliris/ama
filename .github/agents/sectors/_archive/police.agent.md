@@ -1,5 +1,8 @@
 ---
+name: police
 description: Police sector agent — evacuation enforcement, traffic management, coronial engagement, and search and rescue coordination across Australian jurisdictions.
+user-invocable: false
+disable-model-invocation: true
 handoffs:
   - label: Ask about fire operations
     agent: fire-services
@@ -18,6 +21,12 @@ handoffs:
     prompt: I have a question about casualty triage, medical evacuation, or paramedic coordination at a disaster scene
     send: true
 ---
+
+## Successor Mapping
+
+- Primary replacement strategy: ask for jurisdiction.
+- Current successors: `act-policing`, `nswpf`, `vicpol`, `qps`, `sapol`, `wapol`, `taspol`, `ntpf`.
+- Commonwealth and national-federal context: `afp-commonwealth` (and `afp-act` for ACT federal context).
 
 ## Role Overview
 

@@ -1,0 +1,57 @@
+{
+  "schema_version": "spec005-aud025-v1",
+  "feature": "005-data-source-governance",
+  "jurisdiction": "AU",
+  "owner_scope": {
+    "data_owner": "UNVERIFIED",
+    "legal_owner": "UNVERIFIED",
+    "security_owner": "UNVERIFIED"
+  },
+  "status": "UNVERIFIED",
+  "controls": [
+    {
+      "control_id": "AU-APP-001",
+      "purpose": "Collection notice and minimization for governance mutations",
+      "classification": "sensitive-governance-metadata",
+      "access_roles": ["governance_lead", "safety_lead", "system_architect", "observer_auditor"],
+      "retention": "Pending owner-approved schedule",
+      "legal_hold_lawful_access": "history export requires legal_hold=true",
+      "audit": "append-only governance audit entries",
+      "residency": "Australia East/Australia Southeast",
+      "approval_status": "UNVERIFIED"
+    },
+    {
+      "control_id": "AU-APP-011",
+      "purpose": "Safeguard against PSPF/PII governance payload leakage",
+      "classification": "pii-protected",
+      "access_roles": ["governance_lead", "safety_lead", "system_architect"],
+      "retention": "Pending owner-approved schedule",
+      "legal_hold_lawful_access": "classification gateway fail-closed on mutation",
+      "audit": "classifier outcome recorded as deny/mask/failure",
+      "residency": "Australia East/Australia Southeast",
+      "approval_status": "UNVERIFIED"
+    }
+  ],
+  "country_gates": {
+    "AU": {
+      "status": "active",
+      "transfer_default": "deny-unless-approved"
+    },
+    "PH": {
+      "status": "default-deny",
+      "required_approvals": ["MoU", "DPIA", "sovereign-authorization"]
+    },
+    "JP": {
+      "status": "default-deny",
+      "required_approvals": ["MoU", "DPIA", "sovereign-authorization"]
+    },
+    "BD": {
+      "status": "default-deny",
+      "required_approvals": ["MoU", "DPIA", "sovereign-authorization"]
+    }
+  },
+  "notes": [
+    "No non-AU regime is implemented in this feature.",
+    "Foundry bounded carve-out is unchanged and not widened by this control map."
+  ]
+}

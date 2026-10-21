@@ -20,20 +20,23 @@ This view documents the Incident Commander's journey through the ops dashboard w
 
 ## Journey Steps
 
-| Step | WCAG 2.2 Criterion | AA Requirement | Implementation Note |
-| --- | --- | --- | --- |
-| Sign-in | SC 1.3.1 Info and Relationships | Programmatic structure for form labels | Use semantic HTML `<label>` with `for` binding |
-| Acknowledge Alert | SC 1.4.3 Contrast (Minimum) | 4.5:1 text contrast ratio | Alert banner uses approved colour palette |
-| Review Situation | SC 2.4.6 Headings and Labels | Descriptive headings for each panel | Map panel titles use `<h2>` hierarchy |
-| Approve Recommendation | SC 4.1.2 Name, Role, Value | Button state communicated to AT | Approval button uses `aria-pressed` |
-| Monitor Outcome | SC 4.1.3 Status Messages | Status changes announced without focus move | Use `role="status"` live region |
+| Step | Cognitive phase | WCAG 2.2 Criterion | Component/Endpoint mapping | Implementation note | Status |
+| --- | --- | --- | --- | --- | --- |
+| Sign-in | Perception | SC 1.3.1 Info and Relationships | Web auth screen -> Entra OAuth session | Labeled controls and structured form groups | IMPLEMENTED |
+| Situational awareness | Comprehension | SC 2.4.6 Headings and Labels | Workspace panels, map summaries, and incident context | Panel headings and section labels identify current incident context | IMPLEMENTED |
+| Review recommendation | Comprehension | SC 1.4.3 Contrast | Recommendation details and supporting evidence | Evidence presentation requires browser-level accessibility verification | UNVERIFIED |
+| Approve recommendation | Action | SC 4.1.2 Name, Role, Value | Approval card action control -> recommendation approval endpoint | Action uses an explicit button click (`type=button`) with disabled state while submitting | IMPLEMENTED |
+| Publication confirmation | Comprehension | SC 4.1.3 Status Messages | Alert publication response state | Publication success/failure messaging should be surfaced without forced focus movement | UNVERIFIED |
+| Audit receipt | Comprehension | SC 1.3.1 + SC 4.1.3 | Audit retrieval panel and provenance display | Audit row visibility and status announcements require scenario verification in browser testing | UNVERIFIED |
 
 > **👤 Human Approval Gate (FR-009)**: The "Approve Recommendation" step is a mandatory human decision point. The platform must not auto-publish recommendations; the Incident Commander explicitly approves before actuation.
 
 ## FR Notes
 
-- **FR-026**: Ops-dashboard user journey documented with per-step WCAG 2.2 AA annotations.
+- **FR-026**: Ops-dashboard user journey documented with per-step WCAG 2.2 AA annotations; the seven-step sequence matches the EXP-01 source diagram.
 - **FR-009**: Human approval gate is marked on the diagram and documented in the Journey Steps table.
+
+WCAG status notes in this page reflect repository evidence only. Any criterion marked `UNVERIFIED` requires independent accessibility test execution and captured receipts.
 
 ## Related Pages
 

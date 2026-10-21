@@ -82,7 +82,7 @@ def _sli_entry(sli_id: str) -> Mapping[str, Any]:
 #: over a 24 h trailing window. Below this the staging-promotion gate
 #: refuses to evaluate the SLI (Central-Limit-Theorem floor; raise to
 #: ``100`` if the false-positive rate exceeds 5 %). The synthetic
-#: smoke-injection job in ``.github/workflows/staging-promotion.yml``
+#: smoke-injection release-gate exercise
 #: (T-AA19) maintains a 33 % safety margin (≥ 40 events / 24 h).
 MIN_SAMPLES_PER_SLI_24H: Final[int] = 30
 
@@ -124,7 +124,6 @@ ALL_GATES = {
     "measurement_staging": measurement_staging_enabled,
 }
 
-
 # ---------------------------------------------------------------------------
 # Cycle 2 / T-AA17 — SLI threshold-gate helper
 # ---------------------------------------------------------------------------
@@ -159,7 +158,7 @@ EnvelopeSink = Callable[[Mapping[str, Any]], None]
 def _default_envelope_sink(envelope: Mapping[str, Any]) -> None:
     """Default sink — log + (optionally) append-to-file.
 
-    The CI workflow at ``.github/workflows/staging-promotion.yml`` (T-AA35)
+    The release-gate procedure (T-AA35)
     sets ``STAGING_PROMOTION_AUDIT_PATH`` to a job-temp path so the file is
     uploaded as a build artefact; if unset, the envelope is logged only.
     """

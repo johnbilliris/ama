@@ -125,7 +125,7 @@
 1. Create `apps/api/app/repositories/signal_repository.py` — Cosmos DB CRUD with hierarchical partition key
 2. Write contract test: signal stored with correct partition key `{scope}/{jurisdictionId}/{dataSourceId}`
 3. Write contract test: national signal creates fan-out reference in each affected jurisdiction partition
-4. Write contract test: simulation signal stored in `sim_{runId}` scope, invisible to live queries
+4. Write contract test: simulation signal stored in `sim-{runId}` scope, invisible to live queries
 5. Write contract test: dashboard query within ≤500ms p95 against sample dataset
 
 ### F2. Blob storage for raw payloads and audit

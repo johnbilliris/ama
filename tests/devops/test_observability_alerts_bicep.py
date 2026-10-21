@@ -69,7 +69,7 @@ def test_alerts_bicep_egress_block_uses_canonical_block_reason(bicep_text: str) 
 
 
 # ---------------------------------------------------------------------------
-# Cycle 2 / T-AA18 / A2-02 — staging-promotion gate alerts (Z6 + Z7).
+# Cycle 2 / T-AA18 / A2-02 — release-gate alerts (Z6 + Z7).
 # ---------------------------------------------------------------------------
 
 

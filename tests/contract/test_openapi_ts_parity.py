@@ -1,136 +1,177 @@
-"""Contract test: OpenAPI schema vs TypeScript twin field parity (T-AMD-10, D25).
-
-Asserts that every TypeScript interface in packages/domain/src/evidence/index.ts
-mirrors the corresponding OpenAPI schema — no extra optional fields permitted.
-"""
-
 from __future__ import annotations
 
 import re
 from pathlib import Path
 
-import pytest
+import yaml
+
+from apps.api.app.services.evidence.measurement.renderer import (
+    MeasurementMethod,
+    MeasurementMethodDefinition,
+)
+from apps.api.app.services.evidence.models.audit import AuditEntry, AuditTrace
+from apps.api.app.services.evidence.models.benchmark import BenchmarkEntry, CitationRef
+from apps.api.app.services.evidence.models.chain import (
+    Assumption,
+    CausalChain,
+    ThreatToValidity,
+)
+from apps.api.app.services.evidence.models.kpi import (
+    ConfidenceBandRule,
+    IndicatorDefinition,
+    KpiLadderGroup,
+    KpiLadderView,
+    RiskAdjustment,
+)
+from apps.api.app.services.evidence.models.scorecard import (
+    DeltaScorecard,
+    DeterminismCheck,
+    KpiDelta,
+    RunProvenance,
+)
+from apps.api.app.services.evidence.models.signal import (
+    CanonicalEventChain,
+    ConfidenceScore,
+    Signal,
+    SignalIngressRequest,
+)
+from apps.api.app.services.evidence.public_information import (
+    AuslanAsset,
+    PublicInformationChannel,
+    PublicInformationRender,
+)
+from apps.api.app.services.evidence.simulation.router import ReplayRequest
+from packages.domain.src.domain.models import evidence_init as domain
+from scripts.generate_evidence_openapi import build_evidence_openapi
 
 OPENAPI_PATH = Path("specs/040-success-criteria/contracts/openapi.evidence-harness.yaml")
 TS_TWIN_PATH = Path("packages/domain/src/evidence/index.ts")
 
+MODELS = {
+    model.__name__: model
+    for model in (
+        Assumption,
+        AuditEntry,
+        AuditTrace,
+        AuslanAsset,
+        BenchmarkEntry,
+        CanonicalEventChain,
+        CausalChain,
+        CitationRef,
+        ConfidenceBandRule,
+        ConfidenceScore,
+        DeltaScorecard,
+        DeterminismCheck,
+        IndicatorDefinition,
+        KpiDelta,
+        KpiLadderGroup,
+        KpiLadderView,
+        MeasurementMethod,
+        MeasurementMethodDefinition,
+        PublicInformationChannel,
+        PublicInformationRender,
+        ReplayRequest,
+        RiskAdjustment,
+        RunProvenance,
+        Signal,
+        SignalIngressRequest,
+        ThreatToValidity,
+    )
+}
 
-def _load_openapi_schemas() -> dict:
-    try:
-        import yaml
-    except ImportError:
-        pytest.skip("PyYAML not available")
-    if not OPENAPI_PATH.exists():
-        pytest.skip(f"OpenAPI spec not found at {OPENAPI_PATH}")
-    with OPENAPI_PATH.open(encoding="utf-8") as f:
-        spec = yaml.safe_load(f)
-    return spec.get("components", {}).get("schemas", {})
+
+def _load_openapi() -> dict:
+    return yaml.safe_load(OPENAPI_PATH.read_text(encoding="utf-8"))
 
 
-def _extract_ts_interfaces(ts_path: Path) -> dict[str, set[str]]:
-    """Extract interface name → field names from TypeScript source."""
-    if not ts_path.exists():
-        return {}
-    content = ts_path.read_text(encoding="utf-8")
-    interfaces: dict[str, set[str]] = {}
-    # Match: export interface Foo { ... }
-    for m in re.finditer(
-        r"(?:export\s+)?interface\s+(\w+)\s*\{([^}]+)\}",
-        content,
-        re.DOTALL,
+def _interface_blocks(source: str) -> dict[str, str]:
+    blocks: dict[str, str] = {}
+    for match in re.finditer(r"export\s+interface\s+(\w+)[^{]*\{", source):
+        depth = 1
+        cursor = match.end()
+        while cursor < len(source) and depth:
+            if source[cursor] == "{":
+                depth += 1
+            elif source[cursor] == "}":
+                depth -= 1
+            cursor += 1
+        blocks[match.group(1)] = source[match.end() : cursor - 1]
+    return blocks
+
+
+def _ts_fields(block: str) -> dict[str, tuple[bool, str]]:
+    fields: dict[str, tuple[bool, str]] = {}
+    for match in re.finditer(
+        r"^\s*(\w+)(\?)?\s*:\s*([^;]+);",
+        block,
+        re.MULTILINE,
     ):
-        name = m.group(1)
-        body = m.group(2)
-        # Extract field names — lines like "  fieldName?: type;"
-        fields = set(re.findall(r"^\s+(\w+)\??\s*:", body, re.MULTILINE))
-        interfaces[name] = fields
-    return interfaces
+        fields[match.group(1)] = (match.group(2) is None, match.group(3).strip())
+    return fields
 
 
-@pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
-def test_key_interfaces_present_in_ts_twin():
-    """Key Pydantic model names must each have a corresponding TS interface."""
-    required = [
-        "IndicatorDefinition",
-        "RiskAdjustment",
-        "ConfidenceBandRule",
-        "AuditEntry",
-        "AuditTrace",
-        "BenchmarkEntry",
-        "CitationRef",
-        "CausalChain",
-        "DeltaScorecard",
-        "PublicInformationRender",
-    ]
-    ts_interfaces = _extract_ts_interfaces(TS_TWIN_PATH)
-    missing = [name for name in required if name not in ts_interfaces]
-    assert not missing, f"Missing TS interfaces: {missing}"
+def test_stored_openapi_is_generated_from_registered_routes():
+    assert _load_openapi() == build_evidence_openapi()
 
 
-@pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
-def test_openapi_required_fields_present_in_ts_twin():
-    """All OpenAPI-required fields for key schemas must be present in the TS twin (D25).
-
-    Direction: OpenAPI required fields ⊆ TS fields.
-    The TS twin may have additional internal/computed fields not in the OpenAPI contract
-    (e.g. created_by, correlation_id) — that is acceptable per the reuse-only constraint.
-    """
-    schemas = _load_openapi_schemas()
-    ts_interfaces = _extract_ts_interfaces(TS_TWIN_PATH)
-
+def test_python_domain_twins_match_application_fields_and_requiredness():
     mismatches: list[str] = []
-    for schema_name, schema_def in schemas.items():
-        if schema_name not in ts_interfaces:
-            continue
-        # Only check required fields — optional OpenAPI fields may be omitted from TS
-        required_fields = set(schema_def.get("required", []))
-        ts_fields = ts_interfaces[schema_name]
-        missing_required = required_fields - ts_fields
-        if missing_required:
-            mismatches.append(f"{schema_name}: required OpenAPI fields absent from TS: {sorted(missing_required)}")
-
+    for name, app_model in MODELS.items():
+        domain_model = getattr(domain, name)
+        app_fields = {field_name: field.is_required() for field_name, field in app_model.model_fields.items()}
+        domain_fields = {field_name: field.is_required() for field_name, field in domain_model.model_fields.items()}
+        if app_fields != domain_fields:
+            mismatches.append(f"{name}: app={app_fields!r}, domain={domain_fields!r}")
     assert not mismatches, "\n".join(mismatches)
 
 
-@pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
-def test_risk_adjustment_has_provenance_and_signoff():
-    """RiskAdjustment TS interface must include provenance + auditor_signoff_required (T-AMD-11)."""
-    ts_interfaces = _extract_ts_interfaces(TS_TWIN_PATH)
-    ra = ts_interfaces.get("RiskAdjustment", set())
-    assert "provenance" in ra, "RiskAdjustment missing 'provenance' field"
-    assert "auditor_signoff_required" in ra, "RiskAdjustment missing 'auditor_signoff_required' field"
+def test_typescript_twin_matches_openapi_fields_requiredness_and_nullability():
+    schemas = _load_openapi()["components"]["schemas"]
+    blocks = _interface_blocks(TS_TWIN_PATH.read_text(encoding="utf-8"))
+    mismatches: list[str] = []
+
+    for name in MODELS:
+        schema_name = {
+            "ConfidenceScore": "ConfidenceScore-Output",
+            "IndicatorDefinition": "IndicatorDefinition-Output",
+        }.get(name, name)
+        schema = schemas[schema_name]
+        ts_fields = _ts_fields(blocks[name])
+        openapi_fields = schema.get("properties", {})
+        required = set(schema.get("required", []))
+        if set(ts_fields) != set(openapi_fields):
+            mismatches.append(
+                f"{name}: TS-only={sorted(set(ts_fields) - set(openapi_fields))}, "
+                f"OpenAPI-only={sorted(set(openapi_fields) - set(ts_fields))}"
+            )
+            continue
+        for field_name, field_schema in openapi_fields.items():
+            ts_required, ts_type = ts_fields[field_name]
+            if ts_required != (field_name in required):
+                mismatches.append(
+                    f"{name}.{field_name}: TS required={ts_required}, OpenAPI required={field_name in required}"
+                )
+            openapi_nullable = _is_nullable(field_schema)
+            ts_nullable = "null" in ts_type
+            if openapi_nullable != ts_nullable:
+                mismatches.append(
+                    f"{name}.{field_name}: TS nullable={ts_nullable}, OpenAPI nullable={openapi_nullable}"
+                )
+    assert not mismatches, "\n".join(mismatches)
 
 
-@pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
-def test_audit_kind_includes_language_fallback():
-    """AuditKind TS union must include 'language_fallback_used' (T-AMD-13)."""
-    content = TS_TWIN_PATH.read_text(encoding="utf-8")
-    assert "language_fallback_used" in content, "AuditKind missing 'language_fallback_used'"
+def test_openapi_uses_canonical_public_contract_names():
+    schemas = _load_openapi()["components"]["schemas"]
+    citation = schemas["CitationRef"]["properties"]
+    public_channel = schemas["PublicInformationChannel"]["properties"]
+
+    assert "organisation" in citation
+    assert "org" not in citation
+    assert "body" in public_channel
+    assert "content" not in public_channel
 
 
-@pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
-def test_benchmark_entry_has_citation_ref():
-    """BenchmarkEntry must reference CitationRef (T-AMD-12)."""
-    ts_interfaces = _extract_ts_interfaces(TS_TWIN_PATH)
-    be = ts_interfaces.get("BenchmarkEntry", set())
-    assert "source_citation" in be, "BenchmarkEntry missing 'source_citation'"
-    assert "CitationRef" in ts_interfaces, "CitationRef interface missing"
-
-
-@pytest.mark.skipif(not TS_TWIN_PATH.exists(), reason="TS twin not found")
-def test_indicator_definition_risk_adjustment_required():
-    """IndicatorDefinition.risk_adjustment must be required (not optional) in TS twin (T-AMD-11)."""
-    content = TS_TWIN_PATH.read_text(encoding="utf-8")
-    # In the interface, "risk_adjustment:" (no ?) means required
-    # "risk_adjustment?:" means optional
-    # Find the IndicatorDefinition interface block
-    m = re.search(
-        r"interface\s+IndicatorDefinition\s*\{([^}]+)\}",
-        content,
-        re.DOTALL,
-    )
-    assert m, "IndicatorDefinition interface not found"
-    body = m.group(1)
-    # Check that risk_adjustment is declared without '?'
-    assert re.search(r"risk_adjustment\s*:", body), "risk_adjustment should be required (no '?')"
-    assert not re.search(r"risk_adjustment\?", body), "risk_adjustment must not be optional"
+def _is_nullable(schema: dict) -> bool:
+    if schema.get("type") == "null":
+        return True
+    return any(_is_nullable(option) for option in schema.get("anyOf", []))

@@ -122,17 +122,20 @@ export function ClaimsVelocityDashboard(
                   ["dollars_paid", "$ paid"],
                 ] as const
               ).map(([key, label]) => (
-                <th key={key} className="pl-3">
+                <th
+                  key={key}
+                  className="pl-3"
+                  aria-sort={
+                    sortKey === key
+                      ? sortDir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                  }
+                >
                   <button
                     type="button"
                     onClick={() => setSort(key)}
-                    aria-sort={
-                      sortKey === key
-                        ? sortDir === "asc"
-                          ? "ascending"
-                          : "descending"
-                        : "none"
-                    }
                     className="underline"
                   >
                     {label}

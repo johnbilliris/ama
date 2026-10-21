@@ -1,4 +1,4 @@
-"""Pillar A — KPI Ladder + Indicator Definition models (T-A04, FR-002..FR-006)."""
+# Versioned KPI ladder and indicator models.
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Annotated, Literal
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, condecimal
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 AiimsFunction = Literal[
     "Control",
@@ -19,7 +19,8 @@ AiimsFunction = Literal[
 IncidentLevel = Literal[1, 2, 3]
 Provenance = Literal["auto", "manual"]
 IndicatorKind = Literal["leading", "lagging"]
-LifeSafetyTier = Literal["life_safety", "efficiency"]  # FR-006 ranking
+LifeSafetyTier = Literal["life_safety", "efficiency"]
+PublicationStatus = Literal["draft", "published", "superseded"]
 CapstoneScId = Literal[
     "SC-CAP-015-001",
     "SC-CAP-015-002",
@@ -27,6 +28,7 @@ CapstoneScId = Literal[
     "SC-CAP-015-004",
     "SC-CAP-015-005",
 ]
+Decimal4 = Annotated[Decimal, Field(max_digits=18, decimal_places=4)]
 
 
 class ConfidenceBandRule(BaseModel):
@@ -38,8 +40,6 @@ class ConfidenceBandRule(BaseModel):
 
 
 class RiskAdjustment(BaseModel):
-    """FR-004 — 5×5 likelihood × consequence (AS/NZS ISO 31000)."""
-
     model_config = ConfigDict(extra="forbid")
 
     likelihood: Annotated[int, Field(ge=1, le=5)]
@@ -65,20 +65,43 @@ class IndicatorDefinition(BaseModel):
     incident_level: IncidentLevel
     life_safety_tier: LifeSafetyTier
     formula: str
+    formula_version: str = "040.1"
     unit: str
     owner_role: str
     refresh_cadence: str
-    target_value: condecimal(max_digits=18, decimal_places=4)
-    alert_threshold: condecimal(max_digits=18, decimal_places=4)
+    target_value: Decimal4
+    alert_threshold: Decimal4
     baseline_source: str
+    calibration_reference: str = "prototype baseline paired by scenario version, content hash, and seed"
     provenance: Provenance
     confidence_band_rule: ConfidenceBandRule
-    risk_adjustment: RiskAdjustment
+    risk_adjustment: RiskAdjustment | None = None
+    publication_status: PublicationStatus = "published"
     created_at: AwareDatetime
     created_by: str
     superseded_by: str | None = None
 
+    @field_validator(
+        "id",
+        "kpi_id",
+        "name",
+        "formula",
+        "formula_version",
+        "unit",
+        "owner_role",
+        "refresh_cadence",
+        "baseline_source",
+        "calibration_reference",
+    )
+    @classmethod
+    def _must_not_be_blank(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("value must not be blank")
+        return value
+
     def risk_adjusted_value(self, base: Decimal | float) -> Decimal:
+        if self.risk_adjustment is None:
+            raise ValueError("risk adjustment is not available")
         return Decimal(str(base)) * Decimal(str(self.risk_adjustment.weight))
 
 
@@ -95,4 +118,4 @@ class KpiLadderView(BaseModel):
 
     version: str
     generated_at: datetime
-    groups: list[KpiLadderGroup] = Field(min_length=5, max_length=5)
+    groups: list[KpiLadderGroup] = Field(min_length=1, max_length=5)

@@ -1,0 +1,33 @@
+{
+  "observed_at": "2026-10-20T04:48:54.765143+00:00",
+  "checks": {
+    "exact_pair": {
+      "succeeded": true,
+      "details": {
+        "exact_pair_binding": true,
+        "agents_readiness_http": 200
+      }
+    },
+    "actual_redis_client": {
+      "succeeded": true,
+      "details": {
+        "actual_pipeline_status_client": true,
+        "credential_provider_type": "EntraIdCredentialsProvider",
+        "ping": true,
+        "business_rows_read_or_written": 0
+      }
+    },
+    "configured_search_alias": {
+      "succeeded": true,
+      "details": {
+        "configured_alias": "corpus",
+        "document_count": 0,
+        "actual_api_retrieval_client": true,
+        "empty_schema_only": true,
+        "documents_read_or_uploaded": 0
+      }
+    }
+  },
+  "business_invocations": 0,
+  "documents_uploaded": 0
+}

@@ -1,6 +1,10 @@
 """Tests for evacuation.transport — vehicle types, quantities, priorities (T031)."""
 
-from evacuation.models import VulnerabilityCategory
+from evacuation.models import (
+    TransportCoordinationStatus,
+    TransportExclusionReason,
+    VulnerabilityCategory,
+)
 from evacuation.transport import (
     _PRIORITY_ORDER,
     PRIORITY_MAP,
@@ -11,6 +15,7 @@ from evacuation.transport import (
 
 def _make_facility(category, capacity=20, name="Test Facility", lat=-16.92, lng=145.77):
     return {
+        "facility_id": f"facility-{name.lower().replace(' ', '-')}",
         "vulnerability_category": category,
         "capacity": capacity,
         "name": name,
@@ -115,6 +120,85 @@ class TestVehicleTypeMapping:
 
 
 class TestVehicleCountEstimation:
+    def test_40_wheelchair_users_create_10_accessible_vehicle_request(self):
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone()],
+            [_make_facility("mobility_impaired", capacity=40, name="Access Centre")],
+            [_make_assembly_area()],
+            "live:inc-001",
+        )
+
+        request = result.requirements[0]
+        assert request.estimated_individuals == 40
+        assert request.quantity_required == 10
+        assert request.vehicle_type == "wheelchair_accessible_vehicle"
+        assert request.priority_level.value == "immediate"
+        assert request.origin_zone == 1
+        assert request.phase_number == 1
+        assert request.pickup_location == {"lat": -16.92, "lng": 145.77}
+        assert request.destination_assembly_area_id == "aa-1"
+        assert request.dispatch_authorized is False
+
+    def test_200_students_create_four_bus_request(self):
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone()],
+            [
+                _make_facility(
+                    "children_schools_childcare",
+                    capacity=200,
+                    name="District School",
+                )
+            ],
+            [_make_assembly_area()],
+            "live:inc-001",
+        )
+
+        request = result.requirements[0]
+        assert request.estimated_individuals == 200
+        assert request.quantity_required == 4
+        assert request.vehicle_type == "bus"
+        assert request.priority_level.value == "high"
+        assert "child_supervision" in request.special_considerations
+
+    def test_requirement_id_and_resource_payload_are_stable_and_structured(self):
+        coordinator = TransportCoordinator()
+        arguments = (
+            [_make_zone()],
+            [_make_facility("medical_dependent", capacity=5, name="Clinic")],
+            [_make_assembly_area()],
+            "tenant-a:inc-001",
+        )
+
+        first = coordinator.coordinate_transport(*arguments).requirements[0]
+        second = coordinator.coordinate_transport(*arguments).requirements[0]
+        payload = first.to_resource_allocation_payload()
+
+        assert first.requirement_id == second.requirement_id
+        assert payload == {
+            "requirementId": first.requirement_id,
+            "vehicleType": "ambulance",
+            "quantity": 3,
+            "pickupLocation": {"lat": -16.92, "lon": 145.77},
+            "priority": "critical",
+            "estimatedIndividuals": 5,
+            "facilityId": "facility-clinic",
+            "facilityName": "Clinic",
+            "destinationAssemblyAreaId": "aa-1",
+            "destinationAssemblyAreaName": "Assembly aa-1",
+            "destinationRouteId": "",
+            "destinationResolved": True,
+            "unresolvedDestinationReason": None,
+            "originZone": 1,
+            "phaseNumber": 1,
+            "specialConsiderations": [
+                "medical_equipment",
+                "oxygen_supply",
+                "continuous_monitoring",
+            ],
+            "countBasis": "facility_capacity",
+            "dispatchAuthorized": False,
+        }
+
     def test_ceiling_division_exact(self):
         """50 people ÷ 50 per bus = 1 bus."""
         tc = TransportCoordinator()
@@ -177,6 +261,24 @@ class TestVehicleCountEstimation:
 
 
 class TestMissingFacilityData:
+    def test_unavailable_registry_is_distinct_from_authoritative_empty(self):
+        coordinator = TransportCoordinator()
+
+        unavailable = coordinator.coordinate_transport(
+            [_make_zone()],
+            None,
+            [_make_assembly_area()],
+        )
+        empty = coordinator.coordinate_transport(
+            [_make_zone()],
+            [],
+            [_make_assembly_area()],
+        )
+
+        assert unavailable.status == TransportCoordinationStatus.unavailable
+        assert empty.status == TransportCoordinationStatus.complete
+        assert unavailable.assumptions != empty.assumptions
+
     def test_empty_facilities(self):
         tc = TransportCoordinator()
         zones = [_make_zone()]
@@ -203,6 +305,213 @@ class TestMissingFacilityData:
         ]
         reqs = tc.compute_transport_requirements(zones, facilities, [_make_assembly_area()])
         assert reqs == []
+
+    def test_facility_outside_all_memberships_is_not_assigned(self):
+        tc = TransportCoordinator()
+        facilities = [
+            _make_facility(
+                "medical_dependent",
+                capacity=5,
+                lat=0,
+                lng=0,
+            )
+        ]
+
+        reqs = tc.compute_transport_requirements(
+            [_make_zone()],
+            facilities,
+            [_make_assembly_area()],
+        )
+
+        assert reqs == []
+
+    def test_outside_facility_is_retained_as_excluded_inventory(self):
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone()],
+            [
+                _make_facility(
+                    "medical_dependent",
+                    capacity=5,
+                    name="Remote Clinic",
+                    lat=0,
+                    lng=0,
+                )
+            ],
+            [_make_assembly_area()],
+        )
+
+        assert result.requirements == []
+        assert result.exclusions[0].reason == (TransportExclusionReason.outside_affected_area)
+        assert result.exclusions[0].estimated_individuals == 5
+
+    def test_zone_three_facility_is_advisory_not_mandatory(self):
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone(zone_number=3)],
+            [
+                _make_facility(
+                    "children_schools_childcare",
+                    capacity=200,
+                    name="Advisory School",
+                )
+            ],
+            [_make_assembly_area()],
+        )
+
+        assert result.requirements == []
+        assert result.exclusions[0].reason == TransportExclusionReason.advisory_only
+        assert result.exclusions[0].zone_number == 3
+        assert result.identified_population_by_zone == {3: 200}
+
+    def test_invalid_location_is_not_mislabeled_outside_area(self):
+        facility = _make_facility("elderly_aged_care", capacity=60)
+        facility["coordinates"] = {"lat": "unknown", "lng": 145.77}
+
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone()],
+            [facility],
+            [_make_assembly_area()],
+        )
+
+        assert result.exclusions[0].reason == TransportExclusionReason.invalid_location
+
+    def test_uncovered_vulnerable_population_is_explicit(self):
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone()],
+            [_make_facility("medical_dependent", capacity=50)],
+            [_make_assembly_area()],
+        )
+
+        assert result.uncovered_vulnerable_population_by_zone == {1: 700}
+        assert result.status == TransportCoordinationStatus.partial
+        assert "700 vulnerable people" in result.assumptions[0]
+
+    def test_route_backed_farther_accessible_destination_is_selected(self):
+        coordinator = TransportCoordinator()
+        near = _make_assembly_area("near", lat=-16.92, lng=145.77)
+        near["accessibility_features"] = []
+        far = _make_assembly_area("far", lat=-16.80, lng=145.70)
+        far["accessibility_features"] = ["wheelchair_accessible"]
+        allocations = [
+            {
+                "zone_number": 1,
+                "assembly_area_id": "near",
+                "assigned_vulnerable_population": 40,
+            },
+            {
+                "zone_number": 1,
+                "assembly_area_id": "far",
+                "assigned_vulnerable_population": 40,
+            },
+        ]
+        routes = [
+            {
+                "origin_zone": 1,
+                "destination_assembly_area": "near",
+                "allocated_population": 40,
+                "estimated_travel_time_loaded_min": 5,
+                "total_distance_km": 2,
+                "vehicle_suitability": {
+                    "standard": True,
+                    "heavy": True,
+                    "accessible": True,
+                },
+            },
+            {
+                "origin_zone": 1,
+                "destination_assembly_area": "far",
+                "allocated_population": 40,
+                "estimated_travel_time_loaded_min": 15,
+                "total_distance_km": 8,
+                "vehicle_suitability": {
+                    "standard": True,
+                    "heavy": True,
+                    "accessible": True,
+                },
+            },
+        ]
+
+        result = coordinator.coordinate_transport(
+            [_make_zone()],
+            [_make_facility("mobility_impaired", capacity=40)],
+            [near, far],
+            "live:inc-001",
+            allocations,
+            routes,
+        )
+
+        assert result.requirements[0].destination_assembly_area_id == "far"
+        assert result.requirements[0].destination_resolved is True
+
+    def test_no_compatible_destination_keeps_unresolved_request(self):
+        area = _make_assembly_area("near")
+        area["accessibility_features"] = []
+        result = TransportCoordinator().coordinate_transport(
+            [_make_zone()],
+            [_make_facility("mobility_impaired", capacity=40)],
+            [area],
+            "live:inc-001",
+            [
+                {
+                    "zone_number": 1,
+                    "assembly_area_id": "near",
+                    "assigned_vulnerable_population": 40,
+                }
+            ],
+            [
+                {
+                    "origin_zone": 1,
+                    "destination_assembly_area": "near",
+                    "allocated_population": 40,
+                    "vehicle_suitability": {
+                        "standard": True,
+                        "heavy": True,
+                        "accessible": True,
+                    },
+                }
+            ],
+        )
+
+        assert len(result.requirements) == 1
+        assert result.requirements[0].destination_resolved is False
+        assert result.requirements[0].destination_assembly_area_id == ""
+        assert result.requirements[0].unresolved_destination_reason
+        assert result.exclusions == []
+        assert result.status == TransportCoordinationStatus.partial
+        assert any("unresolved destination" in assumption for assumption in result.assumptions)
+
+    def test_shared_boundary_facility_uses_highest_priority_zone(self):
+        tc = TransportCoordinator()
+        facility = _make_facility(
+            "medical_dependent",
+            capacity=5,
+            lat=0.5,
+            lng=1,
+        )
+        zones = [
+            {
+                "zone_number": 1,
+                "membership_boundary": {
+                    "type": "Polygon",
+                    "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]],
+                },
+            },
+            {
+                "zone_number": 2,
+                "membership_boundary": {
+                    "type": "Polygon",
+                    "coordinates": [[[1, 0], [2, 0], [2, 1], [1, 1], [1, 0]]],
+                },
+            },
+        ]
+
+        requirements = tc.compute_transport_requirements(
+            zones,
+            [facility],
+            [_make_assembly_area()],
+        )
+
+        assert len(requirements) == 1
+        assert "Zone: 1" in requirements[0].notes
 
 
 # ---------------------------------------------------------------------------

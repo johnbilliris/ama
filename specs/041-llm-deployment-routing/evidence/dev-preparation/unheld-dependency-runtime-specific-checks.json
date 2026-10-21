@@ -1,0 +1,14 @@
+{
+  "audit": {
+    "authorized": true,
+    "exists": true
+  },
+  "evidence-audit-cold": {
+    "authorized": true,
+    "exists": true
+  },
+  "redis_aad_ping": {
+    "authorized": true,
+    "application_configuration_changed": false
+  }
+}

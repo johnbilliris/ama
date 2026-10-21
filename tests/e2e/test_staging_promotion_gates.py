@@ -14,9 +14,7 @@ This is a CONTRACT test — it loads the canonical KQL templates from
   ``infra/bicep/modules/simulation-app-insights-alerts.bicep`` so
   what-if drift between KQL and alert rules is caught at CI time.
 
-The full workflow integration (deploy → run scenario → poll alerts)
-runs under ``.github/workflows/staging-promotion.yml`` (T-Z05) and
-relies on this test as the static gate.
+This test validates the release-gate contract independently of deployment.
 """
 
 from __future__ import annotations
@@ -40,7 +38,6 @@ from tests.staging_gates import (  # noqa: E402
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SLI_JSON = REPO_ROOT / "infra" / "observability" / "sli-kql.json"
 ALERTS_BICEP = REPO_ROOT / "infra" / "bicep" / "modules" / "simulation-app-insights-alerts.bicep"
-
 
 CANONICAL_IDS = [
     "SLI-Z1",
@@ -176,7 +173,6 @@ def test_promotion_gate_blocks_on_any_sli_breach(sli_doc: dict) -> None:
 # both sample-floor-underage paths for Z6 and Z7.
 # Imports for this block are consolidated at the top of the file.
 # ────────────────────────────────────────────────────────────────────────────
-
 
 _RED_SHAPES = {
     "z6_p95_breach": {

@@ -30,7 +30,7 @@ def compose(
     scenario_id: str,
     seed: int,
     *,
-    feed_calls: list[tuple[EmitFn, dict]],
+    feed_calls: list[tuple[EmitFn, dict[str, object]]],
 ) -> Iterator[CanonicalRecord]:
     """Run each feed module and yield a deterministically interleaved stream.
 

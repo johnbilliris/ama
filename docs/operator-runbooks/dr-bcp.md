@@ -19,7 +19,7 @@
 
 - **RPO** is measured as the timestamp of the latest write committed to the paired region vs. the moment the primary went unhealthy. Target: ≤ 15 minutes.
 - **RTO** is measured from "DR declared" to "first successful operator workflow completion in secondary region." Target: ≤ 60 minutes.
-- Both metrics are captured by `dr-drill.yml` workflow during quarterly drills (per FR-R05 + exercise schedule).
+- Both metrics are captured during operator-led quarterly drills (per FR-R05 + exercise schedule).
 
 ## Failover procedure
 
@@ -117,6 +117,6 @@ Within 5 business days:
 
 - Constitution Non-Negotiable #2 (Data sovereignty) — paired region Australia Southeast inside AU.
 - Spec-032 FR-D01 (DR runbook), FR-D04 (Cosmos PITR), FR-R05 (chaos drills).
-- `dr-drill.yml` GitHub Actions workflow (T818).
+- Quarterly DR drill procedure recorded in this runbook (T818).
 - Capacity model `docs/architecture/capacity-model.md` (T804).
 - Cosmos backup/restore runbook `docs/operator-runbooks/cosmos-backup-restore.md` (T810).

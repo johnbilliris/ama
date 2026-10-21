@@ -1,5 +1,7 @@
 ---
+name: chaos-engineer
 description: "Chaos Engineer — chaos experiment design, failure injection, resilience validation, blast radius control, and disaster-scenario stress testing for the disaster response hub."
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about SLO impact
     agent: sre-engineer
@@ -105,9 +107,9 @@ This agent covers chaos experiment design, failure injection, and resilience val
 - .specify/memory/constitution.md — Principle I: Life Safety First (graceful degradation), Quality Gates
 - specs/001-disaster-response-hub/spec.md — NFR requirements for resilience and degradation
 - docs/disaster-response-hub/operator-runbooks.md — Runbooks validated through chaos experiments
-- pps/api/app/services/resilience.py — Circuit breaker and resilience middleware
-- 	ests/simulation/ — Disaster scenario simulation tests (reusable for chaos experiments)
-- 	ests/load/locustfile.py — Load testing configuration (baseline for stress testing)
+- apps/api/app/middleware/resilience.py — Circuit breaker and resilience middleware
+- tests/simulation/ — Disaster scenario simulation tests (reusable for chaos experiments)
+- tests/load/locustfile.py — Load testing configuration (baseline for stress testing)
 - .github/agents/copilot-instructions.md — Active technology stack
 
 ## Guidance Notes

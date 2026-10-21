@@ -9,5 +9,6 @@ class TaskStatusSyncService:
         return {
             "queued": sum(1 for task in relevant_tasks if task.status == "queued"),
             "inProgress": sum(1 for task in relevant_tasks if task.status == "in_progress"),
+            "blocked": sum(1 for task in relevant_tasks if task.status == "blocked"),
             "completed": sum(1 for task in relevant_tasks if task.status == "completed"),
         }

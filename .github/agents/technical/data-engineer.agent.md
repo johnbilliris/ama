@@ -1,5 +1,7 @@
 ---
+name: data-engineer
 description: Data engineer agent — Cosmos DB, Blob Storage, signal ingestion pipelines, data model conventions, and schema governance for the disaster response hub.
+tools: ["search/codebase","read/changes","web/fetch","search/findTestFiles","web/githubRepo","read/problems","search","search/searchResults","read/terminalLastCommand","read/terminalSelection","execute/testFailure","search/usages","vscode/vscodeAPI","microsoft.docs.mcp"]
 handoffs:
   - label: Ask about architecture decisions
     agent: solution-architect
@@ -62,8 +64,9 @@ This agent covers data pipelines, storage, and schema governance. It does **NOT*
 
 ## Contextual References
 
-- .specify/memory/constitution.md — All 6 principles, especially III (Data Trust, Provenance, Freshness), IV (Privacy, tenant isolation)
-- specs/001-disaster-response-hub/data-model.md — Full entity model: Organisation, Persona, Incident, Signal, Recommendation, HazardPrediction, EvacuationPlan, PublicAlert
+- .specify/memory/constitution.md — Current governing principles I-VIII, II-A, and non-negotiable requirements
+- specs/004-actor-github-agents/contracts/constitutional-grounding.md — Shared constitutional mapping and AU carve-out guardrails for actor guidance
+- specs/001-disaster-response-hub/data-model.md — Full entity model: Organisation, Persona, Incident, Signal, Recommendation, HazardAssessment, PublicAlert
 - packages/schemas/signal-envelope.schema.json — Signal envelope schema for ingestion pipelines
 - packages/schemas/openapi.yaml — API contract definitions for data-facing endpoints
 - packages/domain/src/domain/models/ — Pydantic domain models implementing the data model
@@ -78,7 +81,7 @@ Every data decision must satisfy:
 3. **Data Trust**: Every signal carries provenance metadata (source, timestamp, confidence); prefer authoritative sources (BoM, Geoscience Australia) over community reports
 4. **Privacy & Compliance**: Australian data residency for all storage; tenant-scoped queries; no cross-tenant data leakage; PII minimisation
 5. **Multilingual & Accessible**: Alert content stored with language-tagged variants; UTF-8 encoding throughout
-6. **Azure AU Only**: All data resources in Australian Azure regions; no geo-replication outside AU
+6. **VIII + Non-Negotiable Data Sovereignty**: AU residency is mandatory for persistence, telemetry, and audit data. Non-AU model-hosting inference does not relax storage or logging residency constraints.
 
 ### Data Architecture Patterns
 - **Signal Envelope**: All ingested signals conform to signal-envelope.schema.json — source, timestamp, confidence, payload, provenance chain

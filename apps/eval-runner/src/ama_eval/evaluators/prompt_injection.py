@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 
 from .base import EvalInput, EvalResult, ModelOutput, register
@@ -46,7 +47,7 @@ class _Eval:
     metric_id: str
     family: str
     tier: str
-    fn: callable
+    fn: Callable[[EvalInput, ModelOutput], EvalResult]
 
     def evaluate(self, inp: EvalInput, out: ModelOutput) -> EvalResult:
         return self.fn(inp, out)

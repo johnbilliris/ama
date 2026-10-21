@@ -8,6 +8,7 @@ primary entry point (``process_handoff`` or ``process_signal``).
 from __future__ import annotations
 
 import asyncio
+import itertools
 from unittest.mock import MagicMock
 
 import pytest
@@ -128,15 +129,78 @@ def evacuation_pipeline():
     from evacuation.pipeline import EvacuationProcessingPipeline
     from evacuation.road_network import RoadNetworkLoader
 
+    class _UpstreamStore:
+        def __init__(self, documents):
+            self.documents = documents
+
+        def read_item(self, item, partition_key):
+            document = self.documents[item]
+            assert partition_key == document["incident_scope_key"]
+            return document
+
     config = EvacuationConfig()
     road_network = RoadNetworkLoader()
     road_network.load("data/road-networks/far-north-qld-sample.json")
+    incident_id = "INC-BENCH-001"
+    scope_key = f"live:{incident_id}"
+    recommendation_id = "rec-bench-001"
+    assessment_id = "assess-bench-001"
+    affected_area = {
+        "type": "Polygon",
+        "coordinates": [
+            [
+                [145.75, -16.95],
+                [145.80, -16.95],
+                [145.80, -16.90],
+                [145.75, -16.90],
+                [145.75, -16.95],
+            ]
+        ],
+    }
+    recommendation_store = _UpstreamStore(
+        {
+            recommendation_id: {
+                "recommendation_id": recommendation_id,
+                "incident_id": incident_id,
+                "type": "evacuation",
+                "summary": "Evacuate the affected community",
+                "explanation": "A bushfire threatens the evacuation area.",
+                "required_approval_level": "incident_commander",
+                "assessment_id": assessment_id,
+                "incident_scope_key": scope_key,
+                "tenant_id": "live",
+            }
+        }
+    )
+    assessment_store = _UpstreamStore(
+        {
+            assessment_id: {
+                "hazard_assessment_id": assessment_id,
+                "incident_id": incident_id,
+                "assessment_type": "route_risk",
+                "input_signal_ids": ["signal-bench-001"],
+                "summary": "Bushfire threatens evacuation corridors.",
+                "confidence_level": "high",
+                "incident_scope_key": scope_key,
+                "tenant_id": "live",
+                "hazard_map": {
+                    "affected_area": affected_area,
+                    "severity_level": "high",
+                    "hazard_type": "bushfire",
+                    "confidence_score": 0.85,
+                    "time_horizon": "4h",
+                    "population_estimate": 1000,
+                },
+            }
+        }
+    )
     return EvacuationProcessingPipeline(
         config=config,
         road_network=road_network,
         cosmos_plans_container=None,
         cosmos_decisions_container=None,
-        cosmos_assessments_container=None,
+        cosmos_assessments_container=assessment_store,
+        cosmos_recommendations_container=recommendation_store,
     )
 
 
@@ -165,20 +229,67 @@ def resource_pipeline():
 @pytest.fixture(scope="session")
 def communication_pipeline():
     """Communication pipeline with mocked translator."""
+    from communication.approval import ApprovalWorkflow
     from communication.audit import AuditWriter
     from communication.config import CommunicationConfig
     from communication.dedup import HandoffDeduplicator
+    from communication.models import ContentBlock, GenerationMethod
     from communication.pipeline import CommunicationProcessingPipeline
+    from communication.repository import CommunicationAlertRepository
     from communication.translator import MultilingualTranslator
     from communication.versioning import VersionCounter
 
     config = CommunicationConfig()
+    repository = CommunicationAlertRepository()
+    translator = MagicMock(spec=MultilingualTranslator)
+    translator.translate_all.return_value = {
+        language: ContentBlock(
+            language_code=language,
+            title="Emergency warning",
+            body="Bushfire at the benchmark location",
+            action_items="Follow emergency instructions",
+            generation_method=GenerationMethod.template,
+        )
+        for language in config.supported_languages
+    }
+    translator.back_translate_and_score.return_value = None
+
+    class _Store:
+        def __init__(self, kind: str):
+            self.kind = kind
+
+        def read_item(self, item, partition_key):
+            incident_id = str(partition_key).removeprefix("live:")
+            if self.kind == "incident":
+                return {"id": item, "tenant_id": "live", "commander_chain": ["benchmark-commander"]}
+            if self.kind == "recommendation":
+                return {"id": item, "incident_id": incident_id, "tenant_id": "live"}
+            return {
+                "id": item,
+                "incident_id": incident_id,
+                "tenant_id": "live",
+                "hazard_type": "bushfire",
+                "severity": "high",
+                "location": "Benchmark area",
+                "zones": [{"id": "benchmark-zone", "level": 1, "population_estimate": 1000}],
+            }
+
+    class _Publisher:
+        async def publish(self, payload):
+            return None
+
+    approval = ApprovalWorkflow(service_bus_client=_Publisher(), alert_repository=repository)
     return CommunicationProcessingPipeline(
         config=config,
         deduplicator=HandoffDeduplicator(window_minutes=30),
-        translator=MagicMock(spec=MultilingualTranslator),
+        translator=translator,
         version_counter=VersionCounter(config=config),
         audit_writer=AuditWriter(config=config),
+        incident_store=_Store("incident"),
+        recommendation_store=_Store("recommendation"),
+        assessment_store=_Store("assessment"),
+        alert_repository=repository,
+        approval_workflow=approval,
     )
 
 
@@ -216,5 +327,19 @@ def test_pipeline_resource(benchmark, resource_pipeline) -> None:
 @pytest.mark.benchmark(group="pipeline")
 def test_pipeline_communication(benchmark, communication_pipeline) -> None:
     set_benchmark_metadata(benchmark, agent="communication", metric_type="pipeline", slo_target_s=2.0)
-    handoff = _make_handoff(source="risk_assessment", target="communication")
-    benchmark(communication_pipeline.process_handoff, handoff)
+    sequence = itertools.count(1)
+
+    def run_once():
+        index = next(sequence)
+        incident_id = f"INC-BENCH-{index:06d}"
+        handoff = _make_handoff(source="risk_assessment", target="communication", incident_id=incident_id)
+        handoff.handoff_id = f"benchmark-handoff-{index:06d}"
+        handoff.payload["recommendationId"] = f"recommendation-{index:06d}"
+        handoff.payload["assessmentId"] = f"assessment-{index:06d}"
+        handoff.payload["explanation"] = "Benchmark warning rationale"
+        alert = communication_pipeline.process_handoff(handoff)
+        assert alert is not None
+        assert len(alert.content_blocks) == 6
+        return alert
+
+    benchmark(run_once)

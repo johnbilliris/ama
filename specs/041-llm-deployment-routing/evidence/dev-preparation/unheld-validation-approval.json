@@ -1,0 +1,33 @@
+{
+  "operation": "041-dev-unheld-zero-traffic-validation",
+  "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "resource_group": "ama",
+  "region": "australiaeast",
+  "approval_reference": "Current user's explicit structured response: unheldDevValidation=true, syntheticInference=true",
+  "applications": ["ca-api-dev", "ca-agents-dev"],
+  "image_pair_reference": "held-bootstrap-publication.json",
+  "allowed": [
+    "new unheld zero-business-traffic validation revisions",
+    "exact API-to-agents validation-pair binding",
+    "normal Dev startup governance and coordination writes and maintenance",
+    "bounded metadata and authorization checks of existing configured dependencies",
+    "stop only newly created validation revisions if containment is needed",
+    "bounded synthetic inference only after startup checks pass"
+  ],
+  "window_end": "2026-10-20T04:06:00Z",
+  "max_requests_per_tier": 3,
+  "max_total_requests": 9,
+  "max_generated_tokens_per_request": 512,
+  "synthetic_data_only": true,
+  "tools_allowed": false,
+  "business_promotion": false,
+  "excluded": [
+    "new permission grants",
+    "Foundry resource changes",
+    "secret-value retrieval or replacement",
+    "business route invocation",
+    "business traffic promotion",
+    "full-root provisioning",
+    "staging or production"
+  ]
+}

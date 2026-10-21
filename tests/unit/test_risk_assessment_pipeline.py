@@ -95,6 +95,44 @@ class TestSignalRetrieval:
         # Pipeline should successfully process (signals retrieved from payload)
         assert result is not None
 
+    def test_exact_stored_signal_refs_use_hpk_reader(self):
+        class _Store:
+            def __init__(self) -> None:
+                self.calls: list[dict[str, str]] = []
+
+            def get_by_hpk(self, **kwargs):  # type: ignore[no-untyped-def]
+                self.calls.append(kwargs)
+                return {
+                    "signal_id": kwargs["signal_id"],
+                    "category": "fire",
+                    "confidence_score": 0.9,
+                    "freshness_score": 1.0,
+                    "source_kind": "authoritative",
+                    "payload": {"severity": "high"},
+                    "provenance": {"sourceUri": "https://example.com"},
+                }
+
+        store = _Store()
+        pipeline = _make_pipeline(signal_store=store)
+        handoff = _make_handoff(category="fire")
+        handoff.payload["signal_ids"] = ["sig-hpk-1"]
+        handoff.payload["stored_signal_refs"] = [
+            {
+                "signal_id": "sig-hpk-1",
+                "scope": "live",
+                "jurisdiction_id": "nsw",
+                "data_source_id": "bom-warnings",
+            }
+        ]
+
+        result = pipeline.process_handoff(handoff)
+
+        assert result is not None
+        assert len(store.calls) == 1
+        assert store.calls[0]["scope"] == "live"
+        assert store.calls[0]["jurisdiction_id"] == "nsw"
+        assert store.calls[0]["data_source_id"] == "bom-warnings"
+
 
 # ---------------------------------------------------------------------------
 # Assessment type derivation

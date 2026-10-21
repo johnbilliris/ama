@@ -35,7 +35,7 @@ class SimScenarioCard(BaseModel):
     location: SimScenarioLocation
     start_at: datetime
     aws_default_level: Literal["advice", "watch_and_act", "emergency_warning"] = "advice"
-    parameters: dict = Field(default_factory=dict)
+    parameters: dict[str, object] = Field(default_factory=dict)
     confirmed: bool = False
     confirmed_by_oid: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))

@@ -1,9 +1,8 @@
 /**
  * MSAL bearer acquisition + token refresh helper (T046, FR-010 / Q1).
  *
- * - Configured for the `app-ama-zo6bb5` SPA registration (App-Registration ID
- *   surfaced via NEXT_PUBLIC_AZURE_AD_CLIENT_ID).
- * - All scopes follow the API exposed-scope convention `api://<api-app-id>/.default`.
+ * - Configured from the app registrations provisioned by azd/Bicep.
+ * - Requests the API's explicit delegated `access_as_user` scope.
  * - Silent acquisition first, interactive popup fallback when silent fails.
  *
  * See [`auth-rbac.openapi.yaml`](../../../../specs/035-webapp-capstone-closure/contracts/auth-rbac.openapi.yaml).
@@ -29,11 +28,13 @@ function resolveConfig(): ResolvedConfig | null {
   const clientId = process.env.NEXT_PUBLIC_AZURE_AD_CLIENT_ID;
   const tenantId = process.env.NEXT_PUBLIC_AZURE_AD_TENANT_ID;
   const apiAppId = process.env.NEXT_PUBLIC_AZURE_AD_API_APP_ID;
-  if (!clientId || !tenantId || !apiAppId) return null;
+  const configuredAudience = process.env.NEXT_PUBLIC_AZURE_AD_API_AUDIENCE;
+  const apiAudience = configuredAudience?.trim() || (apiAppId ? `api://${apiAppId}` : "");
+  if (!clientId || !tenantId || !apiAudience) return null;
   return {
     clientId,
     authority: `https://login.microsoftonline.com/${tenantId}`,
-    scopes: [`api://${apiAppId}/.default`],
+    scopes: [`${apiAudience.replace(/\/+$/, "")}/access_as_user`],
   };
 }
 
@@ -77,7 +78,7 @@ export async function acquireBearer(): Promise<BearerToken> {
   const client = await ensureClient();
   if (!client) {
     throw new Error(
-      "msal-not-configured: NEXT_PUBLIC_AZURE_AD_* env not set",
+      "msal-not-configured: NEXT_PUBLIC_AZURE_AD client, tenant, and API audience env not set",
     );
   }
   const cfg = resolveConfig()!;

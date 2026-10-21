@@ -1,0 +1,642 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ama:specify:contracts:platform-evidence",
+  "title": "Extension list sovereign external platform evidence",
+  "description": "Canonical finalized evidence assembled in an AU-resident private Azure Blob container from one Windows fragment and one Ubuntu fragment sharing a validation session. The closed document contains exactly one standalone Windows x64 Azure VM record and one standalone Ubuntu x64 Azure VM record. It excludes GitHub provenance, extension inventory, command output, source content, credentials, SAS tokens, secrets, absolute local paths, and regulated platform data. Each evidence_digest is SHA-256 over RFC 8785 canonical JSON UTF-8 bytes of the record with evidence_digest omitted. Cross-fragment agreement, digest recomputation, and conditional Blob creation are semantic checks outside JSON Schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "feature",
+    "category",
+    "validation_session_id",
+    "script_path",
+    "storage_boundary",
+    "records",
+    "review"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "feature": {
+      "const": "001-extension-list"
+    },
+    "category": {
+      "const": "sovereign-external-platform"
+    },
+    "validation_session_id": {
+      "$ref": "#/$defs/validationSessionId"
+    },
+    "script_path": {
+      "const": "scripts/spec001/run_external_platform_validation.py"
+    },
+    "storage_boundary": {
+      "$ref": "#/$defs/storageBoundary"
+    },
+    "records": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "allOf": [
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "os": { "const": "windows" },
+              "architecture": { "const": "x64" }
+            },
+            "required": ["os", "architecture"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        },
+        {
+          "contains": {
+            "type": "object",
+            "properties": {
+              "os": { "const": "ubuntu" },
+              "architecture": { "const": "x64" }
+            },
+            "required": ["os", "architecture"]
+          },
+          "minContains": 1,
+          "maxContains": 1
+        }
+      ],
+      "items": {
+        "$ref": "#/$defs/platformRecord"
+      }
+    },
+    "review": {
+      "$ref": "#/$defs/review"
+    }
+  },
+  "$defs": {
+    "validationSessionId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "platformRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "os",
+        "architecture",
+        "azure_resource_id",
+        "vm_id",
+        "location",
+        "script_version",
+        "python_version",
+        "package",
+        "lock",
+        "command_outcomes",
+        "executed_at",
+        "evidence_digest"
+      ],
+      "properties": {
+        "os": {
+          "enum": ["windows", "ubuntu"]
+        },
+        "architecture": {
+          "const": "x64"
+        },
+        "distribution_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "distribution_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "windows_product_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "windows_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "azure_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[0-9a-fA-F-]+/resourceGroups/[^/\\r\\n]+/providers/Microsoft\\.Compute/virtualMachines/[^/\\r\\n]+$"
+        },
+        "vm_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "location": {
+          "enum": ["australiaeast", "australiasoutheast"]
+        },
+        "script_version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "python_version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^[^\\r\\n]+$"
+        },
+        "package": {
+          "$ref": "#/$defs/packageMetadata"
+        },
+        "lock": {
+          "$ref": "#/$defs/lockMetadata"
+        },
+        "command_outcomes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/$defs/commandOutcome"
+          }
+        },
+        "executed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "evidence_digest": {
+          "description": "Lowercase hexadecimal SHA-256 over RFC 8785 canonical JSON UTF-8 bytes of this record with evidence_digest omitted.",
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "os": { "const": "ubuntu" } },
+            "required": ["os"]
+          },
+          "then": {
+            "required": ["distribution_id", "distribution_version"],
+            "properties": {
+              "distribution_id": { "const": "ubuntu" },
+              "distribution_version": {}
+            },
+            "not": {
+              "anyOf": [
+                { "properties": { "windows_product_name": {} }, "required": ["windows_product_name"] },
+                { "properties": { "windows_version": {} }, "required": ["windows_version"] }
+              ]
+            }
+          },
+          "else": {
+            "required": ["windows_product_name", "windows_version"],
+            "properties": {
+              "windows_product_name": {},
+              "windows_version": {}
+            },
+            "not": {
+              "anyOf": [
+                { "properties": { "distribution_id": {} }, "required": ["distribution_id"] },
+                { "properties": { "distribution_version": {} }, "required": ["distribution_version"] }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "platformFragment": {
+      "description": "Shape written by collect mode to spec001-extension-list/<validation_session_id>/fragments/<os>-<imds_vm_id>.json with create-if-absent semantics.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "feature",
+        "category",
+        "validation_session_id",
+        "script_path",
+        "storage_boundary",
+        "record"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "1.0"
+        },
+        "feature": {
+          "const": "001-extension-list"
+        },
+        "category": {
+          "const": "sovereign-external-platform-fragment"
+        },
+        "validation_session_id": {
+          "$ref": "#/$defs/validationSessionId"
+        },
+        "script_path": {
+          "const": "scripts/spec001/run_external_platform_validation.py"
+        },
+        "storage_boundary": {
+          "$ref": "#/$defs/storageBoundary"
+        },
+        "record": {
+          "$ref": "#/$defs/platformRecord"
+        }
+      }
+    },
+    "storageBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "storage_account_resource_id",
+        "container_name",
+        "blob_account_host",
+        "location",
+        "public_network_access",
+        "default_network_action",
+        "private_endpoint_connection_resource_id",
+        "private_endpoint_connection_state",
+        "dns_private_only",
+        "container_scope",
+        "managed_identity_principal_id",
+        "role_definition_id",
+        "role_assignment_scope",
+        "no_broader_data_plane_write_role",
+        "immutability_policy_mode",
+        "immutability_retention_days",
+        "replay_marker_blob_name",
+        "replay_marker_blob_uri",
+        "replay_marker_created",
+        "replay_marker_created_at",
+        "replay_marker_retain_until",
+        "write_operation",
+        "control_plane_resource_id",
+        "control_plane_location",
+        "control_plane_public_network_access",
+        "control_plane_private_endpoint_state",
+        "signing_key_vault_resource_id",
+        "signing_key_vault_location",
+        "signing_key_vault_public_network_access",
+        "signing_key_vault_private_endpoint_state",
+        "signing_key_enabled",
+        "signing_key_expires_at",
+        "attestation"
+      ],
+      "properties": {
+        "storage_account_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Storage/storageAccounts/[^/]+$"
+        },
+        "container_name": {
+          "type": "string",
+          "pattern": "^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$"
+        },
+        "blob_account_host": {
+          "type": "string",
+          "pattern": "^[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net$"
+        },
+        "location": {
+          "enum": ["australiaeast", "australiasoutheast"]
+        },
+        "public_network_access": {
+          "const": "Disabled"
+        },
+        "default_network_action": {
+          "const": "Deny"
+        },
+        "private_endpoint_connection_resource_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "private_endpoint_connection_state": {
+          "const": "Approved"
+        },
+        "dns_private_only": {
+          "const": true
+        },
+        "container_scope": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Storage/storageAccounts/[^/]+/blobServices/default/containers/[^/]+$"
+        },
+        "managed_identity_principal_id": {
+          "type": "string",
+          "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$"
+        },
+        "role_definition_id": {
+          "const": "/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+        },
+        "role_assignment_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "no_broader_data_plane_write_role": {
+          "const": true
+        },
+        "immutability_policy_mode": {
+          "const": "Locked"
+        },
+        "immutability_retention_days": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "replay_marker_blob_name": {
+          "type": "string",
+          "pattern": "^spec001-extension-list/attestation-jti/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "replay_marker_created": {
+          "const": true
+        },
+        "replay_marker_blob_uri": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[a-z0-9]{3,24}\\.blob\\.core\\.windows\\.net/[a-z0-9-]+/spec001-extension-list/attestation-jti/[0-9a-f-]+$"
+        },
+        "replay_marker_created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "replay_marker_retain_until": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "write_operation": {
+          "enum": ["collect-fragment", "finalize-canonical"]
+        },
+        "control_plane_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.Web/sites/[^/]+$"
+        },
+        "control_plane_location": {
+          "enum": ["australiaeast", "australiasoutheast"]
+        },
+        "control_plane_public_network_access": {
+          "const": "Disabled"
+        },
+        "control_plane_private_endpoint_state": {
+          "const": "Approved"
+        },
+        "signing_key_vault_resource_id": {
+          "type": "string",
+          "pattern": "^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft\\.KeyVault/vaults/[^/]+$"
+        },
+        "signing_key_vault_location": {
+          "enum": ["australiaeast", "australiasoutheast"]
+        },
+        "signing_key_vault_public_network_access": {
+          "const": "Disabled"
+        },
+        "signing_key_vault_private_endpoint_state": {
+          "const": "Approved"
+        },
+        "signing_key_enabled": {
+          "const": true
+        },
+        "signing_key_expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "attestation": {
+          "$ref": "#/$defs/preWriteAttestation"
+        }
+      }
+    },
+    "attestationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "feature",
+        "operation",
+        "validation_session_id",
+        "nonce",
+        "requested_at",
+        "target_blob_name",
+        "storage_account_resource_id",
+        "private_endpoint_connection_resource_id",
+        "container_scope",
+        "managed_identity_principal_id",
+        "role_definition_id",
+        "no_broader_data_plane_write_role"
+      ],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "feature": { "const": "001-extension-list" },
+        "operation": { "enum": ["collect-fragment", "finalize-canonical"] },
+        "validation_session_id": { "$ref": "#/$defs/validationSessionId" },
+        "nonce": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "target_blob_name": { "type": "string", "pattern": "^spec001-extension-list/[^\\r\\n]+$" },
+        "storage_account_resource_id": { "type": "string", "minLength": 1 },
+        "private_endpoint_connection_resource_id": { "type": "string", "minLength": 1 },
+        "container_scope": { "type": "string", "minLength": 1 },
+        "managed_identity_principal_id": { "type": "string", "format": "uuid" },
+        "role_definition_id": { "const": "/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe" },
+        "no_broader_data_plane_write_role": { "const": true }
+      }
+    },
+    "attestationResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compact_jws"],
+      "properties": {
+        "compact_jws": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+        }
+      }
+    },
+    "preWriteAttestation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issuer",
+        "audience",
+        "algorithm",
+        "key_id",
+        "jti",
+        "nonce",
+        "issued_at",
+        "not_before",
+        "expires_at",
+        "validation_session_id",
+        "managed_identity_principal_id",
+        "operation",
+        "target_blob_name",
+        "role_definition_id",
+        "compact_jws",
+        "reviewer_identifier",
+        "reviewer_role",
+        "attested_at",
+        "storage_account_resource_id",
+        "private_endpoint_connection_resource_id",
+        "container_scope",
+        "no_broader_data_plane_write_role",
+        "attestation_digest"
+      ],
+      "properties": {
+        "issuer": {
+          "const": "ama-security-control-plane"
+        },
+        "audience": {
+          "const": "spec001-extension-list-prewrite"
+        },
+        "algorithm": {
+          "const": "ES256"
+        },
+        "key_id": {
+          "type": "string",
+          "pattern": "^https://[A-Za-z0-9-]+\\.vault\\.azure\\.net/keys/[A-Za-z0-9-]+/[A-Za-z0-9]+$"
+        },
+        "jti": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "nonce": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "not_before": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expires_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "validation_session_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "managed_identity_principal_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "operation": {
+          "enum": ["collect-fragment", "finalize-canonical"]
+        },
+        "target_blob_name": {
+          "type": "string",
+          "pattern": "^spec001-extension-list/[^\\r\\n]+$"
+        },
+        "role_definition_id": {
+          "const": "/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe"
+        },
+        "compact_jws": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"
+        },
+        "reviewer_identifier": {
+          "type": "string",
+          "pattern": "^reviewer-[0-9a-f]{16}$"
+        },
+        "reviewer_role": {
+          "enum": ["security", "compliance"]
+        },
+        "attested_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "storage_account_resource_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "private_endpoint_connection_resource_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "container_scope": {
+          "type": "string",
+          "minLength": 1
+        },
+        "no_broader_data_plane_write_role": {
+          "const": true
+        },
+        "attestation_digest": {
+          "description": "Lowercase SHA-256 over the compact_jws UTF-8 bytes.",
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "packageMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "version"],
+      "properties": {
+        "name": {
+          "const": "ama-specify"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "lockMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "const": "tools/specify-cli/uv.lock"
+        },
+        "sha256": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "commandOutcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command_id", "exit_code", "passed"],
+      "properties": {
+        "command_id": {
+          "enum": [
+            "locked-sync",
+            "ruff-check",
+            "ruff-format-check",
+            "mypy-strict",
+            "pytest-coverage",
+            "line-coverage-check",
+            "wheel-build",
+            "clean-install",
+            "console-smoke",
+            "module-smoke"
+          ]
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "passed": {
+          "type": "boolean"
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewer_identifier",
+        "reviewer_role",
+        "reviewed_at",
+        "decision",
+        "decision_reason_code"
+      ],
+      "properties": {
+        "reviewer_identifier": {
+          "type": "string",
+          "pattern": "^reviewer-[0-9a-f]{16}$"
+        },
+        "reviewer_role": {
+          "enum": ["security", "compliance"]
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "decision": {
+          "enum": ["approved", "rejected"]
+        },
+        "decision_reason_code": {
+          "enum": ["evidence-verified", "evidence-rejected"]
+        }
+      }
+    }
+  }
+}

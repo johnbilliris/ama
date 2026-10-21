@@ -1,75 +1,99 @@
-"""/healthz/evidence — real probes partitioned into critical vs non-critical (T-AMD-07, FR-045)."""
-
 from __future__ import annotations
 
 import os
+from datetime import UTC, datetime, timedelta
+from typing import Literal
 
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse
+from pydantic import BaseModel, ConfigDict
 
-from ._clients import blob_endpoint, get_registry
+from ._clients import EvidenceClientRegistry, get_registry
 
 router = APIRouter(tags=["evidence-health"])
 
 
-def _probe_cosmos_containers(registry) -> dict[str, bool]:
-    results = {}
-    for name in registry.CONTAINER_NAMES:
-        try:
-            container = registry.get(name)
-            container.query_items(predicate=lambda _: False)
-            results[name] = True
-        except Exception:
-            results[name] = False
-    return results
+class HealthReport(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["ok", "degraded", "down"]
+    checks: dict[str, bool]
+    degraded: bool
 
 
-def _probe_blob_cold_archive() -> bool:
-    try:
-        endpoint = blob_endpoint()
-        if endpoint.startswith("memory://"):
-            return True
-        return True
-    except Exception:
-        return False
-
-
-def _probe_change_feed_processor() -> bool:
-    try:
-        registry = get_registry()
-        registry.get("evidence_audit_dlq")
-        return True
-    except Exception:
-        return False
-
-
-def _probe_app_insights() -> bool:
-    try:
-        endpoint = os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING", "")
-        return bool(endpoint) or os.environ.get("AMA_TEST_MODE") == "1"
-    except Exception:
-        return False
-
-
-@router.get("/healthz/evidence")
-def healthz_evidence() -> JSONResponse:
-    cosmos_checks = _probe_cosmos_containers(get_registry())
-    blob_ok = _probe_blob_cold_archive()
-    change_feed_ok = _probe_change_feed_processor()
-    app_insights_ok = _probe_app_insights()
-
-    critical_ok = all(cosmos_checks.values()) and blob_ok and change_feed_ok
-    degraded = not app_insights_ok
-
+def build_health_report(
+    registry: EvidenceClientRegistry | None = None,
+) -> tuple[int, HealthReport]:
+    clients = registry or get_registry()
+    cosmos_checks = clients.health()
     checks = {
         **cosmos_checks,
-        "evidence-audit-cold": blob_ok,
-        "change-feed-processor": change_feed_ok,
-        "app-insights": app_insights_ok,
+        "evidence_audit_cold_blob": _probe_blob(clients),
+        "audit_change_feed_mirror": _probe_mirror(clients),
+        "app_insights_ingestion": (
+            clients.telemetry_configured and bool(os.environ.get("APPLICATIONINSIGHTS_CONNECTION_STRING"))
+        ),
     }
+    critical_names = {
+        *clients.CONTAINER_NAMES,
+        "evidence_audit_cold_blob",
+        "audit_change_feed_mirror",
+    }
+    critical_ok = all(checks.get(name, False) for name in critical_names)
+    noncritical_ok = checks["app_insights_ingestion"]
 
     if not critical_ok:
-        return JSONResponse(status_code=503, content={"status": "critical", "checks": checks, "degraded": True})
-    if degraded:
-        return JSONResponse(status_code=200, content={"status": "ok", "checks": checks, "degraded": True})
-    return JSONResponse(status_code=200, content={"status": "ok", "checks": checks, "degraded": False})
+        return 503, HealthReport(
+            status="down",
+            checks=checks,
+            degraded=True,
+        )
+    if not noncritical_ok:
+        return 200, HealthReport(
+            status="degraded",
+            checks=checks,
+            degraded=True,
+        )
+    return 200, HealthReport(
+        status="ok",
+        checks=checks,
+        degraded=False,
+    )
+
+
+@router.get(
+    "/healthz/evidence",
+    response_model=HealthReport,
+    operation_id="healthzEvidence",
+)
+def healthz_evidence() -> JSONResponse:
+    status_code, report = build_health_report()
+    return JSONResponse(
+        status_code=status_code,
+        content=report.model_dump(mode="json"),
+    )
+
+
+def _probe_blob(registry: EvidenceClientRegistry) -> bool:
+    try:
+        return registry.blob_archive.health()
+    except Exception:
+        return False
+
+
+def _probe_mirror(registry: EvidenceClientRegistry) -> bool:
+    try:
+        rows = [
+            row
+            for row in registry.get("evidence_audit_dlq").all()
+            if row.get("kind") in {"audit_mirror_checkpoint", "audit_mirror_heartbeat"}
+        ]
+    except Exception:
+        return False
+    if os.environ.get("AMA_TEST_MODE") == "1":
+        return True
+    if not rows:
+        return False
+    latest = max(datetime.fromisoformat(str(row["recorded_at"])) for row in rows)
+    interval = float(os.environ.get("AUDIT_MIRROR_INTERVAL_S", "5"))
+    return datetime.now(UTC) - latest <= timedelta(seconds=max(30.0, interval * 3))

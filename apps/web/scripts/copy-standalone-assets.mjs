@@ -38,10 +38,31 @@ if (existsSync(deployDir)) {
 // 2. Run `pnpm deploy` with hoisted node_modules to produce a flat,
 //    symlink-free dependency tree.
 console.log(`[copy-standalone-assets] running pnpm deploy → ${deployDir}`);
-execSync(
-  `pnpm --filter @ama/web --prod --legacy --config.node-linker=hoisted deploy "${deployDir}"`,
-  { cwd: workspaceRoot, stdio: "inherit" },
-);
+const deployCommand = `pnpm --filter @ama/web --prod --legacy --config.node-linker=hoisted deploy "${deployDir}"`;
+const maxDeployAttempts = 3;
+
+for (let attempt = 1; attempt <= maxDeployAttempts; attempt += 1) {
+  try {
+    execSync(deployCommand, { cwd: workspaceRoot, stdio: "inherit" });
+    break;
+  } catch (error) {
+    const stderr =
+      error && typeof error === "object" && "stderr" in error ? String(error.stderr ?? "") : "";
+    const message = error instanceof Error ? error.message : String(error);
+    const isBusyFailure = `${message}\n${stderr}`.includes("EBUSY");
+
+    if (!isBusyFailure || attempt === maxDeployAttempts) {
+      throw error;
+    }
+
+    console.warn(
+      `[copy-standalone-assets] pnpm deploy hit a locked file; retrying (${attempt + 1}/${maxDeployAttempts})`,
+    );
+    if (existsSync(deployDir)) {
+      rmSync(deployDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    }
+  }
+}
 
 // 3. Remove dev/test artifacts and Next.js build caches that pnpm copied
 //    along with the project source. These do not affect runtime.
