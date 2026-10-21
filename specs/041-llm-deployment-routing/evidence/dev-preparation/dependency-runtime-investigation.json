@@ -1,0 +1,35 @@
+{
+  "expected_search_endpoint": true,
+  "expected_alias": true,
+  "https://redis.azure.com/.default": {
+    "error_type": "RequestTokenErr",
+    "invalid_resource": false,
+    "invalid_scope": false,
+    "imds_mentioned": false,
+    "endpoint_unavailable": false,
+    "not_found": false
+  },
+  "https://redis.azure.com": {
+    "credentials_obtained": true
+  },
+  "2024-07-01:corpus": {
+    "error_type": "ResourceNotFoundError",
+    "status": 404
+  },
+  "2024-07-01:corpus-v1": {
+    "count": 0
+  },
+  "2024-05-01-preview:corpus": {
+    "count": 0
+  },
+  "2024-05-01-preview:corpus-v1": {
+    "count": 0
+  },
+  "2025-09-01:corpus": {
+    "error_type": "ResourceNotFoundError",
+    "status": 404
+  },
+  "2025-09-01:corpus-v1": {
+    "count": 0
+  }
+}

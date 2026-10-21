@@ -1,0 +1,374 @@
+{
+  "reviewed_at": "2026-10-19T21:57:04.168098+00:00",
+  "authority": "validation-approval.json",
+  "target": "cog-dev-w3uq6w / ama / 74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "arm_validation": "PASS",
+  "what_if_operation_status": "Succeeded",
+  "resource_change_counts": {
+    "Ignore": 45,
+    "Modify": 8
+  },
+  "resource_creates": 0,
+  "resource_deletes": 0,
+  "review_verdict": "BLOCKED",
+  "strict_carveout_exit_code": 4,
+  "strict_carveout_failures": [
+    "gpt-5.4-dev",
+    "gpt-5.4-mini-dev",
+    "gpt-5.4-sim-dev",
+    "text-embedding-3-large-dev"
+  ],
+  "assessment": [
+    "The helper console counters count property lines, not resource changes; its Create 0 / Modify 23 / Delete 21 is NOT a resource inventory. Machine JSON is authoritative: 8 Modify, 45 Ignore, zero resource creates/deletes.",
+    "Four deployment diffs omit returned currentCapacity and deploymentState; no model/version/SKU/capacity/RAI/version-upgrade input diff was returned. Provider-returned omissions are not automatically cleared.",
+    "Diagnostics omit three existing disabled log categories and zero-day retention fields. Preservation requires reconciliation; no deployment authorised.",
+    "Three RAI policies omit returned contentFilters action=NONE. The 2024-10-01 documented input shape has no action member; old/new API projection requires further verification. No safety-default exemption was assumed.",
+    "The real strict carve-out invocation rejects all four exact deployment names. Registry has only older underlying model names; no gpt-5.4 row exists. Do not manufacture second-reviewer approval or weaken the gate."
+  ],
+  "changes": [
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 30,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-mini-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 60,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-sim-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 20,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/text-embedding-3-large-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": 60,
+          "children": null,
+          "path": "properties.currentCapacity",
+          "propertyChangeType": "Delete"
+        },
+        {
+          "after": null,
+          "before": "Running",
+          "children": null,
+          "path": "properties.deploymentState",
+          "propertyChangeType": "Delete"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Insights/diagnosticSettings/openai-diagnostics",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": {
+                "category": "AzureOpenAIRequestUsage",
+                "enabled": false,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              "children": null,
+              "path": "2",
+              "propertyChangeType": "Delete"
+            },
+            {
+              "after": null,
+              "before": {
+                "category": "Trace",
+                "enabled": false,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              "children": null,
+              "path": "3",
+              "propertyChangeType": "Delete"
+            },
+            {
+              "after": null,
+              "before": {
+                "category": "ManagedNetworkEvent",
+                "enabled": false,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              "children": null,
+              "path": "4",
+              "propertyChangeType": "Delete"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": 0,
+                  "children": null,
+                  "path": "retentionPolicy.days",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": 0,
+                  "children": null,
+                  "path": "retentionPolicy.days",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.logs",
+          "propertyChangeType": "Array"
+        },
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": 0,
+                  "children": null,
+                  "path": "retentionPolicy.days",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.metrics",
+          "propertyChangeType": "Array"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.contentFilters",
+          "propertyChangeType": "Array"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.contentFilters",
+          "propertyChangeType": "Array"
+        }
+      ]
+    },
+    {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+      "change_type": "Modify",
+      "delta": [
+        {
+          "after": null,
+          "before": null,
+          "children": [
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "0",
+              "propertyChangeType": "Modify"
+            },
+            {
+              "after": null,
+              "before": null,
+              "children": [
+                {
+                  "after": null,
+                  "before": "NONE",
+                  "children": null,
+                  "path": "action",
+                  "propertyChangeType": "Delete"
+                }
+              ],
+              "path": "1",
+              "propertyChangeType": "Modify"
+            }
+          ],
+          "path": "properties.contentFilters",
+          "propertyChangeType": "Array"
+        }
+      ]
+    }
+  ],
+  "evidence_sha256": {
+    "validation-approval.json": "a826cd62bb7abe5102c2a8ebc5f8e7dca30743131767570690083e19558b21ba",
+    "validation-refresh.json": "727390b7d44a32899c4079ede1e386a86249086e79fd9f150436df3d0114f987",
+    "validation-protection-comparison.json": "e0fed8aa26b21b87963bfe78e612a66f7d962cc361b7c46e562fb4065fe367b4",
+    "validation-policy-definition-refresh.json": "28ec375fbe5145a7592fc9ba3a9f921dfd80191fd42f3261877de4257bb3e96e",
+    "validation-core.log": "4a218b471809d018cf99cd4a077100084ec3c281244bc984e28f0c1a11e5b482",
+    "validation-what-if.json": "7ada31cb437a350173c62aa58036be76b3291f3f195d1c17eab6d9617d1437e4",
+    "validation-carveout.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "deployments.template.json": "694566b23dfeebdb32f330795b074c49f7eec2591987e92750cdc68d9c443f3c",
+    "deployments.parameters.json": "d96c2f010bebdc04634e764e6cda5639e2df8ec05ec92cec86bf726a3c4de0d7"
+  },
+  "cloud_resource_mutations_performed": false,
+  "images_published": false,
+  "inference_performed": false,
+  "release_ready": false,
+  "independent_release_blockers": [
+    "reviewed zero-drift preservation evidence incomplete",
+    "strict carve-out real preview gate failed; dual review absent",
+    "no verified ACR manifest digests",
+    "no healthy corrected paired rollback/bootstrap plan",
+    "complete preserved configuration binding not established",
+    "no G4 release-stage approval"
+  ]
+}

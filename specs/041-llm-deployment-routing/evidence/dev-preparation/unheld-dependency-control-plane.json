@@ -1,0 +1,40 @@
+{
+  "observed_at": "2026-10-20T03:44:44.501801+00:00",
+  "resources": {
+    "cosmos": {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-dev-w3uq6w",
+      "location": "Australia East",
+      "provisioning_state": "Succeeded",
+      "public_network_access": "Enabled",
+      "local_auth_disabled": false,
+      "virtual_network_filter": false,
+      "ip_rule_count": 6,
+      "api_sql_role_assignments": [
+        {
+          "role_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-dev-w3uq6w/sqlRoleDefinitions/00000000-0000-0000-0000-000000000002",
+          "scope": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.DocumentDB/databaseAccounts/cosmos-dev-w3uq6w"
+        }
+      ]
+    },
+    "storage": {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Storage/storageAccounts/stdevw3uq6w2",
+      "location": "australiaeast",
+      "provisioning_state": "Succeeded",
+      "public_network_access": "Enabled",
+      "network_default_action": "Allow",
+      "api_role_definitions": [
+        "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/ba92f5b4-2d11-453d-a403-e96b0029c9fe",
+        "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/providers/Microsoft.Authorization/roleDefinitions/1407120a-92aa-4202-b7e9-c0e197c71c8f"
+      ]
+    },
+    "search": {
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Search/searchServices/srch-dev-w3uq6w",
+      "location": "Australia East",
+      "provisioning_state": "succeeded",
+      "public_network_access": "Enabled",
+      "local_auth_disabled": true,
+      "index_alias_configured": true
+    }
+  },
+  "changes": 0
+}

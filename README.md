@@ -106,8 +106,35 @@ The complete application stack runs with the repository's
 [`compose.yaml`](compose.yaml). Compose builds and orchestrates the application
 images, a persistent Cosmos DB emulator, and an idempotent seed job:
 
+**All locally built images must be ARM64 (`linux/arm64`) only.** Compose pins
+that platform for every buildable service, regardless of the host architecture
+or `DOCKER_DEFAULT_PLATFORM`. Pulled third-party emulator images are not local
+builds. Do not build AMD64 or multi-platform deployment images on this machine.
+
 ```bash
 docker compose up --build
+```
+
+To build every local image, including both job runners and the Dev Container,
+without starting services:
+
+```bash
+docker buildx bake -f docker-bake.json
+```
+
+Select individual targets by name, for example
+`docker buildx bake -f docker-bake.json api agents`. The Bake definition uses
+only `linux/arm64` and loads local tags without publishing. For any manual
+`docker build` or `docker buildx build`, explicitly pass
+`--platform linux/arm64`; never rely on a builder default or override the local
+platform. New VS Code terminals and the Dev Container also set
+`DOCKER_DEFAULT_PLATFORM=linux/arm64`.
+
+To check every local Dockerfile without building or replacing image tags,
+override the normal Docker exporter with a cache-only exporter:
+
+```bash
+docker buildx bake -f docker-bake.json --check --set "*.output=type=cacheonly"
 ```
 
 | Service | Image | URL |
@@ -159,6 +186,9 @@ docker compose down
 Install the VS Code **Dev Containers** extension and run **Dev Containers:
 Reopen in Container** to open a dedicated editor environment with Python 3.12,
 Node.js 24, pnpm, uv, Playwright, Azure CLI, and `azd`.
+
+The Dev Container's build and run configuration explicitly select
+`linux/arm64`; nested local Docker builds default to that architecture too.
 
 The [`devcontainer.json`](.devcontainer/devcontainer.json) configuration is
 independent from [`compose.yaml`](compose.yaml): it is not an application
@@ -220,13 +250,16 @@ Remove-Item Env:AZD_CONCURRENCY_MAX
 
 On Bash, use `AZD_CONCURRENCY_MAX=1 azd deploy --no-prompt`.
 
-To build the deployment images without provisioning or deploying resources,
-run `azd package --no-prompt`. The command builds each container service as a
-multi-platform OCI image with
-`linux/amd64` and `linux/arm64` variants. Azure Container Apps pulls the AMD64
-variant, while ARM-based Docker Desktop selects the ARM64 variant from the same
-tag for native local execution. Multi-platform loading requires Docker Desktop's
-containerd image store, which is enabled by default in current releases.
+Azure Container Apps requires `linux/amd64` deployment images. Those images
+must be built remotely in ACR or native hosted CI, never locally; `azure.yaml`
+keeps `remoteBuild: true` and `platform: linux/amd64` for its container services.
+Local ARM64 images must not be substituted for Container Apps deployment
+artifacts, and deployment requirements do not permit a local AMD64 exception.
+
+`azd package --no-prompt` is a credentialed remote packaging operation under
+that configuration, not an offline or local development build. It can submit
+ACR build work even without provisioning runtime resources. Use the local Bake
+or Compose commands above for local images instead.
 
 Do not run the provisioning or deployment commands as part of local development.
 They modify Azure resources in the selected `azd` environment.

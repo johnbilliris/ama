@@ -60,7 +60,7 @@ Validate the feature 003 design through a test-first development flow that exerc
 
 1. Create `apps/api/Dockerfile` with multi-stage build, non-root user, health check.
 2. Create `apps/agents/Dockerfile` with multi-stage build, non-root user.
-3. Build each image locally from repository root context: `docker build -f apps/api/Dockerfile -t drh-api .` and `docker build -f apps/agents/Dockerfile -t drh-agents .`.
+3. Build each image locally for ARM64 only from repository root context: `docker build --platform linux/arm64 -f apps/api/Dockerfile -t drh-api .` and `docker build --platform linux/arm64 -f apps/agents/Dockerfile -t drh-agents .`. AMD64 Container Apps images must be built remotely, not locally.
 4. Run each container and verify `/api/health` responds (API readiness) and `/api/health/liveness` responds (API liveness), then verify the agent worker starts (agents).
 
 ### Phase E: Infrastructure as Code (FR-018–020, FR-026–027, SC-007, SC-011)

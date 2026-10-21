@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import yaml
@@ -11,6 +12,45 @@ AZURE_YAML_PATH = ROOT / "azure.yaml"
 CONTAINER_SERVICES = ("api", "agents", "evacuation", "ingestion", "ingest-runner")
 EXPECTED_PLATFORM = "linux/amd64"
 EXPECTED_REGISTRY = "${AZURE_CONTAINER_REGISTRY_ENDPOINT}"
+
+
+def test_local_bake_covers_every_dockerfile_with_arm64_only() -> None:
+    config = json.loads((ROOT / "docker-bake.json").read_text(encoding="utf-8"))
+    targets = config["target"]
+    assert set(config["group"]["default"]["targets"]) == set(targets)
+    dockerfiles = {
+        *ROOT.glob("apps/*/Dockerfile"),
+        ROOT / ".devcontainer" / "Dockerfile",
+    }
+    assert {ROOT / target["dockerfile"] for target in targets.values()} == dockerfiles
+    for target in targets.values():
+        assert target["context"] == "."
+        assert target["platforms"] == ["linux/arm64"]
+        assert target["output"] == ["type=docker"]
+        assert all(tag.endswith(":local") for tag in target["tags"])
+
+
+def test_compose_builds_pin_arm64_independent_of_host_defaults() -> None:
+    compose = yaml.safe_load((ROOT / "compose.yaml").read_text(encoding="utf-8"))
+    bake = json.loads((ROOT / "docker-bake.json").read_text(encoding="utf-8"))
+    for service in compose["services"].values():
+        if "build" not in service:
+            continue
+        assert service["platform"] == "linux/arm64"
+        target = next(target for target in bake["target"].values() if service["image"] in target["tags"])
+        assert service["build"]["dockerfile"] == target["dockerfile"]
+        assert service["build"]["target"] == target["target"]
+        assert service["build"].get("args", {}) == target.get("args", {})
+
+
+def test_devcontainer_and_editor_terminals_use_arm64() -> None:
+    config = json.loads((ROOT / ".devcontainer" / "devcontainer.json").read_text(encoding="utf-8"))
+    assert "--platform=linux/arm64" in config["build"]["options"]
+    assert "--platform=linux/arm64" in config["runArgs"]
+    assert config["containerEnv"]["DOCKER_DEFAULT_PLATFORM"] == "linux/arm64"
+    settings = json.loads((ROOT / ".vscode" / "settings.json").read_text(encoding="utf-8"))
+    for system in ("windows", "linux", "osx"):
+        assert settings[f"terminal.integrated.env.{system}"]["DOCKER_DEFAULT_PLATFORM"] == "linux/arm64"
 
 
 def test_azd_publishes_all_container_services_to_acr() -> None:

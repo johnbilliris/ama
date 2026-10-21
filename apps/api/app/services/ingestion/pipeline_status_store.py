@@ -1,10 +1,15 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from collections import defaultdict
 from datetime import UTC, datetime
 from typing import Any
+
+from apps.ingestion.redis_client import build_redis_client
+
+logger = logging.getLogger(__name__)
 
 
 def _parse_timestamp(value: Any) -> datetime | None:
@@ -28,23 +33,7 @@ class PipelineStatusStore:
 
     @staticmethod
     def _build_redis_client() -> Any | None:
-        host = os.environ.get("REDIS_HOST", "").strip()
-        if not host:
-            return None
-        try:
-            import redis
-
-            port = int(os.environ.get("REDIS_PORT", "6380"))
-            use_ssl = str(os.environ.get("REDIS_SSL", "1")).strip() != "0"
-            return redis.Redis(
-                host=host,
-                port=port,
-                ssl=use_ssl,
-                decode_responses=True,
-                socket_timeout=5,
-            )
-        except Exception:
-            return None
+        return build_redis_client()
 
     def record(self, status: dict[str, Any]) -> None:
         pipeline_id = str(status.get("pipelineId", "")).strip()
@@ -62,16 +51,16 @@ class PipelineStatusStore:
             try:
                 self._redis.hset(self._redis_key, field, json.dumps(row, separators=(",", ":")))
                 self._redis.expire(self._redis_key, max(300, self._stale_after_seconds * 4))
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("Pipeline status Redis write failed (%s); retaining local status", type(exc).__name__)
 
     def clear(self) -> None:
         self._memory_rows.clear()
         if self._redis is not None:
             try:
                 self._redis.delete(self._redis_key)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("Pipeline status Redis clear failed (%s)", type(exc).__name__)
 
     def list_pipeline_statuses(self) -> list[dict[str, Any]]:
         grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
@@ -99,7 +88,8 @@ class PipelineStatusStore:
                 row = json.loads(payload)
                 if isinstance(row, dict):
                     merged[str(field)] = row
-        except Exception:
+        except Exception as exc:
+            logger.warning("Pipeline status Redis read failed (%s); using local status", type(exc).__name__)
             return merged
         return merged
 

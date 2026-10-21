@@ -2,14 +2,19 @@
   "name": "AMA Disaster Response Hub",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".."
+    "context": "..",
+    "options": [
+      "--platform=linux/arm64"
+    ]
   },
   "workspaceFolder": "/workspace",
   "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
   "runArgs": [
-    "--init"
+    "--init",
+    "--platform=linux/arm64"
   ],
   "containerEnv": {
+    "DOCKER_DEFAULT_PLATFORM": "linux/arm64",
     "AMA_ENABLE_PRODUCTION_AUTH": "0",
     "AMA_ENVIRONMENT": "dev",
     "AMA_TEST_MODE": "1",

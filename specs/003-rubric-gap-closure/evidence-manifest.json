@@ -34,9 +34,9 @@
       "environment": "local-python3.14",
       "fixtureCohort": "live-gate-opt-in",
       "denominator": "0/1 live runs",
-      "artifactPath": "artifacts/spec003-docs-and-live-gate.txt",
-      "artifactSha256": "7068c701376e6ad07f84d43db629e1535bfe7204eef9b7b6f30584ad05fffd87",
-      "reason": "AMA_LIVE_REHEARSAL was not set to 1; gate intentionally skipped live execution."
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Historical SKIP: AMA_LIVE_REHEARSAL was not set to 1. The recorded artifact artifacts/spec003-docs-and-live-gate.txt (SHA-256 7068c701376e6ad07f84d43db629e1535bfe7204eef9b7b6f30584ad05fffd87) is not tracked or recoverable from the recorded revision; it is not current execution evidence."
     },
     {
       "scId": "SC-004",
@@ -52,15 +52,15 @@
     },
     {
       "scId": "SC-005",
-      "outcome": "PASS",
+      "outcome": "UNVERIFIED",
       "revisionSha": "5b44c249f00e0e4a13ea2579c8c33d06e2471d7a",
       "command": "C:/Users/prbillir/AppData/Local/Python/pythoncore-3.14-64/python.exe -m pytest tests/integration/test_handoff_chain.py tests/contract/test_aud013_wire_contract.py -q",
       "environment": "local-python3.14",
       "fixtureCohort": "handoff-chain-and-contract-linkage",
       "denominator": "12/12 tests",
-      "artifactPath": "artifacts/spec003-sc005-handoff-chain.txt",
-      "artifactSha256": "12290c5ab1b6c97c36357854c0e41cebba831dd2ef809aa12491dc78cec9fd02",
-      "reason": ""
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Historical PASS claim of 12/12 tests cannot be verified: artifacts/spec003-sc005-handoff-chain.txt (SHA-256 12290c5ab1b6c97c36357854c0e41cebba831dd2ef809aa12491dc78cec9fd02) is not tracked or recoverable from the recorded revision. No replacement historical evidence has been fabricated."
     },
     {
       "scId": "SC-006",
@@ -70,9 +70,9 @@
       "environment": "local-python3.14",
       "fixtureCohort": "api-health-contract-only",
       "denominator": "9/9 tests",
-      "artifactPath": "artifacts/spec003-health-contract.txt",
-      "artifactSha256": "8168eb473b6798ebea826456fbc9ba3d09c7f347134c4c6497a19ff6793715e2",
-      "reason": "Container build and runtime non-root evidence was not executed in this session."
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Container build and runtime non-root evidence was not executed in the recorded session. Historical artifact artifacts/spec003-health-contract.txt (SHA-256 8168eb473b6798ebea826456fbc9ba3d09c7f347134c4c6497a19ff6793715e2) is not tracked or recoverable from the recorded revision."
     },
     {
       "scId": "SC-007",
@@ -94,9 +94,9 @@
       "environment": "local-python3.14",
       "fixtureCohort": "demo-doc-validator-and-live-gate-guards",
       "denominator": "4 passed, 1 skipped",
-      "artifactPath": "artifacts/spec003-docs-and-live-gate.txt",
-      "artifactSha256": "7068c701376e6ad07f84d43db629e1535bfe7204eef9b7b6f30584ad05fffd87",
-      "reason": "Screenshot assets and human reviewer acceptance evidence are still pending capture."
+      "artifactPath": "",
+      "artifactSha256": "",
+      "reason": "Screenshot assets and human reviewer acceptance remain unverified. Historical artifact artifacts/spec003-docs-and-live-gate.txt (SHA-256 7068c701376e6ad07f84d43db629e1535bfe7204eef9b7b6f30584ad05fffd87) is not tracked or recoverable from the recorded revision."
     },
     {
       "scId": "SC-009",

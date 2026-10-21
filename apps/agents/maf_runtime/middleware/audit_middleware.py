@@ -24,6 +24,8 @@ from enum import StrEnum
 from typing import Any
 
 from agent_framework import AgentContext, AgentMiddleware
+from common.audit import get_audit_writer, make_observed_inference_record
+from common.inference_observation import observation_correlation_id, observed_calls
 
 logger = logging.getLogger(__name__)
 
@@ -190,15 +192,54 @@ class AuditMiddleware(AgentMiddleware):
         outcome = AuditOutcome.SUCCESS
         failure_reason: str | None = None
         output_fp: str | None = None
+        calls: list[Any] = []
+        parent_calls = observed_calls.get()
+        calls_token = observed_calls.set(calls)
+        correlation_token = observation_correlation_id.set(ctx.correlation_id)
         try:
             await call_next()
             output = getattr(context, "result", None)
             output_fp = fingerprint(output)
-        except Exception as exc:  # noqa: BLE001 - audit captures every outcome
+        except BaseException as exc:
             outcome = self._classify_outcome(exc)
             failure_reason = f"{type(exc).__name__}: {exc}"
             raise
         finally:
+            observed_calls.reset(calls_token)
+            observation_correlation_id.reset(correlation_token)
+            if parent_calls is not None:
+                parent_calls.extend(calls)
+            last = calls[-1] if calls else None
+            for evidence in calls:
+                metadata = getattr(context, "metadata", None) or {}
+                grounding = metadata.get("rag_audit_context")
+                if not isinstance(grounding, dict):
+                    grounding = {}
+                if not grounding:
+                    # No carve-out is inferred from a role or middleware entry.
+                    # The agent envelope/telemetry still retain the observed call.
+                    continue
+                canonical_name = {
+                    "monitoring": "MonitoringAgent",
+                    "risk_assessment": "RiskAssessmentAgent",
+                    "evacuation": "EvacuationAgent",
+                    "resource_allocation": "ResourceAllocationAgent",
+                    "communication": "CommunicationAgent",
+                }.get(self._agent_name, self._agent_name)
+                try:
+                    record = make_observed_inference_record(
+                        evidence=evidence,
+                        agent_name=canonical_name,
+                        prompt_sha=evidence.prompt_sha or input_fp,
+                        output_text_hash=evidence.output_text_hash or fingerprint(""),
+                        output_tokens=evidence.usage_completion_tokens or 0,
+                        tenant_id=self._get_meta(context, "tenant_id", "unknown"),
+                        **grounding,
+                    )
+                    if record is not None:
+                        await get_audit_writer().write(record)
+                except Exception:
+                    logger.exception("model_audit_write_failed call_id=%s", evidence.call_id)
             ended_at = datetime.now(UTC).isoformat()
             await self._writer.write(
                 {
@@ -216,6 +257,22 @@ class AuditMiddleware(AgentMiddleware):
                     "outcome": outcome.value,
                     "failure_reason": failure_reason,
                     "tool_invocations": [tc.__dict__ for tc in ctx.tool_invocations],
+                    "inference_attempted": last.inference_attempted if last else False,
+                    "inference_outcome": last.inference_outcome if last else "not_attempted",
+                    "model_calls": [
+                        {
+                            "call_id": e.call_id,
+                            "inference_attempted": e.inference_attempted,
+                            "inference_outcome": e.inference_outcome,
+                            "model_id": e.resolved_identity.model_id if e.resolved_identity else None,
+                            "model_version": e.resolved_identity.model_version if e.resolved_identity else None,
+                            "deployment_alias": e.resolved_identity.deployment_name if e.resolved_identity else None,
+                            "usage_prompt_tokens": e.usage_prompt_tokens,
+                            "usage_completion_tokens": e.usage_completion_tokens,
+                        }
+                        for e in calls
+                        if e.inference_attempted is True
+                    ],
                 }
             )
 

@@ -1,0 +1,41 @@
+{
+  "agents": {
+    "http://127.0.0.1:8080/health/startup": {
+      "http_status": 200,
+      "body": {
+        "status": "started",
+        "initialized": true
+      }
+    },
+    "http://127.0.0.1:8080/health/readiness": {
+      "http_status": 200,
+      "body": {
+        "status": "ready",
+        "ready": true,
+        "check_scope": "startup_and_routing_configuration"
+      }
+    }
+  },
+  "api": {
+    "http://127.0.0.1:8000/api/health/startup": {
+      "http_status": 200,
+      "body": {
+        "status": "started",
+        "initialized": true
+      }
+    },
+    "http://127.0.0.1:8000/api/health/readiness": {
+      "http_status": 200,
+      "body": {
+        "status": "ready",
+        "ready": true,
+        "check_scope": "startup_routing_and_tcp_connectivity",
+        "dependencies": {
+          "cosmos": "healthy",
+          "redis": "healthy",
+          "foundry": "healthy"
+        }
+      }
+    }
+  }
+}

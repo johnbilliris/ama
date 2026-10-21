@@ -9,6 +9,8 @@
   to deploy if:
    - Schema validation fails.
    - Reviewer quorum is below 2.
+   - An explicit all-environment quorum waiver is malformed or expired.
+     A valid waiver permits one real approver; no other controls are waived.
    - Any deployment lacks both data_minimisation_required AND
      classification_filter_required.
    - Any deployment's review_date is in the past, older than 6 months, or
@@ -17,17 +19,18 @@
      "TODO", or starts with "<approver-").
    - Any deployment has a region outside {australiaeast, australiasoutheast}
      (FR-RAG-CV-04 — Australian data-residency).
-   - A bicep what-if dump (``-WhatIfPath``) emits any
-     ``Microsoft.CognitiveServices/accounts/deployments@*`` resource whose
-     ``model_name`` is not in the registry (FR-RAG-CV-01).
+   - A bicep what-if dump (``-WhatIfPath``) proposes a cognitive-services
+     deployment whose ``after.properties.model.name`` is missing or not in
+     the registry's ``model_name`` entries (FR-RAG-CV-01). Deployment aliases
+     are not model identities. Ignore/Delete changes do not deploy models.
 
 .PARAMETER RegistryPath
   Path to the carve-out YAML.
 
 .PARAMETER WhatIfPath
   (Optional) Path to a JSON file produced by ``az deployment sub what-if … -o json``.
-  When provided, every Foundry/cognitive-services deployment in the dump must
-  have a matching row in the registry.
+  Proposed Foundry/cognitive-services models must have matching registry rows.
+  Missing proposed model metadata fails closed, without alias/before fallbacks.
 
 .PARAMETER Strict
   If set, fails on warnings as well as errors.
@@ -79,6 +82,31 @@ function Test-PlaceholderApprover {
   return $false
 }
 
+$waiverActive = $false
+if ($registry.PSObject.Properties.Name -contains 'quorum_waiver') {
+  $waiver = $registry.quorum_waiver
+  $expiry = [DateTime]::MinValue
+  $expiryValid = [DateTime]::TryParseExact(
+    [string]$waiver.expires_on, 'yyyy-MM-dd',
+    [Globalization.CultureInfo]::InvariantCulture,
+    [Globalization.DateTimeStyles]::None, [ref]$expiry
+  )
+  $expectedFields = @('scope', 'approved_by', 'approval_reference', 'expires_on')
+  $unexpectedFields = @($waiver.PSObject.Properties.Name | Where-Object { $_ -notin $expectedFields })
+  if ($null -eq $waiver -or $waiver.scope -cne 'all_environments' -or
+      $waiver.approved_by -isnot [string] -or $waiver.approved_by.Trim().Length -lt 3 -or
+      (Test-PlaceholderApprover -Identity $waiver.approved_by) -or
+      $waiver.approval_reference -isnot [string] -or $waiver.approval_reference.Trim().Length -lt 30 -or
+      -not $expiryValid -or $unexpectedFields.Count -gt 0) {
+    $errors += 'Invalid quorum_waiver: requires all_environments scope, a real approved_by identity, approval_reference and ISO expires_on date.'
+  } elseif ($expiry -lt [DateTime]::UtcNow.Date) {
+    $errors += "Expired quorum_waiver: $($waiver.expires_on); normal approval floors apply."
+  } else {
+    $waiverActive = $true
+    Write-Host "Explicit single-approver waiver active for all environments through $($waiver.expires_on) UTC; authorised by $($waiver.approved_by)."
+  }
+}
+
 foreach ($d in @($registry.deployments)) {
   if (-not $d) { continue }
 
@@ -86,8 +114,16 @@ foreach ($d in @($registry.deployments)) {
     $errors += "Deployment '$($d.model_name)' must enable both data_minimisation_required AND classification_filter_required (ADR-033)."
   }
 
-  if ($d.approver_identities.Count -lt 2) {
-    $errors += "Deployment '$($d.model_name)' has fewer than 2 approver_identities."
+  $requiredApprovers = 2
+  if ($d.environment -eq 'prod') {
+    $requiredApprovers = 3
+    if ($registry.min_approvers_prod) { $requiredApprovers = [Math]::Max(3, [int]$registry.min_approvers_prod) }
+  } elseif ($registry.min_approvers_dev) {
+    $requiredApprovers = [Math]::Max(2, [int]$registry.min_approvers_dev)
+  }
+  if ($waiverActive) { $requiredApprovers = 1 }
+  if (@($d.approver_identities).Count -lt $requiredApprovers) {
+    $errors += "Deployment '$($d.model_name)' has fewer than $requiredApprovers approver_identities."
   }
 
   foreach ($a in @($d.approver_identities)) {
@@ -114,32 +150,33 @@ foreach ($d in @($registry.deployments)) {
   }
 }
 
-# Spec 036 (T024) — bicep what-if walk: every cognitive-services deployment
-# in the dump must have a matching registry row. Synthetic test harnesses can
-# pass a YAML/JSON of the exact shape an ``az deployment sub what-if`` dump
-# emits and the gate will refuse drift.
+# Match proposed model identities, not deployment aliases or previous models.
 if ($WhatIfPath) {
   if (-not (Test-Path $WhatIfPath)) {
     [Console]::Error.WriteLine("WhatIf dump not found at $WhatIfPath")
     exit 5
   }
   $whatIf = Get-Content -Raw $WhatIfPath | ConvertFrom-Json -Depth 30
-  $registryNames = @($registry.deployments | ForEach-Object { $_.model_name })
+  $registryModelNames = @($registry.deployments | ForEach-Object { $_.model_name })
   $changes = @()
   if ($whatIf.changes) { $changes = @($whatIf.changes) }
   elseif ($whatIf.properties -and $whatIf.properties.changes) { $changes = @($whatIf.properties.changes) }
   foreach ($change in $changes) {
+    if ($change.changeType -in @('Ignore', 'Delete')) { continue }
     $resourceId = [string]$change.resourceId
-    if ($resourceId -match 'Microsoft\.CognitiveServices/accounts/[^/]+/deployments/([^/]+)') {
+    if ($resourceId -match 'Microsoft\.CognitiveServices/accounts/[^/]+/deployments/([^/]+)$') {
       $name = $Matches[1]
-      if (-not ($registryNames -contains $name)) {
-        $errors += "Bicep what-if would deploy '$name' but it is not in the carve-out registry (FR-RAG-CV-01)."
+      $modelName = [string]$change.after.properties.model.name
+      if ([string]::IsNullOrWhiteSpace($modelName)) {
+        $errors += "Bicep what-if deployment '$name' has no proposed model identity at after.properties.model.name (FR-RAG-CV-01)."
+      } elseif (-not ($registryModelNames -contains $modelName)) {
+        $errors += "Bicep what-if deployment '$name' uses model '$modelName', which is not in the carve-out registry (FR-RAG-CV-01)."
       }
     }
     # Spec 036 FR-RAG-CV-04 — non-AU data-plane resources blocked.
-    $location = [string]$change.location
-    if ($location) {
-      $loc = $location.ToLowerInvariant()
+    foreach ($location in @($change.location, $change.after.location)) {
+      if ([string]::IsNullOrWhiteSpace([string]$location)) { continue }
+      $loc = ([string]$location).ToLowerInvariant()
       if (-not ($AU_REGIONS -contains $loc) -and ($resourceId -match 'Microsoft\.(CognitiveServices|Search|MachineLearningServices)')) {
         $errors += "Bicep what-if would create '$resourceId' in non-AU region '$location' (FR-RAG-CV-04)."
       }
@@ -153,4 +190,3 @@ if ($errors.Count -gt 0) {
 }
 
 Write-Host "✅ Carve-out registry valid. $($registry.deployments.Count) deployment(s) approved."
-

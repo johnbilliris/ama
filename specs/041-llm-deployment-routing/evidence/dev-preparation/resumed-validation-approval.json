@@ -1,0 +1,31 @@
+{
+  "approver": "johnbilliris",
+  "request": "resume the implementation and thoroughly address the blockers",
+  "scope_approval": "Approve four-hour scope on this subscription and region",
+  "window_start": "2026-10-20T00:06:01Z",
+  "window_end": "2026-10-20T04:06:00Z",
+  "tenant": "8ae9933a-1eb0-4922-8ecf-c71a136feff3",
+  "subscription_name": "ME-MngEnvMCAP035973-prbillir-2",
+  "subscription": "74a25c57-d6e4-446e-8c99-7f5ace60011b",
+  "resource_group": "ama",
+  "account": "cog-dev-w3uq6w",
+  "region": "australiaeast",
+  "credentials": "existing CLI credentials; explicitly select subscription",
+  "allowed": [
+    "refresh target and protection metadata, effective policy semantics and existing app revisions",
+    "scoped ARM validation and What-If of the preservation candidate",
+    "strict carve-out check of the real preview"
+  ],
+  "max_observation_age_seconds": 3600,
+  "changed_bindings_require_reconciliation_and_reapproval": true,
+  "excluded": [
+    "secret values",
+    "image publication",
+    "resource deployment",
+    "inference",
+    "traffic changes",
+    "permission or policy changes",
+    "full root template deployment"
+  ],
+  "release_approved": false
+}

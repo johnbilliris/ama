@@ -451,9 +451,9 @@ def _parse_help_frontmatter(body: str) -> tuple[dict, str]:
     if end < 0:
         return {}, body
     try:
-        import yaml  # imported lazily; PyYAML is in the postprovision deps
-    except ImportError:
-        return {}, body
+        import yaml
+    except ImportError as exc:
+        raise RuntimeError("PyYAML is required to strip help-article frontmatter") from exc
     try:
         meta = yaml.safe_load(body[3:end]) or {}
     except yaml.YAMLError:
@@ -673,11 +673,33 @@ def main() -> None:
     parser.add_argument("--storage-account", default="", help="Azure Storage account name")
     parser.add_argument("--dry-run", action="store_true", help="Validate seed data without writing")
     parser.add_argument(
+        "--help-article",
+        default="",
+        help="Load and upsert only the help article with this exact slug",
+    )
+    parser.add_argument(
         "--ensure-local-cosmos-schema",
         action="store_true",
         help="Create and verify the local emulator database and required containers",
     )
     args = parser.parse_args()
+
+    if args.help_article:
+        if args.storage_account or args.ensure_local_cosmos_schema:
+            parser.error("--help-article cannot be combined with storage or schema operations")
+        if not args.cosmos_endpoint and not args.dry_run:
+            parser.error("--help-article requires --cosmos-endpoint unless --dry-run is set")
+
+        records = [article for article in load_help_articles() if article["slug"] == args.help_article]
+        if len(records) != 1:
+            raise ValueError(f"Expected one help article with slug {args.help_article!r}; found {len(records)}")
+        if args.dry_run:
+            print(f"Validated help_articles/{args.help_article}; no writes performed")
+            return
+
+        seed_help_articles(args.cosmos_endpoint, args.cosmos_database, records)
+        print(f"Seeded help_articles/{args.help_article}")
+        return
 
     print("Loading seed data...")
     data = load_seed_data()
