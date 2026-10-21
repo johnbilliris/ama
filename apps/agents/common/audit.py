@@ -38,7 +38,10 @@ import uuid
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+
+if TYPE_CHECKING:
+    from common.foundry_chat_client import InferenceAttemptEvidence
 
 logger = logging.getLogger(__name__)
 
@@ -168,6 +171,8 @@ def make_inference_record(
     hallucinated_citation_count: int = 0,
     chat_turn_index: int | None = None,
     call_id: str | None = None,
+    inference_attempted: bool | None = None,
+    inference_outcome: str | None = None,
     # ---- F-A5 (Cluster A5; ADR-14) — additive-nullable extension fields ----
     operator_override_rationale: str | None = None,
     approval_workflow_state: str | None = None,
@@ -179,6 +184,10 @@ def make_inference_record(
     precedence_tiebreak_applied: list[str] | None = None,
 ) -> dict[str, Any]:
     """Build a record dict matching the audit-record-llm-call.json schema."""
+    if inference_attempted is False or (inference_attempted is None and inference_outcome is not None):
+        raise ValueError("New inference rows require proved submission; use an agent event for unavailable evidence")
+    if inference_outcome not in (None, "succeeded", "failed", "unknown"):
+        raise ValueError("Invalid submitted inference outcome")
     record: dict[str, Any] = {
         "call_id": call_id or str(uuid.uuid4()),
         "timestamp_utc": _now_iso(),
@@ -198,6 +207,10 @@ def make_inference_record(
     }
     if chat_turn_index is not None:
         record["chat_turn_index"] = chat_turn_index
+    if inference_attempted is not None:
+        record["inference_attempted"] = inference_attempted
+    if inference_outcome is not None:
+        record["inference_outcome"] = inference_outcome
     if rag_used:
         if not (embedding_model_id and corpus_build_sha and retrieved_chunks):
             raise ValueError("rag_used=True requires embedding_model_id, corpus_build_sha, retrieved_chunks")
@@ -290,6 +303,31 @@ def make_embedding_record(
     }
 
 
+def make_observed_inference_record(*, evidence: InferenceAttemptEvidence, **kwargs: Any) -> dict[str, Any] | None:
+    """Admit new model-call rows only for a proved request, using its frozen identity.
+
+    The legacy shape builder remains available for historical replay/fixture callers;
+    production evidence-aware writers use this admission boundary.
+    """
+    if evidence.inference_attempted is not True:
+        return None
+    identity = evidence.resolved_identity
+    record = make_inference_record(
+        **kwargs,
+        call_id=evidence.call_id,
+        correlation_id=evidence.correlation_id,
+        model_id=identity.model_id or "unknown" if identity else "unknown",
+        model_version=identity.model_version or "unknown" if identity else "unknown",
+        deployment_alias=identity.deployment_name if identity else "unknown",
+        inference_attempted=True,
+        inference_outcome=evidence.inference_outcome,
+    )
+    from ama_domain.audit_record import AuditRecord
+
+    AuditRecord.model_validate(record)
+    return record
+
+
 # Process singleton — see audit_middleware.py for the spec-030 pattern.
 _writer: AuditWriter | None = None
 
@@ -314,6 +352,7 @@ __all__ = [
     "get_audit_writer",
     "make_embedding_record",
     "make_inference_record",
+    "make_observed_inference_record",
     "replay_key",
     "set_audit_writer",
 ]

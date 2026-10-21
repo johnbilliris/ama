@@ -1,0 +1,458 @@
+{
+  "comparison_basis": "checked-in historical ARM versus newly compiled current Bicep; NOT live What-If",
+  "scope": "full main is NOT an approved deployment candidate",
+  "old_root_resource_count": 76,
+  "new_root_resource_count": 78,
+  "added_identities": [
+    [
+      "Microsoft.Authorization/roleAssignments",
+      "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.Web/sites', variables('webAppName')), variables('monitoringMetricsPublisherRoleId'))]"
+    ],
+    [
+      "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'sim-events')]"
+    ],
+    [
+      "Microsoft.Resources/deployments",
+      "entra-auth"
+    ],
+    [
+      "Microsoft.Web/sites",
+      "[variables('webAppName')]"
+    ]
+  ],
+  "removed_expression_identities": [
+    [
+      "Microsoft.Authorization/roleAssignments",
+      "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.Web/sites', take(format('{0}{1}-{2}', variables('abbrs').webSitesAppService, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 60)), variables('monitoringMetricsPublisherRoleId'))]"
+    ],
+    [
+      "Microsoft.Web/sites",
+      "[take(format('{0}{1}-{2}', variables('abbrs').webSitesAppService, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 60)]"
+    ]
+  ],
+  "changed_root_bodies": [
+    [
+      "Microsoft.App/containerApps",
+      "[take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]"
+    ],
+    [
+      "Microsoft.App/containerApps",
+      "[take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]"
+    ],
+    [
+      "Microsoft.Resources/deployments",
+      "[format('evacuationRuntime-{0}', uniqueString('evacuationRuntime', deployment().name))]"
+    ],
+    [
+      "Microsoft.Resources/deployments",
+      "azure-maps"
+    ],
+    [
+      "Microsoft.Resources/deployments",
+      "azure-openai-deployments"
+    ],
+    [
+      "Microsoft.Resources/deployments",
+      "spec040-evidence-harness"
+    ],
+    [
+      "Microsoft.Storage/storageAccounts/blobServices",
+      "[format('{0}/{1}', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)), 'default')]"
+    ]
+  ],
+  "account_body_unchanged": true,
+  "inventory": [
+    {
+      "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+      "name": "[format('id-ingest-runner-{0}', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces",
+      "name": "[format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics",
+      "name": "[format('{0}/{1}', format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 'topic.corpus-build-complete')]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.ServiceBus/namespaces/topics/subscriptions",
+      "name": "[format('{0}/{1}/{2}', format('sb-corpus-{0}-{1}', parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 'topic.corpus-build-complete', 'sub.cd-pipeline')]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-ingest-search-data-contributor', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-ingest-search-service-contributor', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-ingest-foundry-cogsvc-user', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-ingest-sb-data-sender', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-api-search-data-reader', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-agents-search-data-reader', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid('spec036-ingest-acr-pull', parameters('environmentName'))]",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.ContainerRegistry/registries",
+      "name": "[format('{0}{1}{2}', variables('abbrs').containerRegistryRegistries, replace(parameters('environmentName'), '-', ''), take(variables('uniqueSuffix'), 6))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices",
+      "name": "[format('{0}/{1}', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)), 'default')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+      "name": "[format('{0}/{1}/{2}', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)), 'default', variables('blobContainers')[copyIndex()])]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), parameters('principalId'), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "condition": "[not(empty(parameters('principalId')))]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Storage/storageAccounts', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "name": "[take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'signals')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'simulation')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'sim-events')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'seed')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'sim-chat')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'governance')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'coordination_tasks')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers",
+      "name": "[format('{0}/{1}/{2}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), 'disaster-hub', 'evidence_pack_artefact_cache')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts/blobServices/containers/immutabilityPolicies",
+      "name": "[format('{0}/{1}/{2}/{3}', format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6)), 'default', variables('blobContainers')[4], 'default')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), parameters('principalId'), '00000000-0000-0000-0000-000000000002'))]",
+      "condition": "[not(empty(parameters('principalId')))]"
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), parameters('globalAdministratorPrincipalIds')[copyIndex()], '00000000-0000-0000-0000-000000000001'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), parameters('principalId'), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "condition": "[not(empty(parameters('principalId')))]"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), 'fbdf93bf-df7d-467e-a4d2-9458aa1360c8')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), '00000000-0000-0000-0000-000000000002'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), '00000000-0000-0000-0000-000000000002'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.DocumentDB/databaseAccounts/sqlRoleAssignments",
+      "name": "[format('{0}/{1}', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44), guid(resourceId('Microsoft.DocumentDB/databaseAccounts', take(format('{0}{1}-{2}', variables('abbrs').documentDBDatabaseAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 44)), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), '00000000-0000-0000-0000-000000000002'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.CognitiveServices/accounts",
+      "name": "[take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "name": "[take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments/dotNetComponents",
+      "name": "[format('{0}/{1}', take(format('{0}{1}', variables('abbrs').appManagedEnvironments, parameters('environmentName')), 60), 'aspire-dashboard')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "name": "[take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "name": "[take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "name": "[take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "name": "[take(format('{0}{1}', variables('abbrs').webServerFarms, parameters('environmentName')), 40)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "name": "[variables('webAppName')]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "name": "[take(format('appi-{0}', parameters('environmentName')), 255)]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('monitoringMetricsPublisherRoleId'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('monitoringMetricsPublisherRoleId'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.App/containerApps', take(format('{0}ingest-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('monitoringMetricsPublisherRoleId'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.Insights/components', take(format('appi-{0}', parameters('environmentName')), 255)), resourceId('Microsoft.Web/sites', variables('webAppName')), variables('monitoringMetricsPublisherRoleId'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Insights/diagnosticSettings",
+      "name": "env-diagnostics",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)), resourceId('Microsoft.App/containerApps', take(format('{0}api-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('cognitiveServicesOpenAiUserRoleId'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "name": "[guid(resourceId('Microsoft.CognitiveServices/accounts', take(format('{0}{1}-{2}', variables('abbrs').cognitiveServicesAccounts, parameters('environmentName'), take(variables('uniqueSuffix'), 6)), 64)), resourceId('Microsoft.App/containerApps', take(format('{0}agents-{1}', variables('abbrs').appContainerApps, parameters('environmentName')), 32)), variables('cognitiveServicesOpenAiUserRoleId'))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "entra-auth",
+      "condition": "[variables('enableIncidentMapAuth')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "monitoring",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "[format('evacuationAlerts-{0}', uniqueString('evacuationAlerts', deployment().name))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec035-app-configuration",
+      "condition": "[variables('deploySpec035Hardening')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec035-apim-rate-limit",
+      "condition": "[variables('deploySpec035Hardening')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec035-blob-immutable",
+      "condition": "[variables('deploySpec035Hardening')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec035-recovery-signing-kv",
+      "condition": "[variables('deploySpec035Hardening')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec036-ai-search-blue-green",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec036-ingest-runner-job",
+      "condition": "[parameters('enableSpec036FoundryRag')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "azure-maps",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "content-safety",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "iot-hub",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "recovery-lessons",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "emergency-planning",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "maf-workflow-cosmos",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "[format('redis-{0}', uniqueString('redis', deployment().name))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "log-analytics-key",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "azure-openai-deployments",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "[format('evacuationRuntime-{0}', uniqueString('evacuationRuntime', deployment().name))]",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec040-evidence-harness",
+      "condition": null
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec038-help-cosmos",
+      "condition": "[parameters('enableSpec038Help')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec038-help-screenshots",
+      "condition": "[parameters('enableSpec038Help')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "spec038-help-dashboard",
+      "condition": "[parameters('enableSpec038Help')]"
+    }
+  ],
+  "finding": "Pre-existing Bicep versus checked-in ARM drift (web name expression, entra-auth, sim-events, storage/module bodies) appears when regenerating. Only model wrapper/env source was changed by this task. Do NOT deploy full main or run azd up; review bounded deployments.template.json with explicit existing Dev scope under separate What-If approval."
+}

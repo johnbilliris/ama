@@ -75,7 +75,8 @@ async def test_handoff_chain_records_two_logical_edges_from_signal_workflow(monk
     handoff_events = [event for event in timeline if event.event_type == "handoff"]
     llm_events = [event for event in timeline if event.event_type == "llm_call"]
     assert len(handoff_events) == 2
-    assert len(llm_events) == 2
+    # A generation label without observed inference evidence must not invent model-call events.
+    assert not llm_events
     assert {record["timelineEventId"] for record in records} == {event.event_id for event in handoff_events}
 
 

@@ -1,0 +1,8 @@
+{
+  "reconstructed_expected_matches_original_prewrite_hash": true,
+  "actual_matches_original_prewrite_hash_after_probe_type_ordering": true,
+  "actual_aggregate_sha256": "59be622fccf473d7cd6d92156c56f571c7c2a4c921ecb55cf7c958f3389d66bd",
+  "probe_set_equivalence_only": true,
+  "prestage_scale_source": "Actual pre-write metadata from tool call 334; cooldownPeriod=300, pollingInterval=30, not guessed defaults",
+  "no_app_write": true
+}

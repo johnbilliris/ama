@@ -2,6 +2,7 @@ from unittest.mock import Mock
 
 import pytest
 import redis
+from app.services.ingestion.pipeline_status_store import PipelineStatusStore
 
 from apps.ingestion.worker import _build_dedup_redis_client
 
@@ -52,3 +53,68 @@ def test_local_redis_url_rejects_nonlocal_connections(
 
     with pytest.raises(ValueError, match="Local REDIS_URL"):
         _build_dedup_redis_client()
+
+
+def test_status_store_uses_refreshing_managed_identity_provider(monkeypatch: pytest.MonkeyPatch) -> None:
+    import redis_entraid.cred_provider
+    from redis_entraid.identity_provider import ManagedIdentityType
+
+    provider = Mock()
+    create = Mock(return_value=provider)
+    client = Mock()
+    constructor = Mock(return_value=client)
+    monkeypatch.setattr(redis_entraid.cred_provider, "create_from_managed_identity", create)
+    monkeypatch.setattr(redis, "Redis", constructor)
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("REDIS_HOST", "cache.australiaeast.redis.azure.net")
+    monkeypatch.setenv("REDIS_PORT", "10000")
+    monkeypatch.setenv("REDIS_SSL", "1")
+
+    store = PipelineStatusStore()
+
+    assert store._redis is client
+    create.assert_called_once_with(
+        identity_type=ManagedIdentityType.SYSTEM_ASSIGNED, resource="https://redis.azure.com"
+    )
+    constructor.assert_called_once_with(
+        host="cache.australiaeast.redis.azure.net",
+        port=10000,
+        ssl=True,
+        credential_provider=provider,
+        decode_responses=True,
+        socket_timeout=5,
+        socket_connect_timeout=5,
+    )
+
+
+def test_status_store_preserves_local_host_connection(monkeypatch: pytest.MonkeyPatch) -> None:
+    constructor = Mock()
+    monkeypatch.setattr(redis, "Redis", constructor)
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("AMA_ENVIRONMENT", "test")
+    monkeypatch.setenv("REDIS_HOST", "localhost")
+    monkeypatch.setenv("REDIS_PORT", "6379")
+    monkeypatch.setenv("REDIS_SSL", "0")
+    PipelineStatusStore()
+    assert constructor.call_args.kwargs["ssl"] is False
+    assert "credential_provider" not in constructor.call_args.kwargs
+
+
+def test_cloud_redis_rejects_disabled_tls(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("REDIS_URL", raising=False)
+    monkeypatch.setenv("REDIS_HOST", "cache.australiaeast.redis.azure.net")
+    monkeypatch.setenv("REDIS_SSL", "0")
+    with pytest.raises(RuntimeError, match="requires TLS"):
+        PipelineStatusStore()
+
+
+def test_status_store_reports_redis_auth_failure_without_credentials(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    client = Mock()
+    client.hgetall.side_effect = redis.exceptions.AuthenticationError("sensitive diagnostic")
+    monkeypatch.setattr(PipelineStatusStore, "_build_redis_client", staticmethod(lambda: client))
+    store = PipelineStatusStore()
+    assert store.list_pipeline_statuses() == []
+    assert "AuthenticationError" in caplog.text
+    assert "sensitive diagnostic" not in caplog.text

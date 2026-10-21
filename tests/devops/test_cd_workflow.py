@@ -71,15 +71,21 @@ class TestCDQualityAndRollbackWiring:
         assert "target_env" in outputs
         assert "resource_group" in outputs
 
-    def test_quality_gate_job_uses_reusable_eval_gate(self, cd_workflow):
+    def test_quality_gate_job_uses_reusable_eval_gate(self, cd_workflow, eval_pr_gate_workflow):
         quality = cd_workflow["jobs"].get("quality-gate", {})
         assert quality.get("uses") == "./.github/workflows/eval-pr-gate.yml"
         assert quality.get("needs") == ["deploy"]
         with_block = quality.get("with", {})
         assert with_block.get("min_evaluated_samples") == 1
-        assert with_block.get("max_hallucination_rate") == 0.02
-        assert with_block.get("max_false_positive_rate") == 0.05
-        assert with_block.get("fail_on_missing_metrics") is True
+        assert with_block.get("evaluation_mode") == "pr-fast-subset"
+        assert with_block.get("evaluation_region") == "australiaeast"
+        assert with_block.get("max_cases") == 200
+        declared_inputs = eval_pr_gate_workflow["on"]["workflow_call"]["inputs"]
+        assert set(with_block) <= set(declared_inputs)
+        gate_steps = eval_pr_gate_workflow["jobs"]["eval-gate"]["steps"]
+        failure_step = next(step for step in gate_steps if step.get("name") == "Fail job if eval failed")
+        assert "steps.evaluation.outputs.gate_passed != 'true'" in failure_step["if"]
+        assert "exit 1" in failure_step["run"]
 
     def test_rollback_job_exists_and_depends_on_deploy_and_quality(self, cd_workflow):
         rollback = cd_workflow["jobs"].get("rollback", {})

@@ -68,8 +68,8 @@ def test_container_images_preserve_nonroot_and_dispatcher_startup() -> None:
 
 def test_quickstart_uses_root_build_context() -> None:
     text = _text(QUICKSTART)
-    assert "docker build -f apps/api/Dockerfile -t drh-api ." in text
-    assert "docker build -f apps/agents/Dockerfile -t drh-agents ." in text
+    assert "docker build --platform linux/arm64 -f apps/api/Dockerfile -t drh-api ." in text
+    assert "docker build --platform linux/arm64 -f apps/agents/Dockerfile -t drh-agents ." in text
 
 
 def test_api_health_and_workflow_routes_are_present() -> None:

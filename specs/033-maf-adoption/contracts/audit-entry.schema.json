@@ -11,6 +11,26 @@
     "started_at", "ended_at", "outcome"
   ],
   "properties": {
+    "inference_attempted": { "type": ["boolean", "null"] },
+    "inference_outcome": { "enum": ["succeeded", "failed", "not_attempted", "unknown", null] },
+    "model_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["call_id", "inference_attempted", "inference_outcome"],
+        "properties": {
+          "call_id": { "type": "string", "minLength": 1 },
+          "inference_attempted": { "type": ["boolean", "null"] },
+          "inference_outcome": { "enum": ["succeeded", "failed", "not_attempted", "unknown", null] },
+          "model_id": { "type": ["string", "null"] },
+          "model_version": { "type": ["string", "null"] },
+          "deployment_alias": { "type": ["string", "null"] },
+          "usage_prompt_tokens": { "type": ["integer", "null"], "minimum": 0 },
+          "usage_completion_tokens": { "type": ["integer", "null"], "minimum": 0 }
+        }
+      }
+    },
     "id":           { "type": "string", "format": "uuid" },
     "incident_id":  { "type": "string", "minLength": 1, "description": "Cosmos partition key." },
     "run_id":       { "type": "string", "format": "uuid", "description": "FK to workflow_runs.id." },

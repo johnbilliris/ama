@@ -1,0 +1,10 @@
+{
+  "ref": "refs/tags/avm/res/cognitive-services/account/0.18.0",
+  "node_id": "REF_kwDOGrDB7doAM3JlZnMvdGFncy9hdm0vcmVzL2NvZ25pdGl2ZS1zZXJ2aWNlcy9hY2NvdW50LzAuMTguMA",
+  "url": "https://api.github.com/repos/Azure/bicep-registry-modules/git/refs/tags/avm/res/cognitive-services/account/0.18.0",
+  "object": {
+    "sha": "f1070229a704c42897f07bdc19913cba26895bae",
+    "type": "commit",
+    "url": "https://api.github.com/repos/Azure/bicep-registry-modules/git/commits/f1070229a704c42897f07bdc19913cba26895bae"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "observed_at": "2026-10-20T01:16:29.700764+00:00",
+  "scope": "041-dev-application-only-held-bootstrap",
+  "applications": [
+    {
+      "app": "api",
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-api-dev",
+      "method": "PATCH",
+      "content_type": "application/json",
+      "api_version": "2025-07-01",
+      "source_sha256": "74162339731761ea236576e125f567b6ea8bd720298cec6b00d43cdf3384c572",
+      "patch_sha256": "9baa2054703199d46d2ae398cce3299d99258ecf64732baff5447069c2df84b7",
+      "expected_sha256": "2944fa68105443156111705ba91939d436d2ab16150cd8fb39df7bb0bcd74a77",
+      "secret_definitions_submitted": false,
+      "business_hold": true,
+      "candidate_traffic_weight": 0,
+      "arm_what_if_equivalence_claimed": false,
+      "execution_authorised": false
+    },
+    {
+      "app": "agents",
+      "resource_id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.App/containerApps/ca-agents-dev",
+      "method": "PATCH",
+      "content_type": "application/json",
+      "api_version": "2025-07-01",
+      "source_sha256": "aeb775b6b78df1c0040e8d9993b4d8207b33edac209ef86acf9eaf4885ba83ed",
+      "patch_sha256": "dd3e5d2e1975953ae002d1236fac74eec59f60ce509ea8adf76b1775037d589c",
+      "expected_sha256": "a3273b885abdfd165b1bc6a11762b20e771e9002bc40d90c5f59d257a3dfe5ae",
+      "secret_definitions_submitted": false,
+      "business_hold": true,
+      "candidate_traffic_weight": 0,
+      "arm_what_if_equivalence_claimed": false,
+      "execution_authorised": false
+    }
+  ],
+  "secret_values_persisted": false,
+  "protected_comparison": {
+    "comparison": "PASS",
+    "deployments": 4,
+    "foundry_writes": 0,
+    "account_controls_identity_tags_rai_and_diagnostics": "unchanged"
+  },
+  "deployment_performed": false
+}

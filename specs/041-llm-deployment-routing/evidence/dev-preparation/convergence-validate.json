@@ -1,0 +1,500 @@
+{
+  "started_at": "2026-10-20T07:07:08.063120+00:00",
+  "completed_at": "2026-10-20T07:07:14.099927+00:00",
+  "command": "validate",
+  "exit_code": 0,
+  "stderr": "",
+  "result": {
+    "error": null,
+    "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/llm041-preservation-20261020",
+    "name": "llm041-preservation-20261020",
+    "properties": {
+      "correlationId": "68370388-e612-4b92-8479-4c7e95306b45",
+      "debugSetting": null,
+      "dependencies": [
+        {
+          "dependsOn": [
+            {
+              "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/reasoning-model-deployment",
+              "resourceGroup": "ama",
+              "resourceName": "reasoning-model-deployment",
+              "resourceType": "Microsoft.Resources/deployments"
+            }
+          ],
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+          "resourceGroup": "ama",
+          "resourceName": "cog-dev-w3uq6w/drafting-em-domain-dev",
+          "resourceType": "Microsoft.CognitiveServices/accounts/raiPolicies"
+        },
+        {
+          "dependsOn": [
+            {
+              "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/drafting-model-deployment",
+              "resourceGroup": "ama",
+              "resourceName": "drafting-model-deployment",
+              "resourceType": "Microsoft.Resources/deployments"
+            }
+          ],
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+          "resourceGroup": "ama",
+          "resourceName": "cog-dev-w3uq6w/sim-em-domain-dev",
+          "resourceType": "Microsoft.CognitiveServices/accounts/raiPolicies"
+        },
+        {
+          "dependsOn": [
+            {
+              "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+              "resourceGroup": "ama",
+              "resourceName": "cog-dev-w3uq6w/reasoning-em-domain-dev",
+              "resourceType": "Microsoft.CognitiveServices/accounts/raiPolicies"
+            }
+          ],
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/reasoning-model-deployment",
+          "resourceGroup": "ama",
+          "resourceName": "reasoning-model-deployment",
+          "resourceType": "Microsoft.Resources/deployments"
+        },
+        {
+          "dependsOn": [
+            {
+              "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+              "resourceGroup": "ama",
+              "resourceName": "cog-dev-w3uq6w/drafting-em-domain-dev",
+              "resourceType": "Microsoft.CognitiveServices/accounts/raiPolicies"
+            }
+          ],
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/drafting-model-deployment",
+          "resourceGroup": "ama",
+          "resourceName": "drafting-model-deployment",
+          "resourceType": "Microsoft.Resources/deployments"
+        },
+        {
+          "dependsOn": [
+            {
+              "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+              "resourceGroup": "ama",
+              "resourceName": "cog-dev-w3uq6w/sim-em-domain-dev",
+              "resourceType": "Microsoft.CognitiveServices/accounts/raiPolicies"
+            }
+          ],
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/simulation-model-deployment",
+          "resourceGroup": "ama",
+          "resourceName": "simulation-model-deployment",
+          "resourceType": "Microsoft.Resources/deployments"
+        },
+        {
+          "dependsOn": [
+            {
+              "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/simulation-model-deployment",
+              "resourceGroup": "ama",
+              "resourceName": "simulation-model-deployment",
+              "resourceType": "Microsoft.Resources/deployments"
+            }
+          ],
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/embedding-model-deployment",
+          "resourceGroup": "ama",
+          "resourceName": "embedding-model-deployment",
+          "resourceType": "Microsoft.Resources/deployments"
+        }
+      ],
+      "diagnostics": null,
+      "duration": "PT0S",
+      "error": null,
+      "extensions": [],
+      "mode": "Incremental",
+      "onErrorDeployment": null,
+      "outputResources": null,
+      "outputs": null,
+      "parameters": {
+        "agentPrincipalIds": {
+          "type": "Array",
+          "value": []
+        },
+        "deploymentOperatingStates": {
+          "type": "Object",
+          "value": {
+            "drafting": {
+              "currentCapacity": 60,
+              "deploymentState": "Running"
+            },
+            "embedding": {
+              "currentCapacity": 60,
+              "deploymentState": "Running"
+            },
+            "reasoning": {
+              "currentCapacity": 30,
+              "deploymentState": "Running"
+            },
+            "simulation": {
+              "currentCapacity": 20,
+              "deploymentState": "Running"
+            }
+          }
+        },
+        "diagnosticSettings": {
+          "type": "Object",
+          "value": {
+            "logs": [
+              {
+                "category": "RequestResponse",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              {
+                "category": "Audit",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              {
+                "category": "AzureOpenAIRequestUsage",
+                "enabled": false,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              {
+                "category": "Trace",
+                "enabled": false,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              },
+              {
+                "category": "ManagedNetworkEvent",
+                "enabled": false,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              }
+            ],
+            "metrics": [
+              {
+                "category": "AllMetrics",
+                "enabled": true,
+                "retentionPolicy": {
+                  "days": 0,
+                  "enabled": false
+                }
+              }
+            ]
+          }
+        },
+        "draftingDeploymentName": {
+          "type": "String",
+          "value": "gpt-5.4-mini-dev"
+        },
+        "draftingDeploymentSku": {
+          "type": "String",
+          "value": "GlobalStandard"
+        },
+        "draftingModelName": {
+          "type": "String",
+          "value": "gpt-5.4"
+        },
+        "draftingModelVersion": {
+          "type": "String",
+          "value": "2026-03-05"
+        },
+        "draftingTpmQuota": {
+          "type": "Int",
+          "value": 60
+        },
+        "draftingVersionUpgradeOption": {
+          "type": "String",
+          "value": "OnceNewDefaultVersionAvailable"
+        },
+        "embeddingModelName": {
+          "type": "String",
+          "value": "text-embedding-3-large"
+        },
+        "embeddingModelVersion": {
+          "type": "String",
+          "value": "1"
+        },
+        "embeddingTpmQuota": {
+          "type": "Int",
+          "value": 60
+        },
+        "embeddingVersionUpgradeOption": {
+          "type": "String",
+          "value": "OnceNewDefaultVersionAvailable"
+        },
+        "envPrefix": {
+          "type": "String",
+          "value": "dev"
+        },
+        "location": {
+          "type": "String",
+          "value": "australiaeast"
+        },
+        "logAnalyticsWorkspaceId": {
+          "type": "String",
+          "value": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.OperationalInsights/workspaces/log-dev"
+        },
+        "modelDeploymentSku": {
+          "type": "String",
+          "value": "GlobalStandard"
+        },
+        "openAiAccountName": {
+          "type": "String",
+          "value": "cog-dev-w3uq6w"
+        },
+        "reasoningDeploymentName": {
+          "type": "String",
+          "value": "gpt-5.4-dev"
+        },
+        "reasoningDeploymentSku": {
+          "type": "String",
+          "value": "GlobalStandard"
+        },
+        "reasoningModelName": {
+          "type": "String",
+          "value": "gpt-5.4"
+        },
+        "reasoningModelVersion": {
+          "type": "String",
+          "value": "2026-03-05"
+        },
+        "reasoningTpmQuota": {
+          "type": "Int",
+          "value": 30
+        },
+        "reasoningVersionUpgradeOption": {
+          "type": "String",
+          "value": "OnceNewDefaultVersionAvailable"
+        },
+        "simulationDeploymentName": {
+          "type": "String",
+          "value": "gpt-5.4-sim-dev"
+        },
+        "simulationDeploymentSku": {
+          "type": "String",
+          "value": "GlobalStandard"
+        },
+        "simulationModelName": {
+          "type": "String",
+          "value": "gpt-5.4"
+        },
+        "simulationModelVersion": {
+          "type": "String",
+          "value": "2026-03-05"
+        },
+        "simulationTpmQuota": {
+          "type": "Int",
+          "value": 20
+        },
+        "simulationVersionUpgradeOption": {
+          "type": "String",
+          "value": "OnceNewDefaultVersionAvailable"
+        },
+        "tags": {
+          "type": "Object",
+          "value": {}
+        }
+      },
+      "parametersLink": null,
+      "providers": [
+        {
+          "id": null,
+          "namespace": "Microsoft.CognitiveServices",
+          "providerAuthorizationConsentState": null,
+          "registrationPolicy": null,
+          "registrationState": null,
+          "resourceTypes": [
+            {
+              "aliases": null,
+              "apiProfiles": null,
+              "apiVersions": null,
+              "capabilities": null,
+              "defaultApiVersion": null,
+              "locationMappings": null,
+              "locations": [
+                null
+              ],
+              "properties": null,
+              "resourceType": "accounts",
+              "zoneMappings": null
+            },
+            {
+              "aliases": null,
+              "apiProfiles": null,
+              "apiVersions": null,
+              "capabilities": null,
+              "defaultApiVersion": null,
+              "locationMappings": null,
+              "locations": [
+                null
+              ],
+              "properties": null,
+              "resourceType": "accounts/raiPolicies",
+              "zoneMappings": null
+            }
+          ]
+        },
+        {
+          "id": null,
+          "namespace": "Microsoft.Insights",
+          "providerAuthorizationConsentState": null,
+          "registrationPolicy": null,
+          "registrationState": null,
+          "resourceTypes": [
+            {
+              "aliases": null,
+              "apiProfiles": null,
+              "apiVersions": null,
+              "capabilities": null,
+              "defaultApiVersion": null,
+              "locationMappings": null,
+              "locations": [
+                null
+              ],
+              "properties": null,
+              "resourceType": "diagnosticSettings",
+              "zoneMappings": null
+            }
+          ]
+        },
+        {
+          "id": null,
+          "namespace": "Microsoft.Resources",
+          "providerAuthorizationConsentState": null,
+          "registrationPolicy": null,
+          "registrationState": null,
+          "resourceTypes": [
+            {
+              "aliases": null,
+              "apiProfiles": null,
+              "apiVersions": null,
+              "capabilities": null,
+              "defaultApiVersion": null,
+              "locationMappings": null,
+              "locations": [
+                null
+              ],
+              "properties": null,
+              "resourceType": "deployments",
+              "zoneMappings": null
+            }
+          ]
+        }
+      ],
+      "provisioningState": "Succeeded",
+      "templateHash": "17308902313884431309",
+      "templateLink": null,
+      "timestamp": "2026-10-20T07:07:11.058772+00:00",
+      "validatedResources": [
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-mini-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/gpt-5.4-sim-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/deployments/text-embedding-3-large-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/providers/Microsoft.Insights/diagnosticSettings/openai-diagnostics",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/drafting-em-domain-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/reasoning-em-domain-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.CognitiveServices/accounts/cog-dev-w3uq6w/raiPolicies/sim-em-domain-dev",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/drafting-model-deployment",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/embedding-model-deployment",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/reasoning-model-deployment",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        },
+        {
+          "apiVersion": null,
+          "extension": null,
+          "id": "/subscriptions/74a25c57-d6e4-446e-8c99-7f5ace60011b/resourceGroups/ama/providers/Microsoft.Resources/deployments/simulation-model-deployment",
+          "identifiers": null,
+          "resourceGroup": "ama",
+          "resourceType": null
+        }
+      ],
+      "validationLevel": null
+    },
+    "resourceGroup": "ama",
+    "type": "Microsoft.Resources/deployments"
+  },
+  "candidate_binding": "convergence-candidate-binding.json",
+  "resource_writes": false,
+  "release_approved": false
+}

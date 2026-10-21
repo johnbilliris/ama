@@ -32,6 +32,7 @@ from pathlib import Path
 from typing import Any
 
 from agent_framework import InMemoryCheckpointStorage
+from common.inference_observation import collect_inference_calls
 
 from apps.console_logging import configure_console_logging
 
@@ -139,11 +140,12 @@ class AmaWorkflow:
             )
 
             # 2. Risk Assessment
-            risk_out = await self._risk.execute_step(
-                {**incident_clean, "monitoring": _to_jsonable(monitoring_out)},
-                correlation_id=correlation_id,
-                run_id=run_id,
-            )
+            with collect_inference_calls() as risk_calls:
+                risk_out = await self._risk.execute_step(
+                    {**incident_clean, "monitoring": _to_jsonable(monitoring_out)},
+                    correlation_id=correlation_id,
+                    run_id=run_id,
+                )
             steps_completed.append("risk_assessment")
             await self._save_checkpoint(
                 run_id,
@@ -175,11 +177,12 @@ class AmaWorkflow:
             )
 
             # 4. Communication (draft only — never published)
-            comm_out = await self._communication.execute_step(
-                {**incident_clean, "evacuation": _to_jsonable(evac_out), "resource": _to_jsonable(res_out)},
-                correlation_id=correlation_id,
-                run_id=run_id,
-            )
+            with collect_inference_calls() as communication_calls:
+                comm_out = await self._communication.execute_step(
+                    {**incident_clean, "evacuation": _to_jsonable(evac_out), "resource": _to_jsonable(res_out)},
+                    correlation_id=correlation_id,
+                    run_id=run_id,
+                )
             steps_completed.append("communication")
             await self._save_checkpoint(
                 run_id,
@@ -205,6 +208,11 @@ class AmaWorkflow:
                 "resource_allocation": _to_jsonable(res_out),
                 "communication": _to_jsonable(comm_out),
                 "hitl": _to_jsonable(hitl_out),
+            }
+            # In-process evidence is separate from untrusted generated JSON and persisted checkpoints.
+            final_doc["_inference_calls"] = {
+                "risk_assessment": tuple(risk_calls),
+                "communication": tuple(communication_calls),
             }
             return final_doc
 

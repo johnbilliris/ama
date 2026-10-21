@@ -7,16 +7,15 @@ def _read(path: str) -> str:
     return Path(path).read_text(encoding="utf-8")
 
 
-def test_ci_wires_feature_evidence_binding_and_p1_gate() -> None:
+def test_ci_keeps_feature_evidence_binding_without_the_retired_p1_gate() -> None:
     text = _read(".github/workflows/ci.yml")
     assert "feature-evidence-binding-lint" in text
     assert "python tools/lint/check_feature_evidence_binding.py" in text
-    assert "p1-training-release-gate" in text
-    assert "python scripts/p1_release_training_gate.py" in text
+    assert "p1-training-release-gate" not in text
+    assert "python scripts/p1_release_training_gate.py" not in text
     assert "--base-sha" not in text
     assert "--head-sha" not in text
-    assert 'if [[ "$P1_PR_NUMBER" == "142" || "$P1_BRANCH" == "001-extension-list" ]]' in text
-    assert "waiver_args+=(--waiver-file docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml)" in text
+    assert "docs/disaster-response-hub/p1-flow-waivers/pr-142.yaml" not in text
 
 
 def test_cd_wires_p1_gate_before_deploy() -> None:

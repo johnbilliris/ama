@@ -1,5 +1,7 @@
 using 'main.bicep'
 
+extends 'parameters/dev.bicepparam'
+
 param environmentName = 'dev'
 
 param location = 'australiaeast'

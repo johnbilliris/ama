@@ -85,7 +85,7 @@ def test_keda_uses_managed_identity_and_queue_threshold_20(
     assert "queueName: queueName" in module_text
     assert "messageCount: '20'" in module_text
     assert "identity: evacuationIdentity.outputs.resourceId" in module_text
-    assert "minReplicas: 1" in module_text
+    assert "minReplicas: 2" in module_text
     assert "maxReplicas: 4" in module_text
 
 
