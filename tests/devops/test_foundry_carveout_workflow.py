@@ -27,6 +27,12 @@ def test_workflow_remains_manual_and_retains_guarded_pr_comment_inputs() -> None
     comment_job = workflow["jobs"]["prompt-hash-diff-comment"]
     assert comment_job["if"] == "github.event_name == 'pull_request'"
     assert comment_job["permissions"] == {"pull-requests": "write", "contents": "read"}
+    comment_step = next(step for step in comment_job["steps"] if step.get("name") == "Post comment on PR")
+    assert comment_step["with"] == {
+        "issue-number": "${{ github.event.pull_request.number }}",
+        "body-path": "/tmp/foundry-carveout-comment.md",
+    }
+    assert "} > /tmp/foundry-carveout-comment.md" in text
     assert "data/governance/foundry_carveout_registry.json" in text
     assert "packages/eval-dataset/data/telemetry_injection_v1/cases.jsonl" in text
 
