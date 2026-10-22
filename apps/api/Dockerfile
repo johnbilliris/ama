@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.15-slim AS builder
 ENV PIP_CONFIG_FILE=/dev/null \
     PIP_INDEX_URL=https://packagefeedproxy.microsoft.io/pypi/simple \
     PIP_EXTRA_INDEX_URL= \
@@ -10,6 +10,9 @@ ENV PIP_CONFIG_FILE=/dev/null \
     UV_NO_CONFIG=1
 
 WORKDIR /app
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends build-essential && \
+    rm -rf /var/lib/apt/lists/*
 COPY apps/api/pyproject.toml ./apps/api/
 COPY scripts/install_pyproject_dependencies.py ./scripts/
 RUN pip install --no-cache-dir --upgrade pip && \
@@ -20,7 +23,7 @@ COPY apps/api/app/ ./apps/api/app/
 COPY packages/ ./packages/
 RUN pip install --no-cache-dir --no-deps ./apps/api
 
-FROM python:3.12-slim AS runtime
+FROM python:3.15-slim AS runtime
 
 LABEL com.azure.containerizationassist.createdby="containerization-assist"
 
