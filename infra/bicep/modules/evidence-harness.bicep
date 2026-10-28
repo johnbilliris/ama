@@ -84,6 +84,11 @@ var containerSpecs = [
   { name: 'evidence_audit_dlq', partitionPath: '/audit_id' }
 ]
 
+@description('Dedicated dev autoscale avoids the implicit 400 RU/s manual allocation; other tiers retain their existing configuration.')
+var cosmosThroughputOptions = environmentTier == 'dev' ? {
+  autoscaleSettings: { maxThroughput: 1000 }
+} : {}
+
 @batchSize(1)
 resource evidenceContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2024-08-15' = [for c in containerSpecs: {
   parent: db
@@ -99,6 +104,7 @@ resource evidenceContainers 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/
       }
       defaultTtl: -1
     }
+    options: cosmosThroughputOptions
   }
   tags: tags
 }]

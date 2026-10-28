@@ -15,10 +15,19 @@ param cosmosAccountName string
 @description('SQL database name. Must already exist (created by audit-store.bicep).')
 param databaseName string = 'ama'
 
+@description('Deployment tier; dev uses explicit autoscale while other tiers preserve their existing throughput configuration.')
+@allowed(['dev', 'staging', 'prod'])
+param environmentTier string = 'prod'
+
 @description('TTL in seconds for the checkpoints container default; the retention helper re-stamps documents on terminal-state transition (FR-012a).')
 param checkpointsDefaultTtlSeconds int = 2592000
 
 param tags object = {}
+
+@description('Dedicated dev autoscale avoids the implicit 400 RU/s manual allocation on each container.')
+var cosmosThroughputOptions = environmentTier == 'dev' ? {
+  autoscaleSettings: { maxThroughput: 1000 }
+} : {}
 
 resource account 'Microsoft.DocumentDB/databaseAccounts@2024-08-15' existing = {
   name: cosmosAccountName
@@ -51,6 +60,7 @@ resource workflowRunsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabas
       }
       defaultTtl: -1
     }
+    options: cosmosThroughputOptions
   }
   tags: tags
 }
@@ -76,6 +86,7 @@ resource checkpointsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabase
         ]
       }
     }
+    options: cosmosThroughputOptions
   }
   tags: tags
 }
@@ -101,6 +112,7 @@ resource toolRegistrationsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDa
         ]
       }
     }
+    options: cosmosThroughputOptions
   }
   tags: tags
 }

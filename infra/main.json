@@ -6,7 +6,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.46.1.21595",
-      "templateHash": "14095326183666181819"
+      "templateHash": "15107961672906443469"
     }
   },
   "definitions": {
@@ -330,6 +330,22 @@
         "description": "Deployment environment tier — controls auth policies (e.g. Azure Maps local auth)"
       }
     },
+    "cosmosSignalsAutoscaleMaxRu": {
+      "type": "int",
+      "defaultValue": "[if(equals(parameters('environmentTier'), 'dev'), 1000, 6000)]",
+      "minValue": 1000,
+      "metadata": {
+        "description": "Signals autoscale maximum RU/s: 1000 in dev, preserving 6000 in staging and production."
+      }
+    },
+    "cosmosEvacuationAutoscaleMaxRu": {
+      "type": "int",
+      "defaultValue": "[if(equals(parameters('environmentTier'), 'dev'), 1000, 4000)]",
+      "minValue": 1000,
+      "metadata": {
+        "description": "Evacuation autoscale maximum RU/s per container: 1000 in dev, preserving 4000 in staging and production."
+      }
+    },
     "subscriptionTopology": {
       "type": "string",
       "defaultValue": "B",
@@ -413,9 +429,10 @@
     },
     "spec038CosmosAutoscaleMaxRu": {
       "type": "int",
-      "defaultValue": 4000,
+      "defaultValue": "[if(equals(parameters('environmentTier'), 'dev'), 1000, 4000)]",
+      "minValue": 1000,
       "metadata": {
-        "description": "Spec-038 — autoscale max RU/s per Help Cosmos container (default 4000)."
+        "description": "Spec-038 — autoscale maximum RU/s per Help container: 1000 in dev, preserving 4000 in staging and production."
       }
     },
     "spec038ScreenshotImmutabilityDays": {
@@ -844,7 +861,7 @@
         },
         "options": {
           "autoscaleSettings": {
-            "maxThroughput": 6000
+            "maxThroughput": "[parameters('cosmosSignalsAutoscaleMaxRu')]"
           }
         }
       },
@@ -34887,6 +34904,9 @@
           "databaseName": {
             "value": "disaster-hub"
           },
+          "environmentTier": {
+            "value": "[parameters('environmentTier')]"
+          },
           "tags": {
             "value": "[variables('tags')]"
           }
@@ -34898,7 +34918,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.46.1.21595",
-              "templateHash": "3233752504189679033"
+              "templateHash": "6089457686332845015"
             }
           },
           "parameters": {
@@ -34915,6 +34935,18 @@
                 "description": "SQL database name. Must already exist (created by audit-store.bicep)."
               }
             },
+            "environmentTier": {
+              "type": "string",
+              "defaultValue": "prod",
+              "allowedValues": [
+                "dev",
+                "staging",
+                "prod"
+              ],
+              "metadata": {
+                "description": "Deployment tier; dev uses explicit autoscale while other tiers preserve their existing throughput configuration."
+              }
+            },
             "checkpointsDefaultTtlSeconds": {
               "type": "int",
               "defaultValue": 2592000,
@@ -34926,6 +34958,9 @@
               "type": "object",
               "defaultValue": {}
             }
+          },
+          "variables": {
+            "cosmosThroughputOptions": "[if(equals(parameters('environmentTier'), 'dev'), createObject('autoscaleSettings', createObject('maxThroughput', 1000)), createObject())]"
           },
           "resources": [
             {
@@ -34967,7 +35002,8 @@
                     ]
                   },
                   "defaultTtl": -1
-                }
+                },
+                "options": "[variables('cosmosThroughputOptions')]"
               },
               "tags": "[parameters('tags')]"
             },
@@ -35008,7 +35044,8 @@
                       }
                     ]
                   }
-                }
+                },
+                "options": "[variables('cosmosThroughputOptions')]"
               },
               "tags": "[parameters('tags')]"
             },
@@ -35048,7 +35085,8 @@
                       }
                     ]
                   }
-                }
+                },
+                "options": "[variables('cosmosThroughputOptions')]"
               },
               "tags": "[parameters('tags')]"
             }
@@ -39509,6 +39547,9 @@
           "cosmosDatabaseName": {
             "value": "disaster-hub"
           },
+          "cosmosAutoscaleMaxRu": {
+            "value": "[parameters('cosmosEvacuationAutoscaleMaxRu')]"
+          },
           "storageAccountName": {
             "value": "[format('{0}{1}{2}2', variables('abbrs').storageStorageAccounts, take(replace(parameters('environmentName'), '-', ''), 14), take(variables('uniqueSuffix'), 6))]"
           },
@@ -39545,7 +39586,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.46.1.21595",
-              "templateHash": "16261051039408084049"
+              "templateHash": "4108422040416783418"
             }
           },
           "parameters": {
@@ -39619,6 +39660,14 @@
               "type": "string",
               "metadata": {
                 "description": "Name of the existing Cosmos DB SQL database."
+              }
+            },
+            "cosmosAutoscaleMaxRu": {
+              "type": "int",
+              "defaultValue": 4000,
+              "minValue": 1000,
+              "metadata": {
+                "description": "Autoscale maximum RU/s per evacuation container; the root deployment selects the environment-specific value."
               }
             },
             "storageAccountName": {
@@ -40279,7 +40328,7 @@
                     ]
                   },
                   "autoscaleSettingsMaxThroughput": {
-                    "value": 4000
+                    "value": "[parameters('cosmosAutoscaleMaxRu')]"
                   },
                   "defaultTtl": {
                     "value": -1
@@ -49102,7 +49151,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.46.1.21595",
-              "templateHash": "11980351189838081735"
+              "templateHash": "10391724022792940453"
             }
           },
           "parameters": {
@@ -49219,7 +49268,8 @@
                 "name": "evidence_audit_dlq",
                 "partitionPath": "/audit_id"
               }
-            ]
+            ],
+            "cosmosThroughputOptions": "[if(equals(parameters('environmentTier'), 'dev'), createObject('autoscaleSettings', createObject('maxThroughput', 1000)), createObject())]"
           },
           "resources": [
             {
@@ -49255,7 +49305,8 @@
                     ]
                   },
                   "defaultTtl": -1
-                }
+                },
+                "options": "[variables('cosmosThroughputOptions')]"
               },
               "tags": "[parameters('tags')]"
             },

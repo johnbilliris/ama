@@ -201,6 +201,14 @@ param restrictNetworkAccess bool = true
 @allowed(['dev', 'staging', 'prod'])
 param environmentTier string = endsWith(toLower(environmentName), 'production') || endsWith(toLower(environmentName), 'prod') ? 'prod' : endsWith(toLower(environmentName), 'staging') ? 'staging' : 'dev'
 
+@description('Signals autoscale maximum RU/s: 1000 in dev, preserving 6000 in staging and production.')
+@minValue(1000)
+param cosmosSignalsAutoscaleMaxRu int = environmentTier == 'dev' ? 1000 : 6000
+
+@description('Evacuation autoscale maximum RU/s per container: 1000 in dev, preserving 4000 in staging and production.')
+@minValue(1000)
+param cosmosEvacuationAutoscaleMaxRu int = environmentTier == 'dev' ? 1000 : 4000
+
 @description('Spec 029 — Subscription topology. A: per-environment subscriptions. B: single subscription per environment OR one subscription for all environments. Defaults to B; Topology A tenants must override.')
 @allowed(['A', 'B'])
 param subscriptionTopology string = 'B'
@@ -769,7 +777,7 @@ resource signalsContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/co
         ]
       }
     }
-    options: { autoscaleSettings: { maxThroughput: 6000 } }
+    options: { autoscaleSettings: { maxThroughput: cosmosSignalsAutoscaleMaxRu } }
   }
 }
 
@@ -987,6 +995,7 @@ module mafWorkflowCosmos './bicep/modules/cosmos-workflow.bicep' = {
   params: {
     cosmosAccountName: cosmos.name
     databaseName: cosmosDb.name
+    environmentTier: environmentTier
     tags: tags
   }
 }
@@ -1722,6 +1731,7 @@ module evacuationRuntime './bicep/modules/evacuation-runtime.bicep' = {
     cosmosAccountName: cosmos.name
     cosmosEndpoint: cosmos.properties.documentEndpoint
     cosmosDatabaseName: cosmosDb.name
+    cosmosAutoscaleMaxRu: cosmosEvacuationAutoscaleMaxRu
     storageAccountName: storage.name
     storageAccountKey: storage.listKeys().keys[0].value
     logAnalyticsWorkspaceResourceId: monitoring.outputs.logAnalyticsId
@@ -1816,8 +1826,9 @@ output AZURE_TARGET_SUBSCRIPTION_ID string = subscriptionId
 @description('Spec-038 — toggle the Help corpus + grounded-chat surface.')
 param enableSpec038Help bool = true
 
-@description('Spec-038 — autoscale max RU/s per Help Cosmos container (default 4000).')
-param spec038CosmosAutoscaleMaxRu int = 4000
+@description('Spec-038 — autoscale maximum RU/s per Help container: 1000 in dev, preserving 4000 in staging and production.')
+@minValue(1000)
+param spec038CosmosAutoscaleMaxRu int = environmentTier == 'dev' ? 1000 : 4000
 
 @description('Spec-038 — immutability window for help-screenshots blob container (days).')
 param spec038ScreenshotImmutabilityDays int = 30

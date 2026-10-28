@@ -37,6 +37,10 @@ param cosmosEndpoint string
 @description('Name of the existing Cosmos DB SQL database.')
 param cosmosDatabaseName string
 
+@description('Autoscale maximum RU/s per evacuation container; the root deployment selects the environment-specific value.')
+@minValue(1000)
+param cosmosAutoscaleMaxRu int = 4000
+
 @description('Existing storage account name for the durable audit WAL share.')
 param storageAccountName string
 
@@ -97,7 +101,7 @@ module evacuationContainers 'br/public:avm/res/document-db/database-account/sql-
     databaseAccountName: cosmosAccountName
     sqlDatabaseName: cosmosDatabaseName
     paths: ['/incident_scope_key']
-    autoscaleSettingsMaxThroughput: 4000
+    autoscaleSettingsMaxThroughput: cosmosAutoscaleMaxRu
     defaultTtl: -1
   }
 }]
