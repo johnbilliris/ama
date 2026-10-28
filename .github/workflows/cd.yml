@@ -79,7 +79,7 @@ jobs:
       # Step 1 — checkout the EXACT commit ci validated, not the default branch.
       # workflow_run runs default-branch context unless ref is set explicitly.
       - name: Checkout validated commit
-        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
@@ -524,7 +524,7 @@ jobs:
       (needs.deploy.outputs.health_passed != 'true' || needs.quality-gate.result == 'failure')
     environment: ${{ needs.deploy.outputs.target_env }}
     steps:
-      - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
 
