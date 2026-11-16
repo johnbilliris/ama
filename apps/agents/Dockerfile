@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.15-slim AS builder
 ENV PIP_CONFIG_FILE=/dev/null \
     PIP_INDEX_URL=https://packagefeedproxy.microsoft.io/pypi/simple \
     PIP_EXTRA_INDEX_URL= \
@@ -29,7 +29,7 @@ COPY packages/ ./packages/
 RUN pip install --no-cache-dir --no-deps ./apps/agents && \
     pip check
 
-FROM python:3.12-slim AS runtime-base
+FROM python:3.15-slim AS runtime-base
 
 LABEL com.azure.containerizationassist.createdby="containerization-assist"
 
